@@ -17,20 +17,33 @@ import {
 } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { AdCopyData, Campaign } from '../data/mockData';
-import { MessageSquareText, ChartLine } from "lucide-react";
+import { AdCopyData, Campaign, AdGroup } from '../data/mockData';
+import { MessageSquareText } from "lucide-react";
 
 interface AdCopyPerformanceProps {
   adCopies: AdCopyData[];
   campaigns: Campaign[];
+  adGroups: AdGroup[];
 }
 
-const AdCopyPerformance = ({ adCopies, campaigns }: AdCopyPerformanceProps) => {
+const AdCopyPerformance = ({ adCopies, campaigns, adGroups }: AdCopyPerformanceProps) => {
   const [selectedCampaign, setSelectedCampaign] = useState<string>('all');
+  const [selectedAdGroup, setSelectedAdGroup] = useState<string>('all');
   
-  const filteredAdCopies = selectedCampaign === 'all' 
+  // Filter ad copies first by campaign
+  const campaignFilteredAdCopies = selectedCampaign === 'all' 
     ? adCopies
     : adCopies.filter(adCopy => adCopy.campaignId === selectedCampaign);
+  
+  // Then filter by ad group
+  const filteredAdCopies = selectedAdGroup === 'all' 
+    ? campaignFilteredAdCopies
+    : campaignFilteredAdCopies.filter(adCopy => adCopy.adGroupId === selectedAdGroup);
+
+  // Get available ad groups based on selected campaign
+  const availableAdGroups = selectedCampaign === 'all' 
+    ? adGroups 
+    : adGroups.filter(adGroup => adGroup.campaignId === selectedCampaign);
 
   const formatNumber = (value: number) => {
     return new Intl.NumberFormat('en-US').format(value);
@@ -63,7 +76,7 @@ const AdCopyPerformance = ({ adCopies, campaigns }: AdCopyPerformanceProps) => {
 
   return (
     <Card className="mb-6">
-      <CardHeader className="flex flex-row items-center justify-between">
+      <CardHeader className="flex flex-col space-y-2 sm:flex-row sm:items-center sm:justify-between sm:space-y-0">
         <div className="flex items-center gap-2">
           <MessageSquareText className="h-5 w-5 text-blue-500" />
           <div>
@@ -71,17 +84,34 @@ const AdCopyPerformance = ({ adCopies, campaigns }: AdCopyPerformanceProps) => {
             <CardDescription>Campaign-wise ad copy performance analysis</CardDescription>
           </div>
         </div>
-        <Select value={selectedCampaign} onValueChange={setSelectedCampaign}>
-          <SelectTrigger className="w-[220px]">
-            <SelectValue placeholder="Filter by campaign" />
-          </SelectTrigger>
-          <SelectContent>
-            <SelectItem value="all">All Campaigns</SelectItem>
-            {campaigns.map((campaign) => (
-              <SelectItem key={campaign.id} value={campaign.id}>{campaign.name}</SelectItem>
-            ))}
-          </SelectContent>
-        </Select>
+        <div className="flex flex-col sm:flex-row gap-2">
+          <Select value={selectedCampaign} onValueChange={(value) => {
+            setSelectedCampaign(value);
+            setSelectedAdGroup('all'); // Reset ad group filter when campaign changes
+          }}>
+            <SelectTrigger className="w-[180px]">
+              <SelectValue placeholder="Filter by campaign" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="all">All Campaigns</SelectItem>
+              {campaigns.map((campaign) => (
+                <SelectItem key={campaign.id} value={campaign.id}>{campaign.name}</SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+          
+          <Select value={selectedAdGroup} onValueChange={setSelectedAdGroup}>
+            <SelectTrigger className="w-[180px]">
+              <SelectValue placeholder="Filter by ad group" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="all">All Ad Groups</SelectItem>
+              {availableAdGroups.map((adGroup) => (
+                <SelectItem key={adGroup.id} value={adGroup.id}>{adGroup.name}</SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+        </div>
       </CardHeader>
       <CardContent>
         <div className="overflow-x-auto">
@@ -91,6 +121,7 @@ const AdCopyPerformance = ({ adCopies, campaigns }: AdCopyPerformanceProps) => {
                 <TableHead>Headline</TableHead>
                 <TableHead className="hidden md:table-cell">Description</TableHead>
                 <TableHead>Campaign</TableHead>
+                <TableHead>Ad Group</TableHead>
                 <TableHead>Clicks</TableHead>
                 <TableHead className="hidden md:table-cell">Impressions</TableHead>
                 <TableHead>CTR</TableHead>
@@ -110,6 +141,7 @@ const AdCopyPerformance = ({ adCopies, campaigns }: AdCopyPerformanceProps) => {
                     {adCopy.description}
                   </TableCell>
                   <TableCell>{adCopy.campaignName}</TableCell>
+                  <TableCell>{adCopy.adGroupName}</TableCell>
                   <TableCell>{formatNumber(adCopy.clicks)}</TableCell>
                   <TableCell className="hidden md:table-cell">{formatNumber(adCopy.impressions)}</TableCell>
                   <TableCell>{formatPercent(adCopy.ctr)}</TableCell>

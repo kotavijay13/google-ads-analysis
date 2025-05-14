@@ -12,6 +12,13 @@ export interface Campaign {
   costPerConversion: number;
 }
 
+export interface AdGroup {
+  id: string;
+  name: string;
+  campaignId: string;
+  campaignName: string;
+}
+
 export interface DailyData {
   date: string;
   spend: number;
@@ -39,6 +46,8 @@ export interface KeywordData {
   keyword: string;
   campaignId: string;
   campaignName: string;
+  adGroupId: string;
+  adGroupName: string;
   clicks: number;
   impressions: number;
   ctr: number;
@@ -54,6 +63,8 @@ export interface AdCopyData {
   description: string;
   campaignId: string;
   campaignName: string;
+  adGroupId: string;
+  adGroupName: string;
   clicks: number;
   impressions: number;
   ctr: number;
@@ -131,6 +142,63 @@ export const campaignsData: Campaign[] = [
   },
 ];
 
+export const adGroupsData: AdGroup[] = [
+  {
+    id: '1',
+    name: 'Summer Products',
+    campaignId: '1',
+    campaignName: 'Summer Sale Promotion'
+  },
+  {
+    id: '2',
+    name: 'Seasonal Deals',
+    campaignId: '1',
+    campaignName: 'Summer Sale Promotion'
+  },
+  {
+    id: '3',
+    name: 'Brand Visibility',
+    campaignId: '2',
+    campaignName: 'Brand Awareness'
+  },
+  {
+    id: '4',
+    name: 'Corporate Image',
+    campaignId: '2',
+    campaignName: 'Brand Awareness'
+  },
+  {
+    id: '5',
+    name: 'New Features',
+    campaignId: '3',
+    campaignName: 'Product Launch'
+  },
+  {
+    id: '6',
+    name: 'Product Benefits',
+    campaignId: '3',
+    campaignName: 'Product Launch'
+  },
+  {
+    id: '7',
+    name: 'Previous Customers',
+    campaignId: '4',
+    campaignName: 'Retargeting Campaign'
+  },
+  {
+    id: '8',
+    name: 'Christmas Gifts',
+    campaignId: '5',
+    campaignName: 'Holiday Special'
+  },
+  {
+    id: '9',
+    name: 'Holiday Discounts',
+    campaignId: '5',
+    campaignName: 'Holiday Special'
+  }
+];
+
 export const dailyPerformance: DailyData[] = [
   { date: '2023-05-01', spend: 432.12, clicks: 654, impressions: 12451, conversions: 34 },
   { date: '2023-05-02', spend: 456.78, clicks: 689, impressions: 13245, conversions: 38 },
@@ -168,6 +236,8 @@ export const keywordPerformanceData: KeywordData[] = [
     keyword: 'digital marketing',
     campaignId: '1',
     campaignName: 'Summer Sale Promotion',
+    adGroupId: '1',
+    adGroupName: 'Summer Products',
     clicks: 487,
     impressions: 5621,
     ctr: 8.66,
@@ -181,6 +251,8 @@ export const keywordPerformanceData: KeywordData[] = [
     keyword: 'online advertising',
     campaignId: '1',
     campaignName: 'Summer Sale Promotion',
+    adGroupId: '1',
+    adGroupName: 'Summer Products',
     clicks: 312,
     impressions: 4320,
     ctr: 7.22,
@@ -194,6 +266,8 @@ export const keywordPerformanceData: KeywordData[] = [
     keyword: 'summer deals',
     campaignId: '1',
     campaignName: 'Summer Sale Promotion',
+    adGroupId: '2',
+    adGroupName: 'Seasonal Deals',
     clicks: 215,
     impressions: 3210,
     ctr: 6.70,
@@ -207,6 +281,8 @@ export const keywordPerformanceData: KeywordData[] = [
     keyword: 'brand awareness',
     campaignId: '2',
     campaignName: 'Brand Awareness',
+    adGroupId: '3',
+    adGroupName: 'Brand Visibility',
     clicks: 678,
     impressions: 12453,
     ctr: 5.44,
@@ -220,6 +296,8 @@ export const keywordPerformanceData: KeywordData[] = [
     keyword: 'company reputation',
     campaignId: '2',
     campaignName: 'Brand Awareness',
+    adGroupId: '4',
+    adGroupName: 'Corporate Image',
     clicks: 423,
     impressions: 8756,
     ctr: 4.83,
@@ -233,6 +311,8 @@ export const keywordPerformanceData: KeywordData[] = [
     keyword: 'new product launch',
     campaignId: '3',
     campaignName: 'Product Launch',
+    adGroupId: '5',
+    adGroupName: 'New Features',
     clicks: 756,
     impressions: 9876,
     ctr: 7.65,
@@ -246,6 +326,8 @@ export const keywordPerformanceData: KeywordData[] = [
     keyword: 'product features',
     campaignId: '3',
     campaignName: 'Product Launch',
+    adGroupId: '6',
+    adGroupName: 'Product Benefits',
     clicks: 389,
     impressions: 5432,
     ctr: 7.16,
@@ -259,6 +341,8 @@ export const keywordPerformanceData: KeywordData[] = [
     keyword: 'special discount',
     campaignId: '4',
     campaignName: 'Retargeting Campaign',
+    adGroupId: '7',
+    adGroupName: 'Previous Customers',
     clicks: 543,
     impressions: 4321,
     ctr: 12.57,
@@ -272,6 +356,8 @@ export const keywordPerformanceData: KeywordData[] = [
     keyword: 'holiday gift ideas',
     campaignId: '5',
     campaignName: 'Holiday Special',
+    adGroupId: '8',
+    adGroupName: 'Christmas Gifts',
     clicks: 678,
     impressions: 8765,
     ctr: 7.74,
@@ -285,6 +371,8 @@ export const keywordPerformanceData: KeywordData[] = [
     keyword: 'christmas sale',
     campaignId: '5',
     campaignName: 'Holiday Special',
+    adGroupId: '9',
+    adGroupName: 'Holiday Discounts',
     clicks: 456,
     impressions: 6789,
     ctr: 6.72,
@@ -302,6 +390,8 @@ export const adCopyPerformanceData: AdCopyData[] = [
     description: 'Get 50% off on all summer products',
     campaignId: '1',
     campaignName: 'Summer Sale Promotion',
+    adGroupId: '1',
+    adGroupName: 'Summer Products',
     clicks: 523,
     impressions: 6120,
     ctr: 8.55,
@@ -316,6 +406,8 @@ export const adCopyPerformanceData: AdCopyData[] = [
     description: 'Beat the heat with cool savings',
     campaignId: '1',
     campaignName: 'Summer Sale Promotion',
+    adGroupId: '2',
+    adGroupName: 'Seasonal Deals',
     clicks: 345,
     impressions: 4780,
     ctr: 7.22,
@@ -330,6 +422,8 @@ export const adCopyPerformanceData: AdCopyData[] = [
     description: 'Quality and innovation you can trust',
     campaignId: '2',
     campaignName: 'Brand Awareness',
+    adGroupId: '3',
+    adGroupName: 'Brand Visibility',
     clicks: 712,
     impressions: 13450,
     ctr: 5.29,
@@ -344,6 +438,8 @@ export const adCopyPerformanceData: AdCopyData[] = [
     description: 'Industry experts with proven results',
     campaignId: '2',
     campaignName: 'Brand Awareness',
+    adGroupId: '4',
+    adGroupName: 'Corporate Image',
     clicks: 456,
     impressions: 9120,
     ctr: 5.00,
@@ -358,6 +454,8 @@ export const adCopyPerformanceData: AdCopyData[] = [
     description: 'Experience the innovation firsthand',
     campaignId: '3',
     campaignName: 'Product Launch',
+    adGroupId: '5',
+    adGroupName: 'New Features',
     clicks: 834,
     impressions: 10567,
     ctr: 7.89,
@@ -372,6 +470,8 @@ export const adCopyPerformanceData: AdCopyData[] = [
     description: 'See what our new product can do for you',
     campaignId: '3',
     campaignName: 'Product Launch',
+    adGroupId: '6',
+    adGroupName: 'Product Benefits',
     clicks: 421,
     impressions: 5876,
     ctr: 7.16,
@@ -386,6 +486,8 @@ export const adCopyPerformanceData: AdCopyData[] = [
     description: 'Click to see exclusive deals just for you',
     campaignId: '4',
     campaignName: 'Retargeting Campaign',
+    adGroupId: '7',
+    adGroupName: 'Previous Customers',
     clicks: 612,
     impressions: 4845,
     ctr: 12.63,
@@ -400,6 +502,8 @@ export const adCopyPerformanceData: AdCopyData[] = [
     description: 'Celebrate the holidays with amazing offers',
     campaignId: '5',
     campaignName: 'Holiday Special',
+    adGroupId: '8',
+    adGroupName: 'Christmas Gifts',
     clicks: 723,
     impressions: 9234,
     ctr: 7.83,
@@ -414,6 +518,8 @@ export const adCopyPerformanceData: AdCopyData[] = [
     description: 'Find the perfect present for everyone',
     campaignId: '5',
     campaignName: 'Holiday Special',
+    adGroupId: '8',
+    adGroupName: 'Christmas Gifts',
     clicks: 489,
     impressions: 7123,
     ctr: 6.87,
@@ -428,6 +534,8 @@ export const adCopyPerformanceData: AdCopyData[] = [
     description: 'Fast shipping on all holiday orders',
     campaignId: '5',
     campaignName: 'Holiday Special',
+    adGroupId: '9',
+    adGroupName: 'Holiday Discounts',
     clicks: 356,
     impressions: 5432,
     ctr: 6.55,

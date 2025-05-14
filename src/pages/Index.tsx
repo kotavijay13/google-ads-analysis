@@ -16,7 +16,8 @@ import {
   geoData, 
   getOverviewMetrics,
   keywordPerformanceData,
-  adCopyPerformanceData
+  adCopyPerformanceData,
+  adGroupsData
 } from '@/data/mockData';
 
 const Index = () => {
@@ -53,9 +54,17 @@ const Index = () => {
       
       <CampaignTable campaigns={campaignsData} />
       
-      <KeywordPerformance keywords={keywordPerformanceData} campaigns={campaignsData} />
+      <KeywordPerformance 
+        keywords={keywordPerformanceData} 
+        campaigns={campaignsData}
+        adGroups={adGroupsData}
+      />
       
-      <AdCopyPerformance adCopies={adCopyPerformanceData} campaigns={campaignsData} />
+      <AdCopyPerformance 
+        adCopies={adCopyPerformanceData} 
+        campaigns={campaignsData}
+        adGroups={adGroupsData}
+      />
     </div>
   );
 };

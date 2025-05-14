@@ -17,20 +17,33 @@ import {
 } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { KeywordData, Campaign } from '../data/mockData';
-import { Tag, ChartLine } from "lucide-react";
+import { KeywordData, Campaign, AdGroup } from '../data/mockData';
+import { Tag } from "lucide-react";
 
 interface KeywordPerformanceProps {
   keywords: KeywordData[];
   campaigns: Campaign[];
+  adGroups: AdGroup[];
 }
 
-const KeywordPerformance = ({ keywords, campaigns }: KeywordPerformanceProps) => {
+const KeywordPerformance = ({ keywords, campaigns, adGroups }: KeywordPerformanceProps) => {
   const [selectedCampaign, setSelectedCampaign] = useState<string>('all');
+  const [selectedAdGroup, setSelectedAdGroup] = useState<string>('all');
   
-  const filteredKeywords = selectedCampaign === 'all' 
+  // Filter keywords first by campaign
+  const campaignFilteredKeywords = selectedCampaign === 'all' 
     ? keywords
     : keywords.filter(keyword => keyword.campaignId === selectedCampaign);
+  
+  // Then filter by ad group
+  const filteredKeywords = selectedAdGroup === 'all' 
+    ? campaignFilteredKeywords
+    : campaignFilteredKeywords.filter(keyword => keyword.adGroupId === selectedAdGroup);
+
+  // Get available ad groups based on selected campaign
+  const availableAdGroups = selectedCampaign === 'all' 
+    ? adGroups 
+    : adGroups.filter(adGroup => adGroup.campaignId === selectedCampaign);
 
   const formatNumber = (value: number) => {
     return new Intl.NumberFormat('en-US').format(value);
@@ -63,7 +76,7 @@ const KeywordPerformance = ({ keywords, campaigns }: KeywordPerformanceProps) =>
 
   return (
     <Card className="mb-6">
-      <CardHeader className="flex flex-row items-center justify-between">
+      <CardHeader className="flex flex-col space-y-2 sm:flex-row sm:items-center sm:justify-between sm:space-y-0">
         <div className="flex items-center gap-2">
           <Tag className="h-5 w-5 text-blue-500" />
           <div>
@@ -71,17 +84,34 @@ const KeywordPerformance = ({ keywords, campaigns }: KeywordPerformanceProps) =>
             <CardDescription>Campaign-wise keyword performance analysis</CardDescription>
           </div>
         </div>
-        <Select value={selectedCampaign} onValueChange={setSelectedCampaign}>
-          <SelectTrigger className="w-[220px]">
-            <SelectValue placeholder="Filter by campaign" />
-          </SelectTrigger>
-          <SelectContent>
-            <SelectItem value="all">All Campaigns</SelectItem>
-            {campaigns.map((campaign) => (
-              <SelectItem key={campaign.id} value={campaign.id}>{campaign.name}</SelectItem>
-            ))}
-          </SelectContent>
-        </Select>
+        <div className="flex flex-col sm:flex-row gap-2">
+          <Select value={selectedCampaign} onValueChange={(value) => {
+            setSelectedCampaign(value);
+            setSelectedAdGroup('all'); // Reset ad group filter when campaign changes
+          }}>
+            <SelectTrigger className="w-[180px]">
+              <SelectValue placeholder="Filter by campaign" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="all">All Campaigns</SelectItem>
+              {campaigns.map((campaign) => (
+                <SelectItem key={campaign.id} value={campaign.id}>{campaign.name}</SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+          
+          <Select value={selectedAdGroup} onValueChange={setSelectedAdGroup}>
+            <SelectTrigger className="w-[180px]">
+              <SelectValue placeholder="Filter by ad group" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="all">All Ad Groups</SelectItem>
+              {availableAdGroups.map((adGroup) => (
+                <SelectItem key={adGroup.id} value={adGroup.id}>{adGroup.name}</SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+        </div>
       </CardHeader>
       <CardContent>
         <div className="overflow-x-auto">
@@ -90,6 +120,7 @@ const KeywordPerformance = ({ keywords, campaigns }: KeywordPerformanceProps) =>
               <TableRow>
                 <TableHead>Keyword</TableHead>
                 <TableHead>Campaign</TableHead>
+                <TableHead>Ad Group</TableHead>
                 <TableHead>Clicks</TableHead>
                 <TableHead className="hidden md:table-cell">Impressions</TableHead>
                 <TableHead>CTR</TableHead>
@@ -104,6 +135,7 @@ const KeywordPerformance = ({ keywords, campaigns }: KeywordPerformanceProps) =>
                 <TableRow key={keyword.id}>
                   <TableCell className="font-medium">{keyword.keyword}</TableCell>
                   <TableCell>{keyword.campaignName}</TableCell>
+                  <TableCell>{keyword.adGroupName}</TableCell>
                   <TableCell>{formatNumber(keyword.clicks)}</TableCell>
                   <TableCell className="hidden md:table-cell">{formatNumber(keyword.impressions)}</TableCell>
                   <TableCell>{formatPercent(keyword.ctr)}</TableCell>
