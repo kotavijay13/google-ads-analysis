@@ -8,13 +8,15 @@ import CampaignTable from '@/components/CampaignTable';
 import DeviceBreakdown from '@/components/DeviceBreakdown';
 import GeoPerformance from '@/components/GeoPerformance';
 import KeywordPerformance from '@/components/KeywordPerformance';
+import AdCopyPerformance from '@/components/AdCopyPerformance';
 import { 
   campaignsData, 
   dailyPerformance, 
   deviceData, 
   geoData, 
   getOverviewMetrics,
-  keywordPerformanceData 
+  keywordPerformanceData,
+  adCopyPerformanceData
 } from '@/data/mockData';
 
 const Index = () => {
@@ -52,6 +54,8 @@ const Index = () => {
       <CampaignTable campaigns={campaignsData} />
       
       <KeywordPerformance keywords={keywordPerformanceData} campaigns={campaignsData} />
+      
+      <AdCopyPerformance adCopies={adCopyPerformanceData} campaigns={campaignsData} />
     </div>
   );
 };

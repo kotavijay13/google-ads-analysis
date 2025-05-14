@@ -48,6 +48,21 @@ export interface KeywordData {
   performanceScore: 'high' | 'medium' | 'low';
 }
 
+export interface AdCopyData {
+  id: string;
+  headline: string;
+  description: string;
+  campaignId: string;
+  campaignName: string;
+  clicks: number;
+  impressions: number;
+  ctr: number;
+  spend: number;
+  conversions: number;
+  costPerConversion: number;
+  performanceScore: 'high' | 'medium' | 'low';
+}
+
 export const campaignsData: Campaign[] = [
   {
     id: '1',
@@ -276,6 +291,149 @@ export const keywordPerformanceData: KeywordData[] = [
     spend: 387.65,
     conversions: 24,
     costPerConversion: 16.15,
+    performanceScore: 'medium'
+  }
+];
+
+export const adCopyPerformanceData: AdCopyData[] = [
+  {
+    id: '1',
+    headline: 'Limited Time Offer',
+    description: 'Get 50% off on all summer products',
+    campaignId: '1',
+    campaignName: 'Summer Sale Promotion',
+    clicks: 523,
+    impressions: 6120,
+    ctr: 8.55,
+    spend: 267.45,
+    conversions: 24,
+    costPerConversion: 11.14,
+    performanceScore: 'high'
+  },
+  {
+    id: '2',
+    headline: 'Summer Discounts',
+    description: 'Beat the heat with cool savings',
+    campaignId: '1',
+    campaignName: 'Summer Sale Promotion',
+    clicks: 345,
+    impressions: 4780,
+    ctr: 7.22,
+    spend: 198.60,
+    conversions: 15,
+    costPerConversion: 13.24,
+    performanceScore: 'medium'
+  },
+  {
+    id: '3',
+    headline: 'Discover Our Brand',
+    description: 'Quality and innovation you can trust',
+    campaignId: '2',
+    campaignName: 'Brand Awareness',
+    clicks: 712,
+    impressions: 13450,
+    ctr: 5.29,
+    spend: 456.78,
+    conversions: 35,
+    costPerConversion: 13.05,
+    performanceScore: 'high'
+  },
+  {
+    id: '4',
+    headline: 'Meet the Leaders',
+    description: 'Industry experts with proven results',
+    campaignId: '2',
+    campaignName: 'Brand Awareness',
+    clicks: 456,
+    impressions: 9120,
+    ctr: 5.00,
+    spend: 342.67,
+    conversions: 21,
+    costPerConversion: 16.32,
+    performanceScore: 'medium'
+  },
+  {
+    id: '5',
+    headline: 'Introducing New Features',
+    description: 'Experience the innovation firsthand',
+    campaignId: '3',
+    campaignName: 'Product Launch',
+    clicks: 834,
+    impressions: 10567,
+    ctr: 7.89,
+    spend: 678.45,
+    conversions: 47,
+    costPerConversion: 14.43,
+    performanceScore: 'high'
+  },
+  {
+    id: '6',
+    headline: 'Transform Your Experience',
+    description: 'See what our new product can do for you',
+    campaignId: '3',
+    campaignName: 'Product Launch',
+    clicks: 421,
+    impressions: 5876,
+    ctr: 7.16,
+    spend: 365.32,
+    conversions: 23,
+    costPerConversion: 15.88,
+    performanceScore: 'medium'
+  },
+  {
+    id: '7',
+    headline: 'Special Offer Inside',
+    description: 'Click to see exclusive deals just for you',
+    campaignId: '4',
+    campaignName: 'Retargeting Campaign',
+    clicks: 612,
+    impressions: 4845,
+    ctr: 12.63,
+    spend: 312.87,
+    conversions: 37,
+    costPerConversion: 8.46,
+    performanceScore: 'high'
+  },
+  {
+    id: '8',
+    headline: 'Festive Deals',
+    description: 'Celebrate the holidays with amazing offers',
+    campaignId: '5',
+    campaignName: 'Holiday Special',
+    clicks: 723,
+    impressions: 9234,
+    ctr: 7.83,
+    spend: 576.54,
+    conversions: 38,
+    costPerConversion: 15.17,
+    performanceScore: 'high'
+  },
+  {
+    id: '9',
+    headline: 'Gift Shopping Made Easy',
+    description: 'Find the perfect present for everyone',
+    campaignId: '5',
+    campaignName: 'Holiday Special',
+    clicks: 489,
+    impressions: 7123,
+    ctr: 6.87,
+    spend: 412.65,
+    conversions: 26,
+    costPerConversion: 15.87,
+    performanceScore: 'medium'
+  },
+  {
+    id: '10',
+    headline: 'Last Minute Gifts',
+    description: 'Fast shipping on all holiday orders',
+    campaignId: '5',
+    campaignName: 'Holiday Special',
+    clicks: 356,
+    impressions: 5432,
+    ctr: 6.55,
+    spend: 287.43,
+    conversions: 19,
+    costPerConversion: 15.13,
     performanceScore: 'medium'
   }
 ];
