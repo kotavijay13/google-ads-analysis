@@ -9,6 +9,7 @@ import DeviceBreakdown from '@/components/DeviceBreakdown';
 import GeoPerformance from '@/components/GeoPerformance';
 import KeywordPerformance from '@/components/KeywordPerformance';
 import AdCopyPerformance from '@/components/AdCopyPerformance';
+import AssetPerformance from '@/components/AssetPerformance';
 import { 
   campaignsData, 
   dailyPerformance, 
@@ -17,7 +18,8 @@ import {
   getOverviewMetrics,
   keywordPerformanceData,
   adCopyPerformanceData,
-  adGroupsData
+  adGroupsData,
+  assetPerformanceData
 } from '@/data/mockData';
 
 const Index = () => {
@@ -62,6 +64,12 @@ const Index = () => {
       
       <AdCopyPerformance 
         adCopies={adCopyPerformanceData} 
+        campaigns={campaignsData}
+        adGroups={adGroupsData}
+      />
+
+      <AssetPerformance 
+        assets={assetPerformanceData} 
         campaigns={campaignsData}
         adGroups={adGroupsData}
       />
