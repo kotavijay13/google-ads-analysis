@@ -1,7 +1,7 @@
 
 import { useState } from 'react';
 import { Button } from "@/components/ui/button";
-import { ChartColumnBig, ChartBar, Google } from "lucide-react";
+import { ChartColumnBig, ChartBar, LineChart } from "lucide-react";
 
 interface HeaderProps {
   onRefresh: () => void;
@@ -19,7 +19,7 @@ const Header = ({ onRefresh }: HeaderProps) => {
     <header className="flex flex-col md:flex-row justify-between items-center gap-4 mb-6">
       <div className="flex items-center gap-3">
         <div className="bg-blue-100 p-2 rounded-lg">
-          <Google size={24} className="text-blue-600" />
+          <LineChart size={24} className="text-blue-600" />
         </div>
         <div>
           <h1 className="text-2xl font-bold flex items-center">

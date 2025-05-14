@@ -6,7 +6,7 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-import { ChartLineUp, DollarSign, MousePointerClick, Eye, Target } from "lucide-react";
+import { ChartLine, DollarSign, MousePointerClick, Eye, Target } from "lucide-react";
 
 interface MetricsProps {
   metrics: {
