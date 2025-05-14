@@ -1,4 +1,3 @@
-
 export interface Campaign {
   id: string;
   name: string;
@@ -33,6 +32,20 @@ export interface GeoData {
   clicks: number;
   spend: number;
   conversions: number;
+}
+
+export interface KeywordData {
+  id: string;
+  keyword: string;
+  campaignId: string;
+  campaignName: string;
+  clicks: number;
+  impressions: number;
+  ctr: number;
+  spend: number;
+  conversions: number;
+  costPerConversion: number;
+  performanceScore: 'high' | 'medium' | 'low';
 }
 
 export const campaignsData: Campaign[] = [
@@ -132,6 +145,139 @@ export const geoData: GeoData[] = [
   { region: 'Texas', clicks: 2134, spend: 1876.23, conversions: 112 },
   { region: 'Florida', clicks: 1987, spend: 1654.89, conversions: 98 },
   { region: 'Illinois', clicks: 1654, spend: 1432.56, conversions: 87 },
+];
+
+export const keywordPerformanceData: KeywordData[] = [
+  {
+    id: '1',
+    keyword: 'digital marketing',
+    campaignId: '1',
+    campaignName: 'Summer Sale Promotion',
+    clicks: 487,
+    impressions: 5621,
+    ctr: 8.66,
+    spend: 245.32,
+    conversions: 21,
+    costPerConversion: 11.68,
+    performanceScore: 'high'
+  },
+  {
+    id: '2',
+    keyword: 'online advertising',
+    campaignId: '1',
+    campaignName: 'Summer Sale Promotion',
+    clicks: 312,
+    impressions: 4320,
+    ctr: 7.22,
+    spend: 187.45,
+    conversions: 13,
+    costPerConversion: 14.42,
+    performanceScore: 'medium'
+  },
+  {
+    id: '3',
+    keyword: 'summer deals',
+    campaignId: '1',
+    campaignName: 'Summer Sale Promotion',
+    clicks: 215,
+    impressions: 3210,
+    ctr: 6.70,
+    spend: 157.89,
+    conversions: 8,
+    costPerConversion: 19.74,
+    performanceScore: 'low'
+  },
+  {
+    id: '4',
+    keyword: 'brand awareness',
+    campaignId: '2',
+    campaignName: 'Brand Awareness',
+    clicks: 678,
+    impressions: 12453,
+    ctr: 5.44,
+    spend: 432.67,
+    conversions: 32,
+    costPerConversion: 13.52,
+    performanceScore: 'high'
+  },
+  {
+    id: '5',
+    keyword: 'company reputation',
+    campaignId: '2',
+    campaignName: 'Brand Awareness',
+    clicks: 423,
+    impressions: 8756,
+    ctr: 4.83,
+    spend: 312.45,
+    conversions: 18,
+    costPerConversion: 17.36,
+    performanceScore: 'medium'
+  },
+  {
+    id: '6',
+    keyword: 'new product launch',
+    campaignId: '3',
+    campaignName: 'Product Launch',
+    clicks: 756,
+    impressions: 9876,
+    ctr: 7.65,
+    spend: 621.34,
+    conversions: 43,
+    costPerConversion: 14.45,
+    performanceScore: 'high'
+  },
+  {
+    id: '7',
+    keyword: 'product features',
+    campaignId: '3',
+    campaignName: 'Product Launch',
+    clicks: 389,
+    impressions: 5432,
+    ctr: 7.16,
+    spend: 345.67,
+    conversions: 21,
+    costPerConversion: 16.46,
+    performanceScore: 'medium'
+  },
+  {
+    id: '8',
+    keyword: 'special discount',
+    campaignId: '4',
+    campaignName: 'Retargeting Campaign',
+    clicks: 543,
+    impressions: 4321,
+    ctr: 12.57,
+    spend: 276.54,
+    conversions: 32,
+    costPerConversion: 8.64,
+    performanceScore: 'high'
+  },
+  {
+    id: '9',
+    keyword: 'holiday gift ideas',
+    campaignId: '5',
+    campaignName: 'Holiday Special',
+    clicks: 678,
+    impressions: 8765,
+    ctr: 7.74,
+    spend: 543.21,
+    conversions: 35,
+    costPerConversion: 15.52,
+    performanceScore: 'high'
+  },
+  {
+    id: '10',
+    keyword: 'christmas sale',
+    campaignId: '5',
+    campaignName: 'Holiday Special',
+    clicks: 456,
+    impressions: 6789,
+    ctr: 6.72,
+    spend: 387.65,
+    conversions: 24,
+    costPerConversion: 16.15,
+    performanceScore: 'medium'
+  }
 ];
 
 export const getOverviewMetrics = () => {

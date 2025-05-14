@@ -7,7 +7,15 @@ import PerformanceChart from '@/components/PerformanceChart';
 import CampaignTable from '@/components/CampaignTable';
 import DeviceBreakdown from '@/components/DeviceBreakdown';
 import GeoPerformance from '@/components/GeoPerformance';
-import { campaignsData, dailyPerformance, deviceData, geoData, getOverviewMetrics } from '@/data/mockData';
+import KeywordPerformance from '@/components/KeywordPerformance';
+import { 
+  campaignsData, 
+  dailyPerformance, 
+  deviceData, 
+  geoData, 
+  getOverviewMetrics,
+  keywordPerformanceData 
+} from '@/data/mockData';
 
 const Index = () => {
   const [metrics] = useState(getOverviewMetrics());
@@ -42,6 +50,8 @@ const Index = () => {
       </div>
       
       <CampaignTable campaigns={campaignsData} />
+      
+      <KeywordPerformance keywords={keywordPerformanceData} campaigns={campaignsData} />
     </div>
   );
 };
