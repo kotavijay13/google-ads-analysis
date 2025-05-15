@@ -1,7 +1,15 @@
 
 import { useState } from 'react';
 import { Button } from "@/components/ui/button";
-import { ChartColumnBig, ChartBar, LineChart } from "lucide-react";
+import { ChartColumnBig, ChartBar, LineChart, Settings, User } from "lucide-react";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 
 interface HeaderProps {
   onRefresh: () => void;
@@ -40,6 +48,37 @@ const Header = ({ onRefresh }: HeaderProps) => {
           <span>Analytics</span>
         </Button>
         <Button onClick={handleRefresh} size="sm">Refresh Data</Button>
+        <DropdownMenu>
+          <DropdownMenuTrigger asChild>
+            <Button variant="ghost" size="sm" className="w-9 h-9 p-0">
+              <span className="sr-only">Google Account</span>
+              <div className="h-8 w-8 rounded-full bg-blue-100 flex items-center justify-center">
+                <User size={18} className="text-blue-600" />
+              </div>
+            </Button>
+          </DropdownMenuTrigger>
+          <DropdownMenuContent align="end" className="w-56">
+            <DropdownMenuLabel>
+              <div className="flex flex-col">
+                <span>Marketing Account</span>
+                <span className="text-xs text-muted-foreground">marketing@example.com</span>
+              </div>
+            </DropdownMenuLabel>
+            <DropdownMenuSeparator />
+            <DropdownMenuItem>
+              <User className="mr-2 h-4 w-4" />
+              <span>Account</span>
+            </DropdownMenuItem>
+            <DropdownMenuItem>
+              <Settings className="mr-2 h-4 w-4" />
+              <span>Settings</span>
+            </DropdownMenuItem>
+            <DropdownMenuSeparator />
+            <DropdownMenuItem className="text-red-500">
+              Sign out
+            </DropdownMenuItem>
+          </DropdownMenuContent>
+        </DropdownMenu>
       </div>
     </header>
   );
