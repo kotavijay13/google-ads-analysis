@@ -1,7 +1,7 @@
 
 import { useState } from 'react';
 import { Button } from "@/components/ui/button";
-import { ChartColumnBig, ChartBar, LineChart, Settings, User } from "lucide-react";
+import { ChartColumnBig, ChartBar, LineChart, Settings, User, ChevronDown } from "lucide-react";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -10,6 +10,14 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@/components/ui/popover";
+import { Avatar, AvatarFallback } from "@/components/ui/avatar";
+import { useGoogleAccounts, GoogleAccount } from "@/hooks/use-google-accounts";
+import { toast } from "@/hooks/use-toast";
 
 interface HeaderProps {
   onRefresh: () => void;
@@ -17,10 +25,20 @@ interface HeaderProps {
 
 const Header = ({ onRefresh }: HeaderProps) => {
   const [lastUpdated, setLastUpdated] = useState<Date>(new Date());
+  const { accounts, currentAccount, switchAccount } = useGoogleAccounts();
 
   const handleRefresh = () => {
     setLastUpdated(new Date());
     onRefresh();
+  };
+
+  const handleAccountSwitch = (account: GoogleAccount) => {
+    if (switchAccount(account.id)) {
+      toast({
+        title: "Account switched",
+        description: `Now using ${account.name}`,
+      });
+    }
   };
 
   return (
@@ -39,6 +57,50 @@ const Header = ({ onRefresh }: HeaderProps) => {
         </div>
       </div>
       <div className="flex items-center gap-3">
+        <Popover>
+          <PopoverTrigger asChild>
+            <Button variant="outline" size="sm" className="flex items-center gap-2">
+              <Avatar className="h-6 w-6 mr-1">
+                <AvatarFallback className="text-xs bg-blue-100 text-blue-600">
+                  {currentAccount.name.substring(0, 2).toUpperCase()}
+                </AvatarFallback>
+              </Avatar>
+              <span className="hidden md:inline">{currentAccount.name}</span>
+              <ChevronDown size={16} />
+            </Button>
+          </PopoverTrigger>
+          <PopoverContent className="w-64 p-2" align="end">
+            <div className="flex flex-col gap-2 max-h-80 overflow-y-auto">
+              <div className="text-sm font-medium px-2 py-1.5">
+                Switch Google Ads Account
+              </div>
+              {accounts.map(account => (
+                <Button
+                  key={account.id}
+                  variant={account.id === currentAccount.id ? "secondary" : "ghost"}
+                  className="justify-start text-sm"
+                  onClick={() => handleAccountSwitch(account)}
+                >
+                  <Avatar className="h-6 w-6 mr-2">
+                    <AvatarFallback className="text-xs bg-blue-100 text-blue-600">
+                      {account.name.substring(0, 2).toUpperCase()}
+                    </AvatarFallback>
+                  </Avatar>
+                  <div className="flex flex-col items-start">
+                    <span>{account.name}</span>
+                    <span className="text-xs text-muted-foreground">{account.email}</span>
+                  </div>
+                </Button>
+              ))}
+              <DropdownMenuSeparator className="my-1" />
+              <Button variant="ghost" size="sm" className="justify-start text-sm">
+                <Settings size={16} className="mr-2" />
+                <span>Manage accounts</span>
+              </Button>
+            </div>
+          </PopoverContent>
+        </Popover>
+
         <Button variant="outline" size="sm" className="flex items-center gap-2">
           <ChartBar size={16} />
           <span>Reports</span>
