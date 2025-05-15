@@ -65,7 +65,10 @@ const Header = ({ onRefresh }: HeaderProps) => {
                   {currentAccount.name.substring(0, 2).toUpperCase()}
                 </AvatarFallback>
               </Avatar>
-              <span className="hidden md:inline">{currentAccount.name}</span>
+              <div className="hidden md:flex flex-col items-start">
+                <span className="text-sm font-medium">{currentAccount.name}</span>
+                <span className="text-xs text-muted-foreground">ID: {currentAccount.id}</span>
+              </div>
               <ChevronDown size={16} />
             </Button>
           </PopoverTrigger>
@@ -88,7 +91,7 @@ const Header = ({ onRefresh }: HeaderProps) => {
                   </Avatar>
                   <div className="flex flex-col items-start">
                     <span>{account.name}</span>
-                    <span className="text-xs text-muted-foreground">{account.email}</span>
+                    <span className="text-xs text-muted-foreground">ID: {account.id} • {account.email}</span>
                   </div>
                 </Button>
               ))}

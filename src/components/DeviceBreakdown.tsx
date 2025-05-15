@@ -44,12 +44,12 @@ const DeviceBreakdown = ({ data }: DeviceBreakdownProps) => {
   }));
 
   return (
-    <Card className="col-span-1">
-      <CardHeader>
-        <CardTitle>Device Breakdown</CardTitle>
-        <CardDescription>Click distribution by device type</CardDescription>
+    <Card className="col-span-1 h-full">
+      <CardHeader className="pb-2">
+        <CardTitle className="text-base">Device Breakdown</CardTitle>
+        <CardDescription className="text-xs">Click distribution by device type</CardDescription>
       </CardHeader>
-      <CardContent className="h-[250px]">
+      <CardContent className="h-[180px]">
         <ResponsiveContainer width="100%" height="100%">
           <PieChart>
             <Pie
@@ -57,7 +57,7 @@ const DeviceBreakdown = ({ data }: DeviceBreakdownProps) => {
               cx="50%"
               cy="50%"
               labelLine={false}
-              outerRadius={80}
+              outerRadius={60}
               fill="#8884d8"
               dataKey="value"
               label={({ name, percentage }) => `${name}: ${percentage}`}

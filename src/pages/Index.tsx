@@ -1,5 +1,5 @@
 
-import { useState, useCallback } from 'react';
+import { useState, useCallback, useEffect } from 'react';
 import Header from '@/components/Header';
 import DateRangePicker from '@/components/DateRangePicker';
 import MetricsOverview from '@/components/MetricsOverview';
@@ -10,6 +10,7 @@ import GeoPerformance from '@/components/GeoPerformance';
 import KeywordPerformance from '@/components/KeywordPerformance';
 import AdCopyPerformance from '@/components/AdCopyPerformance';
 import AssetPerformance from '@/components/AssetPerformance';
+import { useGoogleAdsAPI } from '@/hooks/use-google-ads-api';
 import { 
   campaignsData, 
   dailyPerformance, 
@@ -23,16 +24,35 @@ import {
 } from '@/data/mockData';
 
 const Index = () => {
-  const [metrics] = useState(getOverviewMetrics());
+  const [metrics, setMetrics] = useState(getOverviewMetrics());
+  const [dateRange, setDateRange] = useState<{ from: Date; to: Date }>({
+    from: new Date(new Date().setDate(new Date().getDate() - 30)),
+    to: new Date()
+  });
+  
+  // Use the hook to fetch Google Ads data
+  const { 
+    fetchData, 
+    isLoading, 
+    error 
+  } = useGoogleAdsAPI();
   
   const handleRefresh = () => {
-    // In a real application, this would fetch fresh data
+    // Fetch fresh data from Google Ads API
+    fetchData(dateRange.from, dateRange.to);
     console.log('Refreshing data...');
   };
 
   const handleDateChange = useCallback((range: { from: Date; to: Date }) => {
+    setDateRange(range);
     // In a real application, this would filter the data based on the date range
     console.log('Date range changed:', range);
+  }, []);
+
+  // Initial data fetch when component mounts
+  useEffect(() => {
+    // This would normally fetch data from the Google Ads API
+    console.log('Initial data fetch with date range:', dateRange);
   }, []);
 
   return (
@@ -46,9 +66,9 @@ const Index = () => {
 
       <MetricsOverview metrics={metrics} />
       
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
         <PerformanceChart data={dailyPerformance} />
-        <div className="grid gap-6 grid-cols-1">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
           <DeviceBreakdown data={deviceData} />
           <GeoPerformance data={geoData} />
         </div>

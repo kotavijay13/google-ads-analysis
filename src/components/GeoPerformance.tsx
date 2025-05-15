@@ -35,16 +35,18 @@ const GeoPerformance = ({ data }: GeoPerformanceProps) => {
     return new Intl.NumberFormat('en-US').format(value);
   };
 
-  // Sort data by clicks in descending order
-  const sortedData = [...data].sort((a, b) => b.clicks - a.clicks);
+  // Sort data by clicks in descending order and limit to top 5
+  const sortedData = [...data]
+    .sort((a, b) => b.clicks - a.clicks)
+    .slice(0, 5);
 
   return (
-    <Card className="col-span-1">
-      <CardHeader>
-        <CardTitle>Geographic Performance</CardTitle>
-        <CardDescription>Performance metrics by region</CardDescription>
+    <Card className="col-span-1 h-full">
+      <CardHeader className="pb-2">
+        <CardTitle className="text-base">Geographic Performance</CardTitle>
+        <CardDescription className="text-xs">Top 5 regions by clicks</CardDescription>
       </CardHeader>
-      <CardContent className="h-[250px]">
+      <CardContent className="h-[180px]">
         <ResponsiveContainer width="100%" height="100%">
           <BarChart
             data={sortedData}
@@ -59,17 +61,17 @@ const GeoPerformance = ({ data }: GeoPerformanceProps) => {
             <CartesianGrid strokeDasharray="3 3" horizontal={true} vertical={false} />
             <XAxis 
               type="number" 
-              tick={{ fontSize: 12 }}
+              tick={{ fontSize: 10 }}
               tickLine={false}
               axisLine={{ stroke: '#e2e8f0' }}
             />
             <YAxis 
               dataKey="region" 
               type="category" 
-              tick={{ fontSize: 12 }}
+              tick={{ fontSize: 10 }}
               tickLine={false}
               axisLine={{ stroke: '#e2e8f0' }}
-              width={70}
+              width={60}
             />
             <Tooltip 
               formatter={(value: number) => formatNumber(value)}
@@ -80,7 +82,6 @@ const GeoPerformance = ({ data }: GeoPerformanceProps) => {
                 boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06)'
               }}
             />
-            <Legend />
             <Bar dataKey="clicks" fill="#3b82f6" name="Clicks" />
           </BarChart>
         </ResponsiveContainer>
