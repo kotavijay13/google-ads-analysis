@@ -11,6 +11,7 @@ import {
   TableHeader, 
   TableRow 
 } from "@/components/ui/table";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import PerformanceChart from '@/components/PerformanceChart';
 import { dailyPerformance } from '@/data/mockData';
 
@@ -101,7 +102,7 @@ const SEOPage = () => {
         </Card>
       </div>
       
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
         <Card>
           <CardHeader>
             <CardTitle>Organic Traffic Trend</CardTitle>
@@ -150,109 +151,121 @@ const SEOPage = () => {
         </Card>
       </div>
       
-      <Card className="mb-8">
-        <CardHeader>
-          <CardTitle>Top Ranking Keywords</CardTitle>
-        </CardHeader>
-        <CardContent>
-          <Table>
-            <TableHeader>
-              <TableRow>
-                <TableHead>Keyword</TableHead>
-                <TableHead className="text-right">Position</TableHead>
-                <TableHead className="text-right">Change</TableHead>
-                <TableHead className="text-right">Search Volume</TableHead>
-                <TableHead>Difficulty</TableHead>
-              </TableRow>
-            </TableHeader>
-            <TableBody>
-              {keywordRankings.map((keyword) => (
-                <TableRow key={keyword.keyword}>
-                  <TableCell className="font-medium">{keyword.keyword}</TableCell>
-                  <TableCell className="text-right">{keyword.position}</TableCell>
-                  <TableCell className="text-right">
-                    <span className={
-                      keyword.change > 0 
-                        ? "text-green-600" 
-                        : keyword.change < 0 
-                          ? "text-red-600" 
-                          : ""
-                    }>
-                      {keyword.change > 0 ? `+${keyword.change}` : keyword.change}
-                    </span>
-                  </TableCell>
-                  <TableCell className="text-right">{keyword.volume.toLocaleString()}</TableCell>
-                  <TableCell>
-                    <span className={
-                      keyword.difficulty === "High" 
-                        ? "bg-red-100 text-red-800 px-2 py-1 rounded text-xs" 
-                        : "bg-yellow-100 text-yellow-800 px-2 py-1 rounded text-xs"
-                    }>
-                      {keyword.difficulty}
-                    </span>
-                  </TableCell>
-                </TableRow>
-              ))}
-            </TableBody>
-          </Table>
-        </CardContent>
-      </Card>
-      
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
-        <Card>
-          <CardHeader>
-            <CardTitle>Page Speed Insights</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="space-y-6">
-              <div>
-                <div className="flex justify-between mb-2">
-                  <span>Mobile</span>
-                  <span className="font-bold">76/100</span>
-                </div>
-                <div className="w-full bg-gray-200 h-2 rounded-full overflow-hidden">
-                  <div className="bg-amber-500 h-full" style={{ width: "76%" }}></div>
-                </div>
-              </div>
-              <div>
-                <div className="flex justify-between mb-2">
-                  <span>Desktop</span>
-                  <span className="font-bold">92/100</span>
-                </div>
-                <div className="w-full bg-gray-200 h-2 rounded-full overflow-hidden">
-                  <div className="bg-green-500 h-full" style={{ width: "92%" }}></div>
-                </div>
-              </div>
-            </div>
-          </CardContent>
-        </Card>
+      <Tabs defaultValue="keywords" className="mt-6">
+        <TabsList className="mb-4 w-full justify-start">
+          <TabsTrigger value="keywords">Keywords</TabsTrigger>
+          <TabsTrigger value="pages">Pages</TabsTrigger>
+          <TabsTrigger value="performance">Site Performance</TabsTrigger>
+        </TabsList>
         
-        <Card>
-          <CardHeader>
-            <CardTitle>Top Pages by Traffic</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="space-y-4">
-              {[
-                { url: "/blog/seo-tips-2023", visits: 1245, bounce: "32%" },
-                { url: "/services/digital-marketing", visits: 876, bounce: "41%" },
-                { url: "/case-studies/ecommerce", visits: 654, bounce: "28%" },
-                { url: "/contact", visits: 432, bounce: "18%" },
-              ].map((page, i) => (
-                <div key={i} className="flex justify-between items-start py-2 border-b">
-                  <div className="max-w-[60%]">
-                    <div className="font-medium truncate">{page.url}</div>
+        <TabsContent value="keywords" className="mt-0">
+          <Card>
+            <CardHeader>
+              <CardTitle>Top Ranking Keywords</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <Table>
+                <TableHeader>
+                  <TableRow>
+                    <TableHead>Keyword</TableHead>
+                    <TableHead className="text-right">Position</TableHead>
+                    <TableHead className="text-right">Change</TableHead>
+                    <TableHead className="text-right">Search Volume</TableHead>
+                    <TableHead>Difficulty</TableHead>
+                  </TableRow>
+                </TableHeader>
+                <TableBody>
+                  {keywordRankings.map((keyword) => (
+                    <TableRow key={keyword.keyword}>
+                      <TableCell className="font-medium">{keyword.keyword}</TableCell>
+                      <TableCell className="text-right">{keyword.position}</TableCell>
+                      <TableCell className="text-right">
+                        <span className={
+                          keyword.change > 0 
+                            ? "text-green-600" 
+                            : keyword.change < 0 
+                              ? "text-red-600" 
+                              : ""
+                        }>
+                          {keyword.change > 0 ? `+${keyword.change}` : keyword.change}
+                        </span>
+                      </TableCell>
+                      <TableCell className="text-right">{keyword.volume.toLocaleString()}</TableCell>
+                      <TableCell>
+                        <span className={
+                          keyword.difficulty === "High" 
+                            ? "bg-red-100 text-red-800 px-2 py-1 rounded text-xs" 
+                            : "bg-yellow-100 text-yellow-800 px-2 py-1 rounded text-xs"
+                        }>
+                          {keyword.difficulty}
+                        </span>
+                      </TableCell>
+                    </TableRow>
+                  ))}
+                </TableBody>
+              </Table>
+            </CardContent>
+          </Card>
+        </TabsContent>
+        
+        <TabsContent value="pages" className="mt-0">
+          <Card>
+            <CardHeader>
+              <CardTitle>Top Pages by Traffic</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="space-y-4">
+                {[
+                  { url: "/blog/seo-tips-2023", visits: 1245, bounce: "32%" },
+                  { url: "/services/digital-marketing", visits: 876, bounce: "41%" },
+                  { url: "/case-studies/ecommerce", visits: 654, bounce: "28%" },
+                  { url: "/contact", visits: 432, bounce: "18%" },
+                ].map((page, i) => (
+                  <div key={i} className="flex justify-between items-start py-2 border-b">
+                    <div className="max-w-[60%]">
+                      <div className="font-medium truncate">{page.url}</div>
+                    </div>
+                    <div className="text-right">
+                      <div>{page.visits.toLocaleString()} visits</div>
+                      <div className="text-sm text-muted-foreground">{page.bounce} bounce rate</div>
+                    </div>
                   </div>
-                  <div className="text-right">
-                    <div>{page.visits.toLocaleString()} visits</div>
-                    <div className="text-sm text-muted-foreground">{page.bounce} bounce rate</div>
+                ))}
+              </div>
+            </CardContent>
+          </Card>
+        </TabsContent>
+        
+        <TabsContent value="performance" className="mt-0">
+          <Card>
+            <CardHeader>
+              <CardTitle>Page Speed Insights</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="space-y-6">
+                <div>
+                  <div className="flex justify-between mb-2">
+                    <span>Mobile</span>
+                    <span className="font-bold">76/100</span>
+                  </div>
+                  <div className="w-full bg-gray-200 h-2 rounded-full overflow-hidden">
+                    <div className="bg-amber-500 h-full" style={{ width: "76%" }}></div>
                   </div>
                 </div>
-              ))}
-            </div>
-          </CardContent>
-        </Card>
-      </div>
+                <div>
+                  <div className="flex justify-between mb-2">
+                    <span>Desktop</span>
+                    <span className="font-bold">92/100</span>
+                  </div>
+                  <div className="w-full bg-gray-200 h-2 rounded-full overflow-hidden">
+                    <div className="bg-green-500 h-full" style={{ width: "92%" }}></div>
+                  </div>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+        </TabsContent>
+      </Tabs>
     </div>
   );
 };

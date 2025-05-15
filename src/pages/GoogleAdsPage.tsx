@@ -11,6 +11,7 @@ import KeywordPerformance from '@/components/KeywordPerformance';
 import AdCopyPerformance from '@/components/AdCopyPerformance';
 import AssetPerformance from '@/components/AssetPerformance';
 import { useGoogleAdsAPI } from '@/hooks/use-google-ads-api';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { 
   campaignsData, 
   dailyPerformance, 
@@ -45,13 +46,11 @@ const GoogleAdsPage = () => {
 
   const handleDateChange = useCallback((range: { from: Date; to: Date }) => {
     setDateRange(range);
-    // In a real application, this would filter the data based on the date range
     console.log('Date range changed:', range);
   }, []);
 
   // Initial data fetch when component mounts
   useEffect(() => {
-    // This would normally fetch data from the Google Ads API
     console.log('Initial Google Ads data fetch with date range:', dateRange);
   }, []);
 
@@ -74,25 +73,42 @@ const GoogleAdsPage = () => {
         </div>
       </div>
       
-      <CampaignTable campaigns={campaignsData} />
-      
-      <KeywordPerformance 
-        keywords={keywordPerformanceData} 
-        campaigns={campaignsData}
-        adGroups={adGroupsData}
-      />
-      
-      <AdCopyPerformance 
-        adCopies={adCopyPerformanceData} 
-        campaigns={campaignsData}
-        adGroups={adGroupsData}
-      />
-
-      <AssetPerformance 
-        assets={assetPerformanceData} 
-        campaigns={campaignsData}
-        adGroups={adGroupsData}
-      />
+      <Tabs defaultValue="campaigns" className="mt-6">
+        <TabsList className="mb-4 w-full justify-start">
+          <TabsTrigger value="campaigns">Campaigns</TabsTrigger>
+          <TabsTrigger value="keywords">Keywords</TabsTrigger>
+          <TabsTrigger value="adcopy">Ad Copy</TabsTrigger>
+          <TabsTrigger value="assets">Assets</TabsTrigger>
+        </TabsList>
+        
+        <TabsContent value="campaigns" className="mt-0">
+          <CampaignTable campaigns={campaignsData} />
+        </TabsContent>
+        
+        <TabsContent value="keywords" className="mt-0">
+          <KeywordPerformance 
+            keywords={keywordPerformanceData} 
+            campaigns={campaignsData}
+            adGroups={adGroupsData}
+          />
+        </TabsContent>
+        
+        <TabsContent value="adcopy" className="mt-0">
+          <AdCopyPerformance 
+            adCopies={adCopyPerformanceData} 
+            campaigns={campaignsData}
+            adGroups={adGroupsData}
+          />
+        </TabsContent>
+        
+        <TabsContent value="assets" className="mt-0">
+          <AssetPerformance 
+            assets={assetPerformanceData} 
+            campaigns={campaignsData}
+            adGroups={adGroupsData}
+          />
+        </TabsContent>
+      </Tabs>
     </div>
   );
 };

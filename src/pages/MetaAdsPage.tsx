@@ -1,3 +1,4 @@
+
 import { useState, useCallback, useEffect } from 'react';
 import Header from '@/components/Header';
 import DateRangePicker from '@/components/DateRangePicker';
@@ -5,19 +6,18 @@ import MetricsOverview from '@/components/MetricsOverview';
 import PerformanceChart from '@/components/PerformanceChart';
 import CampaignTable from '@/components/CampaignTable';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { 
   dailyPerformance, 
-  getOverviewMetrics,
-  Campaign
+  getOverviewMetrics
 } from '@/data/mockData';
 
-// Mock data for Meta Ads campaigns, with ctr and cpc properties added
-const metaCampaigns: Campaign[] = [
+// Mock data for Meta Ads campaigns
+const metaCampaigns = [
   {
     id: "meta-1",
     name: "Spring Collection - Facebook",
     status: "Active",
-    budget: 1500,
     spend: 1350.32,
     impressions: 592800,
     clicks: 12850,
@@ -32,7 +32,6 @@ const metaCampaigns: Campaign[] = [
     id: "meta-2",
     name: "Instagram Story Ads",
     status: "Active",
-    budget: 2000,
     spend: 1876.42,
     impressions: 734500,
     clicks: 22670,
@@ -47,7 +46,6 @@ const metaCampaigns: Campaign[] = [
     id: "meta-3",
     name: "Retargeting - Carousel",
     status: "Active",
-    budget: 1200,
     spend: 1120.89,
     impressions: 428600,
     clicks: 18970,
@@ -149,110 +147,122 @@ const MetaAdsPage = () => {
         </div>
       </div>
       
-      <CampaignTable campaigns={metaCampaigns} />
-      
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
-        <Card>
-          <CardHeader>
-            <CardTitle>Audience Insights</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="space-y-4">
-              <div>
-                <h4 className="font-medium mb-2">Age Distribution</h4>
-                <div className="space-y-2">
-                  <div className="flex justify-between items-center">
-                    <div>18-24</div>
-                    <div className="w-2/3">
-                      <div className="bg-blue-500 h-2 rounded" style={{ width: "22%" }}></div>
-                    </div>
-                    <div>22%</div>
-                  </div>
-                  <div className="flex justify-between items-center">
-                    <div>25-34</div>
-                    <div className="w-2/3">
-                      <div className="bg-blue-500 h-2 rounded" style={{ width: "38%" }}></div>
-                    </div>
-                    <div>38%</div>
-                  </div>
-                  <div className="flex justify-between items-center">
-                    <div>35-44</div>
-                    <div className="w-2/3">
-                      <div className="bg-blue-500 h-2 rounded" style={{ width: "25%" }}></div>
-                    </div>
-                    <div>25%</div>
-                  </div>
-                </div>
-              </div>
-              
-              <div>
-                <h4 className="font-medium mb-2">Gender</h4>
-                <div className="flex justify-between gap-4">
-                  <div className="flex-1 bg-blue-100 p-3 rounded text-center">
-                    <div className="font-bold">46%</div>
-                    <div className="text-sm">Male</div>
-                  </div>
-                  <div className="flex-1 bg-pink-100 p-3 rounded text-center">
-                    <div className="font-bold">52%</div>
-                    <div className="text-sm">Female</div>
-                  </div>
-                  <div className="flex-1 bg-gray-100 p-3 rounded text-center">
-                    <div className="font-bold">2%</div>
-                    <div className="text-sm">Other</div>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </CardContent>
-        </Card>
+      <Tabs defaultValue="campaigns" className="mt-6">
+        <TabsList className="mb-4 w-full justify-start">
+          <TabsTrigger value="campaigns">Campaigns</TabsTrigger>
+          <TabsTrigger value="audience">Audience</TabsTrigger>
+          <TabsTrigger value="creative">Creative</TabsTrigger>
+        </TabsList>
         
-        <Card>
-          <CardHeader>
-            <CardTitle>Creative Performance</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="space-y-4">
-              {[
-                { 
-                  title: "Summer Collection Video", 
-                  type: "Video Ad", 
-                  ctr: "3.8%", 
-                  engagement: "High",
-                  thumbnail: "https://placehold.co/60x60/blue/white"
-                },
-                { 
-                  title: "Product Carousel", 
-                  type: "Carousel Ad", 
-                  ctr: "2.4%", 
-                  engagement: "Medium",
-                  thumbnail: "https://placehold.co/60x60/green/white" 
-                },
-                { 
-                  title: "Customer Testimonial", 
-                  type: "Image Ad", 
-                  ctr: "1.9%", 
-                  engagement: "Medium",
-                  thumbnail: "https://placehold.co/60x60/orange/white" 
-                },
-              ].map((ad, i) => (
-                <div key={i} className="flex gap-4 items-center border-b pb-4">
-                  <div className="w-[60px] h-[60px] bg-gray-200 rounded overflow-hidden">
-                    <div className="w-full h-full bg-blue-200 flex items-center justify-center text-xs">Ad</div>
-                  </div>
-                  <div className="flex-1">
-                    <div className="font-medium">{ad.title}</div>
-                    <div className="text-sm text-muted-foreground">{ad.type}</div>
-                  </div>
-                  <div className="text-right">
-                    <div className="font-medium">{ad.ctr} CTR</div>
-                    <div className="text-sm text-muted-foreground">{ad.engagement} Engagement</div>
+        <TabsContent value="campaigns" className="mt-0">
+          <CampaignTable campaigns={metaCampaigns} />
+        </TabsContent>
+        
+        <TabsContent value="audience" className="mt-0">
+          <Card>
+            <CardHeader>
+              <CardTitle>Audience Insights</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="space-y-4">
+                <div>
+                  <h4 className="font-medium mb-2">Age Distribution</h4>
+                  <div className="space-y-2">
+                    <div className="flex justify-between items-center">
+                      <div>18-24</div>
+                      <div className="w-2/3">
+                        <div className="bg-blue-500 h-2 rounded" style={{ width: "22%" }}></div>
+                      </div>
+                      <div>22%</div>
+                    </div>
+                    <div className="flex justify-between items-center">
+                      <div>25-34</div>
+                      <div className="w-2/3">
+                        <div className="bg-blue-500 h-2 rounded" style={{ width: "38%" }}></div>
+                      </div>
+                      <div>38%</div>
+                    </div>
+                    <div className="flex justify-between items-center">
+                      <div>35-44</div>
+                      <div className="w-2/3">
+                        <div className="bg-blue-500 h-2 rounded" style={{ width: "25%" }}></div>
+                      </div>
+                      <div>25%</div>
+                    </div>
                   </div>
                 </div>
-              ))}
-            </div>
-          </CardContent>
-        </Card>
-      </div>
+                
+                <div>
+                  <h4 className="font-medium mb-2">Gender</h4>
+                  <div className="flex justify-between gap-4">
+                    <div className="flex-1 bg-blue-100 p-3 rounded text-center">
+                      <div className="font-bold">46%</div>
+                      <div className="text-sm">Male</div>
+                    </div>
+                    <div className="flex-1 bg-pink-100 p-3 rounded text-center">
+                      <div className="font-bold">52%</div>
+                      <div className="text-sm">Female</div>
+                    </div>
+                    <div className="flex-1 bg-gray-100 p-3 rounded text-center">
+                      <div className="font-bold">2%</div>
+                      <div className="text-sm">Other</div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+        </TabsContent>
+        
+        <TabsContent value="creative" className="mt-0">
+          <Card>
+            <CardHeader>
+              <CardTitle>Creative Performance</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="space-y-4">
+                {[
+                  { 
+                    title: "Summer Collection Video", 
+                    type: "Video Ad", 
+                    ctr: "3.8%", 
+                    engagement: "High",
+                    thumbnail: "https://placehold.co/60x60/blue/white"
+                  },
+                  { 
+                    title: "Product Carousel", 
+                    type: "Carousel Ad", 
+                    ctr: "2.4%", 
+                    engagement: "Medium",
+                    thumbnail: "https://placehold.co/60x60/green/white" 
+                  },
+                  { 
+                    title: "Customer Testimonial", 
+                    type: "Image Ad", 
+                    ctr: "1.9%", 
+                    engagement: "Medium",
+                    thumbnail: "https://placehold.co/60x60/orange/white" 
+                  },
+                ].map((ad, i) => (
+                  <div key={i} className="flex gap-4 items-center border-b pb-4">
+                    <div className="w-[60px] h-[60px] bg-gray-200 rounded overflow-hidden">
+                      <div className="w-full h-full bg-blue-200 flex items-center justify-center text-xs">Ad</div>
+                    </div>
+                    <div className="flex-1">
+                      <div className="font-medium">{ad.title}</div>
+                      <div className="text-sm text-muted-foreground">{ad.type}</div>
+                    </div>
+                    <div className="text-right">
+                      <div className="font-medium">{ad.ctr} CTR</div>
+                      <div className="text-sm text-muted-foreground">{ad.engagement} Engagement</div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </CardContent>
+          </Card>
+        </TabsContent>
+      </Tabs>
     </div>
   );
 };

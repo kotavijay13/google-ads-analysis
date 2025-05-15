@@ -11,6 +11,7 @@ import {
   TableHeader, 
   TableRow 
 } from "@/components/ui/table";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import PerformanceChart from '@/components/PerformanceChart';
 import { dailyPerformance } from '@/data/mockData';
 
@@ -151,7 +152,7 @@ const LeadsPage = () => {
         </Card>
       </div>
       
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
         <Card>
           <CardHeader>
             <CardTitle>Lead Generation Trend</CardTitle>
@@ -207,100 +208,112 @@ const LeadsPage = () => {
         </Card>
       </div>
       
-      <Card className="mb-8">
-        <CardHeader>
-          <CardTitle>Recent Leads</CardTitle>
-        </CardHeader>
-        <CardContent>
-          <Table>
-            <TableHeader>
-              <TableRow>
-                <TableHead>Name</TableHead>
-                <TableHead>Email</TableHead>
-                <TableHead>Source</TableHead>
-                <TableHead>Campaign</TableHead>
-                <TableHead>Date</TableHead>
-                <TableHead>Status</TableHead>
-              </TableRow>
-            </TableHeader>
-            <TableBody>
-              {leads.map((lead) => (
-                <TableRow key={lead.id}>
-                  <TableCell className="font-medium">{lead.name}</TableCell>
-                  <TableCell>{lead.email}</TableCell>
-                  <TableCell>{lead.source}</TableCell>
-                  <TableCell>{lead.campaign}</TableCell>
-                  <TableCell>{lead.date}</TableCell>
-                  <TableCell>
-                    <span className={`px-2 py-1 rounded text-xs ${getStatusColor(lead.status)}`}>
-                      {lead.status}
-                    </span>
-                  </TableCell>
-                </TableRow>
-              ))}
-            </TableBody>
-          </Table>
-        </CardContent>
-      </Card>
-      
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        <Card>
-          <CardHeader>
-            <CardTitle>Lead Status Distribution</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="grid grid-cols-2 gap-4">
-              <div className="bg-blue-100 p-4 rounded">
-                <div className="text-blue-800 text-sm font-medium mb-1">New</div>
-                <div className="text-2xl font-bold">124</div>
-                <div className="text-xs text-blue-800/80">36% of total</div>
-              </div>
-              <div className="bg-yellow-100 p-4 rounded">
-                <div className="text-yellow-800 text-sm font-medium mb-1">Contacted</div>
-                <div className="text-2xl font-bold">86</div>
-                <div className="text-xs text-yellow-800/80">25% of total</div>
-              </div>
-              <div className="bg-purple-100 p-4 rounded">
-                <div className="text-purple-800 text-sm font-medium mb-1">Qualified</div>
-                <div className="text-2xl font-bold">68</div>
-                <div className="text-xs text-purple-800/80">20% of total</div>
-              </div>
-              <div className="bg-green-100 p-4 rounded">
-                <div className="text-green-800 text-sm font-medium mb-1">Converted</div>
-                <div className="text-2xl font-bold">69</div>
-                <div className="text-xs text-green-800/80">19% of total</div>
-              </div>
-            </div>
-          </CardContent>
-        </Card>
+      <Tabs defaultValue="leads" className="mt-6">
+        <TabsList className="mb-4 w-full justify-start">
+          <TabsTrigger value="leads">Leads</TabsTrigger>
+          <TabsTrigger value="status">Lead Status</TabsTrigger>
+          <TabsTrigger value="campaigns">Campaign Performance</TabsTrigger>
+        </TabsList>
         
-        <Card>
-          <CardHeader>
-            <CardTitle>Campaign Performance</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="space-y-4">
-              {[
-                { name: "Summer Sale", leads: 87, cpl: "$28.43", conversion: "26%" },
-                { name: "Product Launch", leads: 64, cpl: "$36.12", conversion: "18%" },
-                { name: "Retargeting", leads: 51, cpl: "$22.75", conversion: "32%" },
-                { name: "Partner Program", leads: 42, cpl: "$12.20", conversion: "21%" },
-              ].map((campaign, i) => (
-                <div key={i} className="flex justify-between items-start py-2 border-b">
-                  <div>
-                    <div className="font-medium">{campaign.name}</div>
-                    <div className="text-sm text-muted-foreground">{campaign.leads} leads</div>
-                  </div>
-                  <div className="text-right">
-                    <div>{campaign.cpl} CPL</div>
-                    <div className="text-sm text-muted-foreground">{campaign.conversion} conv. rate</div>
-                  </div>
+        <TabsContent value="leads" className="mt-0">
+          <Card>
+            <CardHeader>
+              <CardTitle>Recent Leads</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <Table>
+                <TableHeader>
+                  <TableRow>
+                    <TableHead>Name</TableHead>
+                    <TableHead>Email</TableHead>
+                    <TableHead>Source</TableHead>
+                    <TableHead>Campaign</TableHead>
+                    <TableHead>Date</TableHead>
+                    <TableHead>Status</TableHead>
+                  </TableRow>
+                </TableHeader>
+                <TableBody>
+                  {leads.map((lead) => (
+                    <TableRow key={lead.id}>
+                      <TableCell className="font-medium">{lead.name}</TableCell>
+                      <TableCell>{lead.email}</TableCell>
+                      <TableCell>{lead.source}</TableCell>
+                      <TableCell>{lead.campaign}</TableCell>
+                      <TableCell>{lead.date}</TableCell>
+                      <TableCell>
+                        <span className={`px-2 py-1 rounded text-xs ${getStatusColor(lead.status)}`}>
+                          {lead.status}
+                        </span>
+                      </TableCell>
+                    </TableRow>
+                  ))}
+                </TableBody>
+              </Table>
+            </CardContent>
+          </Card>
+        </TabsContent>
+        
+        <TabsContent value="status" className="mt-0">
+          <Card>
+            <CardHeader>
+              <CardTitle>Lead Status Distribution</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="grid grid-cols-2 gap-4">
+                <div className="bg-blue-100 p-4 rounded">
+                  <div className="text-blue-800 text-sm font-medium mb-1">New</div>
+                  <div className="text-2xl font-bold">124</div>
+                  <div className="text-xs text-blue-800/80">36% of total</div>
                 </div>
-              ))}
-            </div>
-          </CardContent>
-        </Card>
-      </div>
+                <div className="bg-yellow-100 p-4 rounded">
+                  <div className="text-yellow-800 text-sm font-medium mb-1">Contacted</div>
+                  <div className="text-2xl font-bold">86</div>
+                  <div className="text-xs text-yellow-800/80">25% of total</div>
+                </div>
+                <div className="bg-purple-100 p-4 rounded">
+                  <div className="text-purple-800 text-sm font-medium mb-1">Qualified</div>
+                  <div className="text-2xl font-bold">68</div>
+                  <div className="text-xs text-purple-800/80">20% of total</div>
+                </div>
+                <div className="bg-green-100 p-4 rounded">
+                  <div className="text-green-800 text-sm font-medium mb-1">Converted</div>
+                  <div className="text-2xl font-bold">69</div>
+                  <div className="text-xs text-green-800/80">19% of total</div>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+        </TabsContent>
+        
+        <TabsContent value="campaigns" className="mt-0">
+          <Card>
+            <CardHeader>
+              <CardTitle>Campaign Performance</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="space-y-4">
+                {[
+                  { name: "Summer Sale", leads: 87, cpl: "$28.43", conversion: "26%" },
+                  { name: "Product Launch", leads: 64, cpl: "$36.12", conversion: "18%" },
+                  { name: "Retargeting", leads: 51, cpl: "$22.75", conversion: "32%" },
+                  { name: "Partner Program", leads: 42, cpl: "$12.20", conversion: "21%" },
+                ].map((campaign, i) => (
+                  <div key={i} className="flex justify-between items-start py-2 border-b">
+                    <div>
+                      <div className="font-medium">{campaign.name}</div>
+                      <div className="text-sm text-muted-foreground">{campaign.leads} leads</div>
+                    </div>
+                    <div className="text-right">
+                      <div>{campaign.cpl} CPL</div>
+                      <div className="text-sm text-muted-foreground">{campaign.conversion} conv. rate</div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </CardContent>
+          </Card>
+        </TabsContent>
+      </Tabs>
     </div>
   );
 };
