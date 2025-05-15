@@ -34,9 +34,24 @@ const CampaignTable = ({ campaigns }: CampaignTableProps) => {
     return new Intl.NumberFormat('en-US').format(value);
   };
 
-  const formatPercent = (value: number) => {
+  const formatPercent = (value: number | undefined) => {
+    // Handle undefined or null values
+    if (value === undefined || value === null) {
+      return '0.00%';
+    }
     return value.toFixed(2) + '%';
   };
+
+  // Make sure each campaign has the required properties
+  const sanitizeCampaigns = campaigns.map(campaign => {
+    return {
+      ...campaign,
+      // If ctr is missing, calculate it or set to 0
+      ctr: campaign.ctr || (campaign.clicks && campaign.impressions ? (campaign.clicks / campaign.impressions) * 100 : 0),
+      // If cpc (cost per click) is missing, calculate it or set to 0
+      cpc: campaign.cpc || (campaign.spend && campaign.clicks ? campaign.spend / campaign.clicks : 0)
+    };
+  });
 
   return (
     <Card className="col-span-1 lg:col-span-3 mb-6">
@@ -60,7 +75,7 @@ const CampaignTable = ({ campaigns }: CampaignTableProps) => {
               </TableRow>
             </TableHeader>
             <TableBody>
-              {campaigns.map((campaign) => (
+              {sanitizeCampaigns.map((campaign) => (
                 <TableRow key={campaign.id}>
                   <TableCell className="font-medium">{campaign.name}</TableCell>
                   <TableCell>

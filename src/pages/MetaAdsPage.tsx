@@ -1,4 +1,3 @@
-
 import { useState, useCallback, useEffect } from 'react';
 import Header from '@/components/Header';
 import DateRangePicker from '@/components/DateRangePicker';
@@ -8,11 +7,12 @@ import CampaignTable from '@/components/CampaignTable';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { 
   dailyPerformance, 
-  getOverviewMetrics
+  getOverviewMetrics,
+  Campaign
 } from '@/data/mockData';
 
-// Mock data for Meta Ads campaigns
-const metaCampaigns = [
+// Mock data for Meta Ads campaigns, with ctr and cpc properties added
+const metaCampaigns: Campaign[] = [
   {
     id: "meta-1",
     name: "Spring Collection - Facebook",
@@ -22,9 +22,10 @@ const metaCampaigns = [
     impressions: 592800,
     clicks: 12850,
     conversions: 342,
-    costPerClick: 0.11,
+    cpc: 0.11,
     costPerConversion: 3.95,
     conversionRate: 2.66,
+    ctr: 2.17,  // (clicks / impressions) * 100
     roas: 4.8
   },
   {
@@ -36,9 +37,10 @@ const metaCampaigns = [
     impressions: 734500,
     clicks: 22670,
     conversions: 587,
-    costPerClick: 0.08,
+    cpc: 0.08,
     costPerConversion: 3.20,
     conversionRate: 2.59,
+    ctr: 3.09, // (clicks / impressions) * 100
     roas: 5.2
   },
   {
@@ -50,9 +52,10 @@ const metaCampaigns = [
     impressions: 428600,
     clicks: 18970,
     conversions: 524,
-    costPerClick: 0.06,
+    cpc: 0.06,
     costPerConversion: 2.14,
     conversionRate: 2.76,
+    ctr: 4.43, // (clicks / impressions) * 100
     roas: 6.5
   }
 ];
@@ -146,14 +149,7 @@ const MetaAdsPage = () => {
         </div>
       </div>
       
-      <Card className="mb-8">
-        <CardHeader>
-          <CardTitle>Campaign Performance</CardTitle>
-        </CardHeader>
-        <CardContent>
-          <CampaignTable campaigns={metaCampaigns} />
-        </CardContent>
-      </Card>
+      <CampaignTable campaigns={metaCampaigns} />
       
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
         <Card>
