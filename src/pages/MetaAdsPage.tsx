@@ -8,13 +8,27 @@ import CampaignTable from '@/components/CampaignTable';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { 
+  Table, 
+  TableBody, 
+  TableCell, 
+  TableHead, 
+  TableHeader, 
+  TableRow 
+} from "@/components/ui/table";
+import { 
   dailyPerformance, 
   getOverviewMetrics,
   Campaign
 } from '@/data/mockData';
 
+// Extended Campaign type to include roas
+interface MetaCampaign extends Campaign {
+  roas: number;
+  dailyBudget: number;
+}
+
 // Mock data for Meta Ads campaigns
-const metaCampaigns: Campaign[] = [
+const metaCampaigns: MetaCampaign[] = [
   {
     id: "meta-1",
     name: "Spring Collection - Facebook",
@@ -27,7 +41,8 @@ const metaCampaigns: Campaign[] = [
     costPerConversion: 3.95,
     conversionRate: 2.66,
     ctr: 2.17,  // (clicks / impressions) * 100
-    roas: 4.8
+    roas: 4.8,
+    dailyBudget: 50.00
   },
   {
     id: "meta-2",
@@ -41,7 +56,8 @@ const metaCampaigns: Campaign[] = [
     costPerConversion: 3.20,
     conversionRate: 2.59,
     ctr: 3.09, // (clicks / impressions) * 100
-    roas: 5.2
+    roas: 5.2,
+    dailyBudget: 75.00
   },
   {
     id: "meta-3",
@@ -55,7 +71,8 @@ const metaCampaigns: Campaign[] = [
     costPerConversion: 2.14,
     conversionRate: 2.76,
     ctr: 4.43, // (clicks / impressions) * 100
-    roas: 6.5
+    roas: 6.5,
+    dailyBudget: 45.00
   }
 ];
 
@@ -87,6 +104,11 @@ const MetaAdsPage = () => {
     console.log('Initial Meta Ads data fetch with date range:', dateRange);
   }, []);
 
+  // Calculate revenue data
+  const totalRevenue = metaCampaigns.reduce((total, campaign) => {
+    return total + (campaign.spend * campaign.roas);
+  }, 0);
+
   return (
     <div className="container mx-auto py-6 px-4 max-w-7xl">
       <Header onRefresh={handleRefresh} title="Meta Ads Dashboard" />
@@ -99,10 +121,17 @@ const MetaAdsPage = () => {
       <MetricsOverview metrics={metrics} />
       
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
-        <PerformanceChart data={dailyPerformance} />
+        <Card>
+          <CardHeader>
+            <CardTitle>Performance Trend</CardTitle>
+          </CardHeader>
+          <CardContent className="pt-2">
+            <PerformanceChart data={dailyPerformance} />
+          </CardContent>
+        </Card>
         
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-          <Card>
+          <Card className="h-full">
             <CardHeader className="pb-2">
               <CardTitle className="text-sm font-medium">Platform Breakdown</CardTitle>
             </CardHeader>
@@ -124,23 +153,25 @@ const MetaAdsPage = () => {
             </CardContent>
           </Card>
           
-          <Card>
+          <Card className="h-full">
             <CardHeader className="pb-2">
-              <CardTitle className="text-sm font-medium">Ad Format Performance</CardTitle>
+              <CardTitle className="text-sm font-medium">Revenue Generated</CardTitle>
             </CardHeader>
             <CardContent className="pt-2">
-              <div className="space-y-4">
+              <div className="text-2xl font-bold">${totalRevenue.toLocaleString(undefined, {maximumFractionDigits: 2})}</div>
+              <p className="text-xs text-muted-foreground">+15% from last month</p>
+              <div className="space-y-4 mt-4">
                 <div className="flex justify-between">
-                  <div>Stories</div>
-                  <div className="font-medium">$0.12 CPC</div>
+                  <div>Facebook</div>
+                  <div className="font-medium">${(totalRevenue * 0.62).toLocaleString(undefined, {maximumFractionDigits: 2})}</div>
                 </div>
                 <div className="flex justify-between">
-                  <div>Feed</div>
-                  <div className="font-medium">$0.18 CPC</div>
+                  <div>Instagram</div>
+                  <div className="font-medium">${(totalRevenue * 0.31).toLocaleString(undefined, {maximumFractionDigits: 2})}</div>
                 </div>
                 <div className="flex justify-between">
-                  <div>Reels</div>
-                  <div className="font-medium">$0.14 CPC</div>
+                  <div>Audience Network</div>
+                  <div className="font-medium">${(totalRevenue * 0.07).toLocaleString(undefined, {maximumFractionDigits: 2})}</div>
                 </div>
               </div>
             </CardContent>
@@ -153,10 +184,43 @@ const MetaAdsPage = () => {
           <TabsTrigger value="campaigns">Campaigns</TabsTrigger>
           <TabsTrigger value="audience">Audience</TabsTrigger>
           <TabsTrigger value="creative">Creative</TabsTrigger>
+          <TabsTrigger value="budget">Budget & Bidding</TabsTrigger>
         </TabsList>
         
         <TabsContent value="campaigns" className="mt-0">
-          <CampaignTable campaigns={metaCampaigns} />
+          <Card>
+            <CardHeader>
+              <CardTitle>Campaign Performance</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <Table>
+                <TableHeader>
+                  <TableRow>
+                    <TableHead>Campaign Name</TableHead>
+                    <TableHead className="text-right">Daily Budget</TableHead>
+                    <TableHead className="text-right">Spend</TableHead>
+                    <TableHead className="text-right">Clicks</TableHead>
+                    <TableHead className="text-right">Conversions</TableHead>
+                    <TableHead className="text-right">ROAS</TableHead>
+                    <TableHead className="text-right">Revenue</TableHead>
+                  </TableRow>
+                </TableHeader>
+                <TableBody>
+                  {metaCampaigns.map((campaign) => (
+                    <TableRow key={campaign.id}>
+                      <TableCell className="font-medium">{campaign.name}</TableCell>
+                      <TableCell className="text-right">${campaign.dailyBudget.toFixed(2)}</TableCell>
+                      <TableCell className="text-right">${campaign.spend.toLocaleString(undefined, {maximumFractionDigits: 2})}</TableCell>
+                      <TableCell className="text-right">{campaign.clicks.toLocaleString()}</TableCell>
+                      <TableCell className="text-right">{campaign.conversions.toLocaleString()}</TableCell>
+                      <TableCell className="text-right">{campaign.roas.toFixed(1)}x</TableCell>
+                      <TableCell className="text-right">${(campaign.spend * campaign.roas).toLocaleString(undefined, {maximumFractionDigits: 2})}</TableCell>
+                    </TableRow>
+                  ))}
+                </TableBody>
+              </Table>
+            </CardContent>
+          </Card>
         </TabsContent>
         
         <TabsContent value="audience" className="mt-0">
@@ -256,6 +320,58 @@ const MetaAdsPage = () => {
                     <div className="text-right">
                       <div className="font-medium">{ad.ctr} CTR</div>
                       <div className="text-sm text-muted-foreground">{ad.engagement} Engagement</div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </CardContent>
+          </Card>
+        </TabsContent>
+        
+        <TabsContent value="budget" className="mt-0">
+          <Card>
+            <CardHeader>
+              <CardTitle>Budget & Bidding</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="space-y-6">
+                {metaCampaigns.map((campaign) => (
+                  <div key={campaign.id} className="border rounded-md p-4">
+                    <div className="flex justify-between items-start">
+                      <div>
+                        <h3 className="font-medium">{campaign.name}</h3>
+                        <p className="text-sm text-muted-foreground">Budget: ${campaign.dailyBudget.toFixed(2)}/day</p>
+                      </div>
+                      <div className="text-right">
+                        <div className="text-sm">
+                          <span className="font-medium">ROAS: </span>{campaign.roas.toFixed(1)}x
+                        </div>
+                        <div className="text-sm">
+                          <span className="font-medium">CPC: </span>${campaign.cpc.toFixed(2)}
+                        </div>
+                      </div>
+                    </div>
+                    <div className="mt-4 grid grid-cols-2 gap-4">
+                      <div>
+                        <label className="text-xs">Daily Budget</label>
+                        <div className="mt-1 flex items-center">
+                          <span className="text-sm font-medium">$</span>
+                          <input
+                            type="number"
+                            className="ml-1 flex-1 border-0 border-b focus:ring-0 focus:border-black text-sm p-0"
+                            defaultValue={campaign.dailyBudget}
+                            step="1"
+                          />
+                        </div>
+                      </div>
+                      <div>
+                        <label className="text-xs">Bid Strategy</label>
+                        <select className="w-full mt-1 bg-transparent border-0 border-b focus:ring-0 focus:border-black text-sm p-0">
+                          <option>Lowest Cost</option>
+                          <option>Target CPA</option>
+                          <option>Target ROAS</option>
+                        </select>
+                      </div>
                     </div>
                   </div>
                 ))}

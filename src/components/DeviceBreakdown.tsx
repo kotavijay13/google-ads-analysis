@@ -43,27 +43,54 @@ const DeviceBreakdown = ({ data }: DeviceBreakdownProps) => {
     percentage: ((item.clicks / totalClicks) * 100).toFixed(1) + '%',
   }));
 
+  // Custom label for the pie chart segments
+  const renderLabel = ({ cx, cy, midAngle, innerRadius, outerRadius, percent, index }) => {
+    const RADIAN = Math.PI / 180;
+    const radius = innerRadius + (outerRadius - innerRadius) * 1.4;
+    const x = cx + radius * Math.cos(-midAngle * RADIAN);
+    const y = cy + radius * Math.sin(-midAngle * RADIAN);
+
+    return (
+      <text
+        x={x}
+        y={y}
+        fill={COLORS[index % COLORS.length]}
+        textAnchor={x > cx ? "start" : "end"}
+        dominantBaseline="central"
+        className="text-[10px] font-medium"
+      >
+        {chartData[index].name} ({chartData[index].percentage})
+      </text>
+    );
+  };
+
   return (
     <Card className="col-span-1 h-full">
       <CardHeader className="pb-2">
         <CardTitle className="text-base">Device Breakdown</CardTitle>
         <CardDescription className="text-xs">Click distribution by device type</CardDescription>
       </CardHeader>
-      <CardContent className="h-[180px]">
+      <CardContent className="h-[200px]">
         <ResponsiveContainer width="100%" height="100%">
           <PieChart>
             <Pie
               data={chartData}
               cx="50%"
               cy="50%"
-              labelLine={false}
+              labelLine={true}
               outerRadius={60}
               fill="#8884d8"
               dataKey="value"
-              label={({ name, percentage }) => `${name}: ${percentage}`}
+              label={renderLabel}
+              className="stroke-background stroke-2"
             >
               {chartData.map((entry, index) => (
-                <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
+                <Cell 
+                  key={`cell-${index}`} 
+                  fill={COLORS[index % COLORS.length]} 
+                  stroke="white"
+                  strokeWidth={2}
+                />
               ))}
             </Pie>
             <Tooltip
@@ -74,8 +101,8 @@ const DeviceBreakdown = ({ data }: DeviceBreakdownProps) => {
                 borderRadius: '0.375rem',
                 boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06)'
               }}
+              
             />
-            <Legend />
           </PieChart>
         </ResponsiveContainer>
       </CardContent>

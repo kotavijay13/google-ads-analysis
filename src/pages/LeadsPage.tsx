@@ -14,13 +14,15 @@ import {
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import PerformanceChart from '@/components/PerformanceChart';
 import { dailyPerformance } from '@/data/mockData';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 
-// Mock lead data
+// Mock lead data with phone numbers added
 const leads = [
   { 
     id: "lead-1", 
     name: "John Smith", 
-    email: "john@example.com", 
+    email: "john@example.com",
+    phone: "(555) 123-4567",
     source: "Google Ads", 
     campaign: "Summer Sale", 
     date: "2023-05-12", 
@@ -29,7 +31,8 @@ const leads = [
   { 
     id: "lead-2", 
     name: "Sarah Johnson", 
-    email: "sarah@example.com", 
+    email: "sarah@example.com",
+    phone: "(555) 234-5678",
     source: "Facebook", 
     campaign: "Retargeting", 
     date: "2023-05-11", 
@@ -38,7 +41,8 @@ const leads = [
   { 
     id: "lead-3", 
     name: "Michael Brown", 
-    email: "michael@example.com", 
+    email: "michael@example.com",
+    phone: "(555) 345-6789",
     source: "Organic Search", 
     campaign: "SEO", 
     date: "2023-05-10", 
@@ -47,7 +51,8 @@ const leads = [
   { 
     id: "lead-4", 
     name: "Emma Wilson", 
-    email: "emma@example.com", 
+    email: "emma@example.com",
+    phone: "(555) 456-7890",
     source: "Referral", 
     campaign: "Partner Program", 
     date: "2023-05-09", 
@@ -56,7 +61,8 @@ const leads = [
   { 
     id: "lead-5", 
     name: "David Lee", 
-    email: "david@example.com", 
+    email: "david@example.com",
+    phone: "(555) 567-8901",
     source: "Contact Form", 
     campaign: "Website", 
     date: "2023-05-08", 
@@ -71,6 +77,7 @@ const LeadsPage = () => {
   });
   
   const [isLoading, setIsLoading] = useState(false);
+  const [leadsData, setLeadsData] = useState(leads);
   
   const handleRefresh = () => {
     setIsLoading(true);
@@ -85,6 +92,14 @@ const LeadsPage = () => {
     setDateRange(range);
     console.log('Date range changed:', range);
   }, []);
+
+  const handleStatusChange = (leadId: string, newStatus: string) => {
+    setLeadsData(prevLeads => 
+      prevLeads.map(lead => 
+        lead.id === leadId ? { ...lead, status: newStatus } : lead
+      )
+    );
+  };
 
   // Initial data fetch when component mounts
   useEffect(() => {
@@ -152,62 +167,6 @@ const LeadsPage = () => {
         </Card>
       </div>
       
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
-        <Card>
-          <CardHeader>
-            <CardTitle>Lead Generation Trend</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <PerformanceChart data={dailyPerformance} />
-          </CardContent>
-        </Card>
-        
-        <Card>
-          <CardHeader>
-            <CardTitle>Lead Sources</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="space-y-4">
-              <div className="flex justify-between items-center">
-                <div>Google Ads</div>
-                <div className="w-2/3">
-                  <div className="bg-blue-500 h-2 rounded" style={{ width: "42%" }}></div>
-                </div>
-                <div>42%</div>
-              </div>
-              <div className="flex justify-between items-center">
-                <div>Facebook Ads</div>
-                <div className="w-2/3">
-                  <div className="bg-blue-500 h-2 rounded" style={{ width: "28%" }}></div>
-                </div>
-                <div>28%</div>
-              </div>
-              <div className="flex justify-between items-center">
-                <div>Organic Search</div>
-                <div className="w-2/3">
-                  <div className="bg-blue-500 h-2 rounded" style={{ width: "16%" }}></div>
-                </div>
-                <div>16%</div>
-              </div>
-              <div className="flex justify-between items-center">
-                <div>Referrals</div>
-                <div className="w-2/3">
-                  <div className="bg-blue-500 h-2 rounded" style={{ width: "9%" }}></div>
-                </div>
-                <div>9%</div>
-              </div>
-              <div className="flex justify-between items-center">
-                <div>Direct</div>
-                <div className="w-2/3">
-                  <div className="bg-blue-500 h-2 rounded" style={{ width: "5%" }}></div>
-                </div>
-                <div>5%</div>
-              </div>
-            </div>
-          </CardContent>
-        </Card>
-      </div>
-      
       <Tabs defaultValue="leads" className="mt-6">
         <TabsList className="mb-4 w-full justify-start">
           <TabsTrigger value="leads">Leads</TabsTrigger>
@@ -226,6 +185,7 @@ const LeadsPage = () => {
                   <TableRow>
                     <TableHead>Name</TableHead>
                     <TableHead>Email</TableHead>
+                    <TableHead>Phone</TableHead>
                     <TableHead>Source</TableHead>
                     <TableHead>Campaign</TableHead>
                     <TableHead>Date</TableHead>
@@ -233,17 +193,29 @@ const LeadsPage = () => {
                   </TableRow>
                 </TableHeader>
                 <TableBody>
-                  {leads.map((lead) => (
+                  {leadsData.map((lead) => (
                     <TableRow key={lead.id}>
                       <TableCell className="font-medium">{lead.name}</TableCell>
                       <TableCell>{lead.email}</TableCell>
+                      <TableCell>{lead.phone}</TableCell>
                       <TableCell>{lead.source}</TableCell>
                       <TableCell>{lead.campaign}</TableCell>
                       <TableCell>{lead.date}</TableCell>
                       <TableCell>
-                        <span className={`px-2 py-1 rounded text-xs ${getStatusColor(lead.status)}`}>
-                          {lead.status}
-                        </span>
+                        <Select 
+                          defaultValue={lead.status} 
+                          onValueChange={(value) => handleStatusChange(lead.id, value)}
+                        >
+                          <SelectTrigger className={`w-[130px] h-7 text-xs ${getStatusColor(lead.status)}`}>
+                            <SelectValue placeholder={lead.status} />
+                          </SelectTrigger>
+                          <SelectContent>
+                            <SelectItem value="New">New</SelectItem>
+                            <SelectItem value="Contacted">Contacted</SelectItem>
+                            <SelectItem value="Qualified">Qualified</SelectItem>
+                            <SelectItem value="Converted">Converted</SelectItem>
+                          </SelectContent>
+                        </Select>
                       </TableCell>
                     </TableRow>
                   ))}

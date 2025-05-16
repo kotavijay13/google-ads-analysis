@@ -1,5 +1,5 @@
 
-import { LayoutDashboard, TrendingUp, Facebook, ListChecks, Users } from "lucide-react";
+import { LayoutDashboard, TrendingUp, Facebook, ListChecks, Users, Settings } from "lucide-react";
 import { useNavigate, useLocation } from "react-router-dom";
 import {
   Sidebar,
@@ -38,6 +38,11 @@ const navigationItems = [
     title: "Leads",
     path: "/leads",
     icon: Users,
+  },
+  {
+    title: "Admin",
+    path: "/admin",
+    icon: Settings,
   },
 ];
 

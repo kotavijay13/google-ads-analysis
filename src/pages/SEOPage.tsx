@@ -14,6 +14,7 @@ import {
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import PerformanceChart from '@/components/PerformanceChart';
 import { dailyPerformance } from '@/data/mockData';
+import { Link } from 'lucide-react';
 
 // Mock SEO data
 const keywordRankings = [
@@ -22,6 +23,55 @@ const keywordRankings = [
   { keyword: "ppc management", position: 2, change: 4, volume: 2800, difficulty: "Medium" },
   { keyword: "seo consultant", position: 8, change: 0, volume: 1900, difficulty: "High" },
   { keyword: "content marketing strategy", position: 4, change: 1, volume: 1600, difficulty: "Medium" },
+];
+
+// Mock URL meta data
+const urlMetaData = [
+  { 
+    url: "/", 
+    title: "Digital Marketing Agency | Services for SMBs | YourCompany", 
+    description: "Full-service digital marketing agency specializing in SEO, PPC, social media marketing, and content strategy for small and medium businesses.",
+    pageSpeed: { mobile: 76, desktop: 92 },
+    wordCount: 1450,
+    h1Count: 1,
+    imageCount: 8
+  },
+  { 
+    url: "/services", 
+    title: "Marketing Services | SEO, PPC, Social Media | YourCompany", 
+    description: "Explore our digital marketing services including search engine optimization, paid advertising, social media management, and content creation.",
+    pageSpeed: { mobile: 82, desktop: 94 },
+    wordCount: 1280,
+    h1Count: 1,
+    imageCount: 6
+  },
+  { 
+    url: "/blog", 
+    title: "Digital Marketing Blog | Industry News & Tips | YourCompany", 
+    description: "Stay updated with the latest digital marketing trends, news, and actionable tips for growing your business online.",
+    pageSpeed: { mobile: 68, desktop: 88 },
+    wordCount: 950,
+    h1Count: 1,
+    imageCount: 12
+  },
+  { 
+    url: "/case-studies", 
+    title: "Case Studies | Client Success Stories | YourCompany", 
+    description: "Read our client success stories and learn how our digital marketing strategies have helped businesses achieve their growth goals.",
+    pageSpeed: { mobile: 71, desktop: 90 },
+    wordCount: 2100,
+    h1Count: 1,
+    imageCount: 14
+  },
+  { 
+    url: "/contact", 
+    title: "Contact Us | Get a Free Consultation | YourCompany", 
+    description: "Get in touch with our digital marketing experts for a free consultation. Find our contact details and office locations.",
+    pageSpeed: { mobile: 85, desktop: 97 },
+    wordCount: 450,
+    h1Count: 1,
+    imageCount: 3
+  },
 ];
 
 const SEOPage = () => {
@@ -50,6 +100,12 @@ const SEOPage = () => {
   useEffect(() => {
     console.log('Initial SEO data fetch with date range:', dateRange);
   }, []);
+
+  const getSpeedColor = (score: number) => {
+    if (score >= 90) return "bg-green-500";
+    if (score >= 70) return "bg-amber-500";
+    return "bg-red-500";
+  };
 
   return (
     <div className="container mx-auto py-6 px-4 max-w-7xl">
@@ -93,60 +149,11 @@ const SEOPage = () => {
         
         <Card>
           <CardHeader className="pb-2">
-            <CardTitle className="text-sm font-medium">Domain Authority</CardTitle>
+            <CardTitle className="text-sm font-medium">Revenue Generated</CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">42</div>
-            <p className="text-xs text-muted-foreground">+3 from last check</p>
-          </CardContent>
-        </Card>
-      </div>
-      
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
-        <Card>
-          <CardHeader>
-            <CardTitle>Organic Traffic Trend</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <PerformanceChart data={dailyPerformance} />
-          </CardContent>
-        </Card>
-        
-        <Card>
-          <CardHeader>
-            <CardTitle>Traffic Sources</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="space-y-4">
-              <div className="flex justify-between items-center">
-                <div>Organic Search</div>
-                <div className="w-2/3">
-                  <div className="bg-green-500 h-2 rounded" style={{ width: "62%" }}></div>
-                </div>
-                <div>62%</div>
-              </div>
-              <div className="flex justify-between items-center">
-                <div>Direct</div>
-                <div className="w-2/3">
-                  <div className="bg-blue-500 h-2 rounded" style={{ width: "18%" }}></div>
-                </div>
-                <div>18%</div>
-              </div>
-              <div className="flex justify-between items-center">
-                <div>Referral</div>
-                <div className="w-2/3">
-                  <div className="bg-purple-500 h-2 rounded" style={{ width: "12%" }}></div>
-                </div>
-                <div>12%</div>
-              </div>
-              <div className="flex justify-between items-center">
-                <div>Social</div>
-                <div className="w-2/3">
-                  <div className="bg-orange-500 h-2 rounded" style={{ width: "8%" }}></div>
-                </div>
-                <div>8%</div>
-              </div>
-            </div>
+            <div className="text-2xl font-bold">$24,680</div>
+            <p className="text-xs text-muted-foreground">+18% from last month</p>
           </CardContent>
         </Card>
       </div>
@@ -155,6 +162,7 @@ const SEOPage = () => {
         <TabsList className="mb-4 w-full justify-start">
           <TabsTrigger value="keywords">Keywords</TabsTrigger>
           <TabsTrigger value="pages">Pages</TabsTrigger>
+          <TabsTrigger value="meta-data">URL Meta Data</TabsTrigger>
           <TabsTrigger value="performance">Site Performance</TabsTrigger>
         </TabsList>
         
@@ -236,34 +244,147 @@ const SEOPage = () => {
           </Card>
         </TabsContent>
         
-        <TabsContent value="performance" className="mt-0">
+        <TabsContent value="meta-data" className="mt-0">
           <Card>
             <CardHeader>
-              <CardTitle>Page Speed Insights</CardTitle>
+              <CardTitle>URL Meta Data Analysis</CardTitle>
             </CardHeader>
             <CardContent>
-              <div className="space-y-6">
-                <div>
-                  <div className="flex justify-between mb-2">
-                    <span>Mobile</span>
-                    <span className="font-bold">76/100</span>
-                  </div>
-                  <div className="w-full bg-gray-200 h-2 rounded-full overflow-hidden">
-                    <div className="bg-amber-500 h-full" style={{ width: "76%" }}></div>
-                  </div>
-                </div>
-                <div>
-                  <div className="flex justify-between mb-2">
-                    <span>Desktop</span>
-                    <span className="font-bold">92/100</span>
-                  </div>
-                  <div className="w-full bg-gray-200 h-2 rounded-full overflow-hidden">
-                    <div className="bg-green-500 h-full" style={{ width: "92%" }}></div>
-                  </div>
-                </div>
+              <div className="overflow-auto">
+                <Table>
+                  <TableHeader>
+                    <TableRow>
+                      <TableHead>URL</TableHead>
+                      <TableHead>Meta Title</TableHead>
+                      <TableHead>Meta Description</TableHead>
+                      <TableHead className="text-center">Mobile Speed</TableHead>
+                      <TableHead className="text-center">Desktop Speed</TableHead>
+                    </TableRow>
+                  </TableHeader>
+                  <TableBody>
+                    {urlMetaData.map((page) => (
+                      <TableRow key={page.url}>
+                        <TableCell className="whitespace-nowrap">
+                          <div className="flex items-center gap-2">
+                            <Link size={14} />
+                            <span className="font-medium">{page.url}</span>
+                          </div>
+                        </TableCell>
+                        <TableCell className="max-w-xs">
+                          <div className="truncate" title={page.title}>{page.title}</div>
+                          <div className="text-xs text-muted-foreground">{page.title.length} chars</div>
+                        </TableCell>
+                        <TableCell className="max-w-xs">
+                          <div className="truncate" title={page.description}>{page.description}</div>
+                          <div className="text-xs text-muted-foreground">{page.description.length} chars</div>
+                        </TableCell>
+                        <TableCell className="text-center">
+                          <div className="flex justify-center">
+                            <div className="w-10 h-10 rounded-full flex items-center justify-center relative">
+                              <div className="absolute inset-0 rounded-full overflow-hidden">
+                                <div 
+                                  className={`${getSpeedColor(page.pageSpeed.mobile)} h-full`} 
+                                  style={{ width: `${page.pageSpeed.mobile}%` }}
+                                ></div>
+                              </div>
+                              <span className="relative text-xs font-medium">{page.pageSpeed.mobile}</span>
+                            </div>
+                          </div>
+                        </TableCell>
+                        <TableCell className="text-center">
+                          <div className="flex justify-center">
+                            <div className="w-10 h-10 rounded-full flex items-center justify-center relative">
+                              <div className="absolute inset-0 rounded-full overflow-hidden">
+                                <div 
+                                  className={`${getSpeedColor(page.pageSpeed.desktop)} h-full`} 
+                                  style={{ width: `${page.pageSpeed.desktop}%` }}
+                                ></div>
+                              </div>
+                              <span className="relative text-xs font-medium">{page.pageSpeed.desktop}</span>
+                            </div>
+                          </div>
+                        </TableCell>
+                      </TableRow>
+                    ))}
+                  </TableBody>
+                </Table>
               </div>
             </CardContent>
           </Card>
+        </TabsContent>
+        
+        <TabsContent value="performance" className="mt-0">
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+            <Card>
+              <CardHeader>
+                <CardTitle>Page Speed Insights</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="space-y-6">
+                  <div>
+                    <div className="flex justify-between mb-2">
+                      <span>Mobile</span>
+                      <span className="font-bold">76/100</span>
+                    </div>
+                    <div className="w-full bg-gray-200 h-2 rounded-full overflow-hidden">
+                      <div className="bg-amber-500 h-full" style={{ width: "76%" }}></div>
+                    </div>
+                  </div>
+                  <div>
+                    <div className="flex justify-between mb-2">
+                      <span>Desktop</span>
+                      <span className="font-bold">92/100</span>
+                    </div>
+                    <div className="w-full bg-gray-200 h-2 rounded-full overflow-hidden">
+                      <div className="bg-green-500 h-full" style={{ width: "92%" }}></div>
+                    </div>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+            
+            <Card>
+              <CardHeader>
+                <CardTitle>Core Web Vitals</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="space-y-6">
+                  <div>
+                    <div className="flex justify-between mb-1">
+                      <span>Largest Contentful Paint (LCP)</span>
+                      <span className="text-green-500 font-medium">2.1s</span>
+                    </div>
+                    <div className="w-full bg-gray-200 h-2 rounded-full overflow-hidden">
+                      <div className="bg-green-500 h-full" style={{ width: "70%" }}></div>
+                    </div>
+                    <p className="text-xs text-muted-foreground mt-1">Good: Under 2.5s</p>
+                  </div>
+                  
+                  <div>
+                    <div className="flex justify-between mb-1">
+                      <span>First Input Delay (FID)</span>
+                      <span className="text-green-500 font-medium">18ms</span>
+                    </div>
+                    <div className="w-full bg-gray-200 h-2 rounded-full overflow-hidden">
+                      <div className="bg-green-500 h-full" style={{ width: "90%" }}></div>
+                    </div>
+                    <p className="text-xs text-muted-foreground mt-1">Good: Under 100ms</p>
+                  </div>
+                  
+                  <div>
+                    <div className="flex justify-between mb-1">
+                      <span>Cumulative Layout Shift (CLS)</span>
+                      <span className="text-amber-500 font-medium">0.17</span>
+                    </div>
+                    <div className="w-full bg-gray-200 h-2 rounded-full overflow-hidden">
+                      <div className="bg-amber-500 h-full" style={{ width: "60%" }}></div>
+                    </div>
+                    <p className="text-xs text-muted-foreground mt-1">Needs Improvement: 0.1-0.25</p>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+          </div>
         </TabsContent>
       </Tabs>
     </div>

@@ -10,6 +10,7 @@ import GoogleAdsPage from "./pages/GoogleAdsPage";
 import MetaAdsPage from "./pages/MetaAdsPage";
 import SEOPage from "./pages/SEOPage";
 import LeadsPage from "./pages/LeadsPage";
+import AdminPage from "./pages/AdminPage";
 import NotFound from "./pages/NotFound";
 import MainSidebar from "./components/Sidebar";
 
@@ -31,6 +32,7 @@ const App = () => (
                 <Route path="/meta-ads" element={<MetaAdsPage />} />
                 <Route path="/seo" element={<SEOPage />} />
                 <Route path="/leads" element={<LeadsPage />} />
+                <Route path="/admin" element={<AdminPage />} />
                 <Route path="*" element={<NotFound />} />
               </Routes>
             </div>
