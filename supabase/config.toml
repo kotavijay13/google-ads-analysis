@@ -1,1 +1,8 @@
+
 project_id = "omgbcuomikauxthmslpi"
+
+[functions.google-ads-auth]
+verify_jwt = true
+
+[functions.meta-ads-auth]
+verify_jwt = true

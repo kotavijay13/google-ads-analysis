@@ -1,6 +1,7 @@
 
-import { LayoutDashboard, TrendingUp, Facebook, ListChecks, Users, Settings } from "lucide-react";
+import { LayoutDashboard, TrendingUp, Facebook, ListChecks, Users, Settings, LogOut, Link } from "lucide-react";
 import { useNavigate, useLocation } from "react-router-dom";
+import { useAuth } from "@/context/AuthContext";
 import {
   Sidebar,
   SidebarContent,
@@ -9,9 +10,11 @@ import {
   SidebarMenu,
   SidebarMenuButton,
   SidebarMenuItem,
-  SidebarProvider,
+  SidebarFooter,
 } from "@/components/ui/sidebar";
 import { cn } from "@/lib/utils";
+import { Button } from "@/components/ui/button";
+import { toast } from "@/components/ui/sonner";
 
 const navigationItems = [
   {
@@ -44,12 +47,29 @@ const navigationItems = [
     path: "/admin",
     icon: Settings,
   },
+  {
+    title: "Integrations",
+    path: "/integrations",
+    icon: Link,
+  }
 ];
 
 export const MainSidebar = () => {
   const navigate = useNavigate();
   const location = useLocation();
+  const { user, signOut } = useAuth();
   const currentPath = location.pathname;
+
+  const handleSignOut = async () => {
+    try {
+      await signOut();
+      toast.success("Signed out successfully");
+      navigate('/auth');
+    } catch (error) {
+      toast.error("Failed to sign out");
+      console.error(error);
+    }
+  };
 
   return (
     <Sidebar>
@@ -77,6 +97,35 @@ export const MainSidebar = () => {
           </SidebarGroupContent>
         </SidebarGroup>
       </SidebarContent>
+      
+      {user && (
+        <SidebarFooter>
+          <div className="px-3 py-2">
+            <Button 
+              variant="ghost" 
+              className="w-full flex justify-start" 
+              onClick={handleSignOut}
+            >
+              <LogOut size={20} className="mr-2" />
+              Sign Out
+            </Button>
+          </div>
+        </SidebarFooter>
+      )}
+      
+      {!user && (
+        <SidebarFooter>
+          <div className="px-3 py-2">
+            <Button 
+              variant="ghost" 
+              className="w-full flex justify-start" 
+              onClick={() => navigate('/auth')}
+            >
+              Sign In
+            </Button>
+          </div>
+        </SidebarFooter>
+      )}
     </Sidebar>
   );
 };

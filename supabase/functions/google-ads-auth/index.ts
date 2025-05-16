@@ -1,0 +1,157 @@
+
+import { serve } from "https://deno.land/std@0.177.0/http/server.ts";
+import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
+
+const corsHeaders = {
+  'Access-Control-Allow-Origin': '*',
+  'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
+};
+
+serve(async (req) => {
+  // Handle CORS preflight requests
+  if (req.method === 'OPTIONS') {
+    return new Response(null, { headers: corsHeaders });
+  }
+
+  try {
+    const { code, redirectUri } = await req.json();
+    
+    // Get env variables
+    const clientId = Deno.env.get('GOOGLE_CLIENT_ID');
+    const clientSecret = Deno.env.get('GOOGLE_CLIENT_SECRET');
+    const supabaseUrl = Deno.env.get('SUPABASE_URL');
+    const supabaseKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY');
+    
+    // Validate required data
+    if (!code || !redirectUri || !clientId || !clientSecret || !supabaseUrl || !supabaseKey) {
+      return new Response(
+        JSON.stringify({ error: 'Missing required parameters' }),
+        { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      );
+    }
+    
+    // Create a Supabase client with the service role key
+    const supabase = createClient(supabaseUrl, supabaseKey);
+    
+    // Get the user from the request
+    const authHeader = req.headers.get('Authorization');
+    if (!authHeader) {
+      return new Response(
+        JSON.stringify({ error: 'Not authenticated' }),
+        { status: 401, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      );
+    }
+    
+    const token = authHeader.replace('Bearer ', '');
+    const { data: { user }, error: authError } = await supabase.auth.getUser(token);
+    
+    if (authError || !user) {
+      return new Response(
+        JSON.stringify({ error: authError?.message || 'User not found' }),
+        { status: 401, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      );
+    }
+    
+    // Exchange the authorization code for access and refresh tokens
+    const tokenResponse = await fetch('https://oauth2.googleapis.com/token', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/x-www-form-urlencoded',
+      },
+      body: new URLSearchParams({
+        code,
+        client_id: clientId,
+        client_secret: clientSecret,
+        redirect_uri: redirectUri,
+        grant_type: 'authorization_code',
+      }),
+    });
+    
+    const tokenData = await tokenResponse.json();
+    
+    if (!tokenResponse.ok || !tokenData.access_token) {
+      console.error('Google OAuth token error:', tokenData);
+      return new Response(
+        JSON.stringify({ error: tokenData.error_description || 'Failed to get access token' }),
+        { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      );
+    }
+    
+    // Calculate token expiry time
+    const expiresAt = new Date();
+    expiresAt.setSeconds(expiresAt.getSeconds() + tokenData.expires_in);
+    
+    // Store the tokens in Supabase
+    const { data: tokenRecord, error: tokenError } = await supabase
+      .from('api_tokens')
+      .upsert({
+        user_id: user.id,
+        provider: 'google',
+        access_token: tokenData.access_token,
+        refresh_token: tokenData.refresh_token,
+        expires_at: expiresAt.toISOString(),
+      }, {
+        onConflict: 'user_id,provider'
+      })
+      .select()
+      .single();
+    
+    if (tokenError) {
+      console.error('Error storing tokens:', tokenError);
+      return new Response(
+        JSON.stringify({ error: 'Failed to store access tokens' }),
+        { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      );
+    }
+    
+    // Fetch Google Ads accounts using the new token
+    try {
+      // This is a simplified example - in a real app, you would use the Google Ads API with proper version path
+      const googleAdsUrl = 'https://googleads.googleapis.com/v15/customers:listAccessibleCustomers';
+      const accountsResponse = await fetch(googleAdsUrl, {
+        headers: {
+          'Authorization': `Bearer ${tokenData.access_token}`,
+          'developer-token': Deno.env.get('GOOGLE_ADS_DEVELOPER_TOKEN') || '',
+        },
+      });
+      
+      const accountsData = await accountsResponse.json();
+      
+      if (accountsResponse.ok && accountsData.resourceNames) {
+        // Format: customers/{customer_id}
+        const customerIds = accountsData.resourceNames.map((name: string) => name.split('/')[1]);
+        
+        // Get account names - in a real app you would make additional API calls to get names
+        // For simplicity, we'll just use IDs as names in this example
+        for (const customerId of customerIds) {
+          await supabase
+            .from('ad_accounts')
+            .upsert({
+              user_id: user.id,
+              platform: 'google',
+              account_id: customerId,
+              account_name: `Google Ads Account ${customerId}`, // In reality, you'd get the actual name
+            }, {
+              onConflict: 'user_id,platform,account_id'
+            });
+        }
+      }
+    } catch (error) {
+      console.error('Error fetching Google Ads accounts:', error);
+      // We don't fail the whole operation if just the accounts fetch fails
+    }
+    
+    return new Response(
+      JSON.stringify({ success: true }),
+      { status: 200, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+    );
+    
+  } catch (error) {
+    console.error('Error in Google Ads auth:', error);
+    
+    return new Response(
+      JSON.stringify({ error: error.message || 'Internal server error' }),
+      { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+    );
+  }
+});
