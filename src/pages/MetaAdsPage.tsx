@@ -9,15 +9,16 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { 
   dailyPerformance, 
-  getOverviewMetrics
+  getOverviewMetrics,
+  Campaign
 } from '@/data/mockData';
 
 // Mock data for Meta Ads campaigns
-const metaCampaigns = [
+const metaCampaigns: Campaign[] = [
   {
     id: "meta-1",
     name: "Spring Collection - Facebook",
-    status: "Active",
+    status: "Active" as const,
     spend: 1350.32,
     impressions: 592800,
     clicks: 12850,
@@ -31,7 +32,7 @@ const metaCampaigns = [
   {
     id: "meta-2",
     name: "Instagram Story Ads",
-    status: "Active",
+    status: "Active" as const,
     spend: 1876.42,
     impressions: 734500,
     clicks: 22670,
@@ -45,7 +46,7 @@ const metaCampaigns = [
   {
     id: "meta-3",
     name: "Retargeting - Carousel",
-    status: "Active",
+    status: "Active" as const,
     spend: 1120.89,
     impressions: 428600,
     clicks: 18970,
