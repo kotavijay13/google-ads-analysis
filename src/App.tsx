@@ -18,6 +18,7 @@ import GoogleCallback from "./pages/GoogleCallback";
 import MetaCallback from "./pages/MetaCallback";
 import NotFound from "./pages/NotFound";
 import MainSidebar from "./components/Sidebar";
+import ProtectedRoute from "./components/ProtectedRoute";
 
 const queryClient = new QueryClient();
 
@@ -33,14 +34,14 @@ const App = () => (
               <MainSidebar />
               <div className="flex-1">
                 <Routes>
-                  <Route path="/" element={<Index />} />
-                  <Route path="/google-ads" element={<GoogleAdsPage />} />
-                  <Route path="/meta-ads" element={<MetaAdsPage />} />
-                  <Route path="/seo" element={<SEOPage />} />
-                  <Route path="/leads" element={<LeadsPage />} />
-                  <Route path="/admin" element={<AdminPage />} />
                   <Route path="/auth" element={<AuthPage />} />
-                  <Route path="/integrations" element={<IntegrationsPage />} />
+                  <Route path="/" element={<ProtectedRoute><Index /></ProtectedRoute>} />
+                  <Route path="/google-ads" element={<ProtectedRoute><GoogleAdsPage /></ProtectedRoute>} />
+                  <Route path="/meta-ads" element={<ProtectedRoute><MetaAdsPage /></ProtectedRoute>} />
+                  <Route path="/seo" element={<ProtectedRoute><SEOPage /></ProtectedRoute>} />
+                  <Route path="/leads" element={<ProtectedRoute><LeadsPage /></ProtectedRoute>} />
+                  <Route path="/admin" element={<ProtectedRoute><AdminPage /></ProtectedRoute>} />
+                  <Route path="/integrations" element={<ProtectedRoute><IntegrationsPage /></ProtectedRoute>} />
                   <Route path="/google-callback" element={<GoogleCallback />} />
                   <Route path="/meta-callback" element={<MetaCallback />} />
                   <Route path="*" element={<NotFound />} />
