@@ -1,4 +1,3 @@
-
 import { useState } from 'react';
 import { Plus, Trash2, Edit } from 'lucide-react';
 import Header from '@/components/Header';
@@ -93,9 +92,14 @@ const AdminPage = () => {
     setFields(fields.filter(field => field.id !== id));
   };
 
+  const handleRefresh = () => {
+    // Refresh admin data if needed
+    console.log("Refreshing admin data");
+  };
+
   return (
     <div className="container mx-auto py-6 px-4 max-w-7xl">
-      <Header title="Admin Dashboard" />
+      <Header title="Admin Dashboard" onRefresh={handleRefresh} />
       
       <div className="flex justify-between items-center mb-6">
         <h2 className="text-lg font-medium">System Configuration</h2>
