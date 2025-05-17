@@ -27,6 +27,7 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
   const [session, setSession] = useState<Session | null>(null);
   const [user, setUser] = useState<User | null>(null);
   const [loading, setLoading] = useState(true);
+  const [initialized, setInitialized] = useState(false);
 
   useEffect(() => {
     // Set up auth state listener FIRST
@@ -34,7 +35,9 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
       (event, currentSession) => {
         setSession(currentSession);
         setUser(currentSession?.user ?? null);
-        setLoading(false);
+        if (initialized) {
+          setLoading(false);
+        }
       }
     );
 
@@ -42,11 +45,12 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
     supabase.auth.getSession().then(({ data: { session: currentSession } }) => {
       setSession(currentSession);
       setUser(currentSession?.user ?? null);
+      setInitialized(true);
       setLoading(false);
     });
 
     return () => subscription.unsubscribe();
-  }, []);
+  }, [initialized]);
 
   const signOut = async () => {
     await supabase.auth.signOut();

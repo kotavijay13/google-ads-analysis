@@ -18,7 +18,7 @@ const IntegrationsPage = () => {
           <CardDescription className="text-sm">
             <p className="mb-4">
               <strong>Important Note for App Users:</strong> You do not need to create Google Cloud or Meta developer apps.
-              This application allows you to simply log in with your existing Google/Meta accounts to access your ad accounts.
+              Merge Insights AI allows you to simply log in with your existing Google/Meta accounts to access your ad accounts.
             </p>
             <p>
               Once you connect your accounts using the buttons below, this dashboard will pull and display 

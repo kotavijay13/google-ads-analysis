@@ -1,5 +1,5 @@
 
-import { LayoutDashboard, TrendingUp, Facebook, ListChecks, Users, Settings, LogOut, Link } from "lucide-react";
+import { LayoutDashboard, TrendingUp, Facebook, ListChecks, Users, Settings, LogOut, Link, MessageSquare } from "lucide-react";
 import { useNavigate, useLocation } from "react-router-dom";
 import { useAuth } from "@/context/AuthContext";
 import {
@@ -18,6 +18,11 @@ import { toast } from "@/components/ui/sonner";
 
 const navigationItems = [
   {
+    title: "Integrations",
+    path: "/integrations",
+    icon: Link,
+  },
+  {
     title: "Dashboard",
     path: "/",
     icon: LayoutDashboard,
@@ -33,6 +38,11 @@ const navigationItems = [
     icon: Facebook,
   },
   {
+    title: "WhatsApp",
+    path: "/whatsapp",
+    icon: MessageSquare,
+  },
+  {
     title: "SEO",
     path: "/seo",
     icon: ListChecks,
@@ -46,11 +56,6 @@ const navigationItems = [
     title: "Admin",
     path: "/admin",
     icon: Settings,
-  },
-  {
-    title: "Integrations",
-    path: "/integrations",
-    icon: Link,
   }
 ];
 
@@ -76,6 +81,9 @@ export const MainSidebar = () => {
       <SidebarContent>
         <SidebarGroup>
           <SidebarGroupContent>
+            <div className="px-4 py-3 mb-2">
+              <h1 className="text-xl font-bold">Merge Insights AI</h1>
+            </div>
             <SidebarMenu>
               {navigationItems.map((item) => (
                 <SidebarMenuItem key={item.title}>

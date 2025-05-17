@@ -9,6 +9,7 @@ import { AuthProvider } from "@/context/AuthContext";
 import Index from "./pages/Index";
 import GoogleAdsPage from "./pages/GoogleAdsPage";
 import MetaAdsPage from "./pages/MetaAdsPage";
+import WhatsAppPage from "./pages/WhatsAppPage";
 import SEOPage from "./pages/SEOPage";
 import LeadsPage from "./pages/LeadsPage";
 import AdminPage from "./pages/AdminPage";
@@ -34,7 +35,7 @@ const Layout = ({ children }: { children: React.ReactNode }) => {
   const showSidebar = user && !isAuthPage && !isCallbackPage;
   
   return (
-    <div className="flex min-h-svh w-full">
+    <div className="flex min-h-svh w-full bg-gray-50">
       {showSidebar && <MainSidebar />}
       <div className={`flex-1 ${!showSidebar ? 'w-full' : ''}`}>
         {children}
@@ -57,6 +58,7 @@ const App = () => (
                 <Route path="/" element={<ProtectedRoute><Index /></ProtectedRoute>} />
                 <Route path="/google-ads" element={<ProtectedRoute><GoogleAdsPage /></ProtectedRoute>} />
                 <Route path="/meta-ads" element={<ProtectedRoute><MetaAdsPage /></ProtectedRoute>} />
+                <Route path="/whatsapp" element={<ProtectedRoute><WhatsAppPage /></ProtectedRoute>} />
                 <Route path="/seo" element={<ProtectedRoute><SEOPage /></ProtectedRoute>} />
                 <Route path="/leads" element={<ProtectedRoute><LeadsPage /></ProtectedRoute>} />
                 <Route path="/admin" element={<ProtectedRoute><AdminPage /></ProtectedRoute>} />
