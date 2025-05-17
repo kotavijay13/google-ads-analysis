@@ -26,18 +26,21 @@ const queryClient = new QueryClient();
 
 // Layout component to conditionally render sidebar
 const Layout = ({ children }: { children: React.ReactNode }) => {
-  const { user, loading } = useAuth();
   const location = useLocation();
+  
+  // Don't wrap auth page or callback pages with sidebar
   const isAuthPage = location.pathname === '/auth';
   const isCallbackPage = location.pathname.includes('callback');
   
-  // Hide sidebar on auth pages and callback pages
-  const showSidebar = user && !isAuthPage && !isCallbackPage;
+  if (isAuthPage || isCallbackPage) {
+    return <div className="w-full">{children}</div>;
+  }
   
+  // For all other routes, use the normal layout with sidebar
   return (
     <div className="flex min-h-svh w-full bg-gray-50">
-      {showSidebar && <MainSidebar />}
-      <div className={`flex-1 ${!showSidebar ? 'w-full' : ''}`}>
+      <MainSidebar />
+      <div className="flex-1">
         {children}
       </div>
     </div>
@@ -52,22 +55,52 @@ const App = () => (
       <AuthProvider>
         <BrowserRouter>
           <SidebarProvider defaultOpen={true}>
-            <Layout>
-              <Routes>
-                <Route path="/auth" element={<AuthPage />} />
-                <Route path="/google-callback" element={<GoogleCallback />} />
-                <Route path="/meta-callback" element={<MetaCallback />} />
-                <Route path="/" element={<ProtectedRoute><Index /></ProtectedRoute>} />
-                <Route path="/google-ads" element={<ProtectedRoute><GoogleAdsPage /></ProtectedRoute>} />
-                <Route path="/meta-ads" element={<ProtectedRoute><MetaAdsPage /></ProtectedRoute>} />
-                <Route path="/whatsapp" element={<ProtectedRoute><WhatsAppPage /></ProtectedRoute>} />
-                <Route path="/seo" element={<ProtectedRoute><SEOPage /></ProtectedRoute>} />
-                <Route path="/leads" element={<ProtectedRoute><LeadsPage /></ProtectedRoute>} />
-                <Route path="/admin" element={<ProtectedRoute><AdminPage /></ProtectedRoute>} />
-                <Route path="/integrations" element={<ProtectedRoute><IntegrationsPage /></ProtectedRoute>} />
-                <Route path="*" element={<NotFound />} />
-              </Routes>
-            </Layout>
+            <Routes>
+              <Route path="/auth" element={<AuthPage />} />
+              <Route path="/google-callback" element={<GoogleCallback />} />
+              <Route path="/meta-callback" element={<MetaCallback />} />
+              <Route path="/" element={
+                <Layout>
+                  <ProtectedRoute><Index /></ProtectedRoute>
+                </Layout>
+              } />
+              <Route path="/google-ads" element={
+                <Layout>
+                  <ProtectedRoute><GoogleAdsPage /></ProtectedRoute>
+                </Layout>
+              } />
+              <Route path="/meta-ads" element={
+                <Layout>
+                  <ProtectedRoute><MetaAdsPage /></ProtectedRoute>
+                </Layout>
+              } />
+              <Route path="/whatsapp" element={
+                <Layout>
+                  <ProtectedRoute><WhatsAppPage /></ProtectedRoute>
+                </Layout>
+              } />
+              <Route path="/seo" element={
+                <Layout>
+                  <ProtectedRoute><SEOPage /></ProtectedRoute>
+                </Layout>
+              } />
+              <Route path="/leads" element={
+                <Layout>
+                  <ProtectedRoute><LeadsPage /></ProtectedRoute>
+                </Layout>
+              } />
+              <Route path="/admin" element={
+                <Layout>
+                  <ProtectedRoute><AdminPage /></ProtectedRoute>
+                </Layout>
+              } />
+              <Route path="/integrations" element={
+                <Layout>
+                  <ProtectedRoute><IntegrationsPage /></ProtectedRoute>
+                </Layout>
+              } />
+              <Route path="*" element={<NotFound />} />
+            </Routes>
           </SidebarProvider>
         </BrowserRouter>
       </AuthProvider>

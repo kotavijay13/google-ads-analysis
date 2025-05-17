@@ -27,36 +27,55 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
   const [session, setSession] = useState<Session | null>(null);
   const [user, setUser] = useState<User | null>(null);
   const [loading, setLoading] = useState(true);
-  const [initialized, setInitialized] = useState(false);
-
+  
   useEffect(() => {
-    // Set up auth state listener FIRST
-    const { data: { subscription } } = supabase.auth.onAuthStateChange(
-      (event, currentSession) => {
-        // Prevent rapid state updates that might cause infinite loops
+    // First check for existing session
+    const initializeAuth = async () => {
+      // Set loading to true before checking the session
+      setLoading(true);
+      
+      try {
+        const { data: { session: currentSession } } = await supabase.auth.getSession();
+        
+        // Only update state if the session has changed
         if (JSON.stringify(currentSession) !== JSON.stringify(session)) {
           setSession(currentSession);
           setUser(currentSession?.user ?? null);
         }
-        if (initialized) {
-          setLoading(false);
+      } catch (error) {
+        console.error('Error fetching auth session:', error);
+      } finally {
+        // Always set loading to false when done
+        setLoading(false);
+      }
+    };
+
+    // Run the initialization
+    initializeAuth();
+    
+    // Then set up listener for future changes
+    const { data: { subscription } } = supabase.auth.onAuthStateChange(
+      (event, currentSession) => {
+        // Only update if the session has changed
+        if (JSON.stringify(currentSession) !== JSON.stringify(session)) {
+          setSession(currentSession);
+          setUser(currentSession?.user ?? null);
         }
       }
     );
 
-    // THEN check for existing session
-    supabase.auth.getSession().then(({ data: { session: currentSession } }) => {
-      setSession(currentSession);
-      setUser(currentSession?.user ?? null);
-      setInitialized(true);
-      setLoading(false);
-    });
-
     return () => subscription.unsubscribe();
-  }, [initialized]);
+  }, []);
 
   const signOut = async () => {
-    await supabase.auth.signOut();
+    try {
+      setLoading(true);
+      await supabase.auth.signOut();
+    } catch (error) {
+      console.error('Error signing out:', error);
+    } finally {
+      setLoading(false);
+    }
   };
 
   const value = {

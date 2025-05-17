@@ -62,21 +62,25 @@ const navigationItems = [
 export const MainSidebar = () => {
   const navigate = useNavigate();
   const location = useLocation();
-  const { user, signOut } = useAuth();
+  const { user, loading, signOut } = useAuth();
   const currentPath = location.pathname;
 
   const handleSignOut = async () => {
     try {
       await signOut();
       toast.success("Signed out successfully");
-      navigate('/auth', { replace: true });
+      // Don't need to navigate here, the ProtectedRoute will handle it
     } catch (error) {
       toast.error("Failed to sign out");
       console.error(error);
     }
   };
 
-  if (!user) return null;
+  // Don't render sidebar during loading or if no user
+  if (loading || !user) return null;
+
+  // Don't render sidebar on auth pages
+  if (location.pathname === '/auth') return null;
 
   return (
     <Sidebar>

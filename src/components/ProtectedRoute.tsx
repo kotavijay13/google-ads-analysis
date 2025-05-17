@@ -1,6 +1,6 @@
 
 import { useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useLocation } from 'react-router-dom';
 import { useAuth } from '@/context/AuthContext';
 import { Loader2 } from 'lucide-react';
 
@@ -11,12 +11,13 @@ interface ProtectedRouteProps {
 const ProtectedRoute = ({ children }: ProtectedRouteProps) => {
   const { user, loading } = useAuth();
   const navigate = useNavigate();
+  const location = useLocation();
 
   useEffect(() => {
-    if (!loading && !user) {
+    if (!loading && !user && location.pathname !== '/auth') {
       navigate('/auth', { replace: true });
     }
-  }, [user, loading, navigate]);
+  }, [user, loading, navigate, location.pathname]);
 
   if (loading) {
     return (
@@ -26,7 +27,8 @@ const ProtectedRoute = ({ children }: ProtectedRouteProps) => {
     );
   }
 
-  if (!user) return null;
+  // Wait until we're not loading before rendering children
+  if (!loading && !user) return null;
 
   return <>{children}</>;
 };

@@ -1,6 +1,6 @@
 
 import { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useLocation } from 'react-router-dom';
 import { supabase } from '@/integrations/supabase/client';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -16,42 +16,55 @@ const AuthPage = () => {
   const [password, setPassword] = useState('');
   const [loading, setLoading] = useState(false);
   const [authError, setAuthError] = useState<string | null>(null);
-  const [isCheckingAuth, setIsCheckingAuth] = useState(true);
+  const [redirecting, setRedirecting] = useState(false);
   const navigate = useNavigate();
   const { user, loading: authLoading } = useAuth();
+  const location = useLocation();
 
-  // Check if user is already logged in, but with improved state management
+  // Check if user is already logged in
   useEffect(() => {
+    // Prevent redirection during the initial auth loading phase
     if (authLoading) {
-      return; // Wait until auth checking is complete
+      return;
     }
     
-    setIsCheckingAuth(false);
-    
-    if (user) {
-      navigate('/', { replace: true });
+    // Only redirect if we have a user and we're not already redirecting
+    if (user && !redirecting) {
+      setRedirecting(true);
+      
+      // Add a small delay to prevent rapid redirections
+      const redirectTimer = setTimeout(() => {
+        navigate('/', { replace: true });
+      }, 100);
+      
+      return () => clearTimeout(redirectTimer);
     }
-  }, [user, authLoading, navigate]);
+  }, [user, authLoading, navigate, redirecting]);
 
   const handleSignUp = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
     setAuthError(null);
     
-    const { data, error } = await supabase.auth.signUp({
-      email,
-      password,
-    });
-    
-    setLoading(false);
-    
-    if (error) {
-      setAuthError(error.message);
-      toast.error(error.message);
-    } else {
-      toast.success('Sign up successful! Please check your email for verification.');
-      setEmail('');
-      setPassword('');
+    try {
+      const { data, error } = await supabase.auth.signUp({
+        email,
+        password,
+      });
+      
+      if (error) {
+        setAuthError(error.message);
+        toast.error(error.message);
+      } else {
+        toast.success('Sign up successful! Please check your email for verification.');
+        setEmail('');
+        setPassword('');
+      }
+    } catch (error) {
+      console.error('Signup error:', error);
+      toast.error('An unexpected error occurred. Please try again.');
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -60,24 +73,29 @@ const AuthPage = () => {
     setLoading(true);
     setAuthError(null);
     
-    const { data, error } = await supabase.auth.signInWithPassword({
-      email,
-      password,
-    });
-    
-    setLoading(false);
-    
-    if (error) {
-      setAuthError(error.message);
-      toast.error(error.message);
-    } else {
-      toast.success('Signed in successfully!');
-      navigate('/', { replace: true });
+    try {
+      const { data, error } = await supabase.auth.signInWithPassword({
+        email,
+        password,
+      });
+      
+      if (error) {
+        setAuthError(error.message);
+        toast.error(error.message);
+      } else {
+        toast.success('Signed in successfully!');
+        // No need to navigate here, the useEffect will handle it
+      }
+    } catch (error) {
+      console.error('Signin error:', error);
+      toast.error('An unexpected error occurred. Please try again.');
+    } finally {
+      setLoading(false);
     }
   };
 
   // Show loading state while checking auth
-  if (authLoading || isCheckingAuth) {
+  if (authLoading) {
     return (
       <div className="flex items-center justify-center min-h-screen bg-gray-50">
         <Loader2 className="h-8 w-8 animate-spin text-primary" />
@@ -85,7 +103,17 @@ const AuthPage = () => {
     );
   }
 
-  // Only render the auth form if not logged in
+  // Don't render the auth form if we're redirecting
+  if (redirecting) {
+    return (
+      <div className="flex items-center justify-center min-h-screen bg-gray-50">
+        <Loader2 className="h-8 w-8 animate-spin text-primary" />
+        <span className="ml-2">Redirecting to dashboard...</span>
+      </div>
+    );
+  }
+
+  // Only render the auth form if not logged in and not redirecting
   return (
     <div className="flex items-center justify-center min-h-screen bg-gray-50 w-full p-4">
       <Card className="w-full max-w-md shadow-lg">
