@@ -16,13 +16,20 @@ const AuthPage = () => {
   const [password, setPassword] = useState('');
   const [loading, setLoading] = useState(false);
   const [authError, setAuthError] = useState<string | null>(null);
+  const [isCheckingAuth, setIsCheckingAuth] = useState(true);
   const navigate = useNavigate();
   const { user, loading: authLoading } = useAuth();
 
-  // Check if user is already logged in
+  // Check if user is already logged in, but with improved state management
   useEffect(() => {
-    if (user && !authLoading) {
-      navigate('/');
+    if (authLoading) {
+      return; // Wait until auth checking is complete
+    }
+    
+    setIsCheckingAuth(false);
+    
+    if (user) {
+      navigate('/', { replace: true });
     }
   }, [user, authLoading, navigate]);
 
@@ -65,12 +72,12 @@ const AuthPage = () => {
       toast.error(error.message);
     } else {
       toast.success('Signed in successfully!');
-      navigate('/');
+      navigate('/', { replace: true });
     }
   };
 
   // Show loading state while checking auth
-  if (authLoading) {
+  if (authLoading || isCheckingAuth) {
     return (
       <div className="flex items-center justify-center min-h-screen bg-gray-50">
         <Loader2 className="h-8 w-8 animate-spin text-primary" />
@@ -81,7 +88,7 @@ const AuthPage = () => {
   // Only render the auth form if not logged in
   return (
     <div className="flex items-center justify-center min-h-screen bg-gray-50 w-full p-4">
-      <Card className="w-full max-w-md">
+      <Card className="w-full max-w-md shadow-lg">
         <CardHeader className="text-center">
           <CardTitle className="text-2xl">Merge Insights AI</CardTitle>
           <CardDescription>Sign in or create an account</CardDescription>
@@ -126,7 +133,7 @@ const AuthPage = () => {
               <CardFooter>
                 <Button 
                   type="submit" 
-                  className="w-full" 
+                  className="w-full bg-indigo-600 hover:bg-indigo-700 text-white" 
                   disabled={loading}
                 >
                   {loading ? (
@@ -178,7 +185,7 @@ const AuthPage = () => {
               <CardFooter>
                 <Button 
                   type="submit" 
-                  className="w-full" 
+                  className="w-full bg-indigo-600 hover:bg-indigo-700 text-white" 
                   disabled={loading}
                 >
                   {loading ? (

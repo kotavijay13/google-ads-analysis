@@ -33,8 +33,11 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
     // Set up auth state listener FIRST
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
       (event, currentSession) => {
-        setSession(currentSession);
-        setUser(currentSession?.user ?? null);
+        // Prevent rapid state updates that might cause infinite loops
+        if (JSON.stringify(currentSession) !== JSON.stringify(session)) {
+          setSession(currentSession);
+          setUser(currentSession?.user ?? null);
+        }
         if (initialized) {
           setLoading(false);
         }

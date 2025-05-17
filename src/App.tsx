@@ -55,6 +55,8 @@ const App = () => (
             <Layout>
               <Routes>
                 <Route path="/auth" element={<AuthPage />} />
+                <Route path="/google-callback" element={<GoogleCallback />} />
+                <Route path="/meta-callback" element={<MetaCallback />} />
                 <Route path="/" element={<ProtectedRoute><Index /></ProtectedRoute>} />
                 <Route path="/google-ads" element={<ProtectedRoute><GoogleAdsPage /></ProtectedRoute>} />
                 <Route path="/meta-ads" element={<ProtectedRoute><MetaAdsPage /></ProtectedRoute>} />
@@ -63,8 +65,6 @@ const App = () => (
                 <Route path="/leads" element={<ProtectedRoute><LeadsPage /></ProtectedRoute>} />
                 <Route path="/admin" element={<ProtectedRoute><AdminPage /></ProtectedRoute>} />
                 <Route path="/integrations" element={<ProtectedRoute><IntegrationsPage /></ProtectedRoute>} />
-                <Route path="/google-callback" element={<GoogleCallback />} />
-                <Route path="/meta-callback" element={<MetaCallback />} />
                 <Route path="*" element={<NotFound />} />
               </Routes>
             </Layout>

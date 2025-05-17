@@ -69,12 +69,14 @@ export const MainSidebar = () => {
     try {
       await signOut();
       toast.success("Signed out successfully");
-      navigate('/auth');
+      navigate('/auth', { replace: true });
     } catch (error) {
       toast.error("Failed to sign out");
       console.error(error);
     }
   };
+
+  if (!user) return null;
 
   return (
     <Sidebar>
@@ -106,34 +108,18 @@ export const MainSidebar = () => {
         </SidebarGroup>
       </SidebarContent>
       
-      {user && (
-        <SidebarFooter>
-          <div className="px-3 py-2">
-            <Button 
-              variant="ghost" 
-              className="w-full flex justify-start" 
-              onClick={handleSignOut}
-            >
-              <LogOut size={20} className="mr-2" />
-              Sign Out
-            </Button>
-          </div>
-        </SidebarFooter>
-      )}
-      
-      {!user && (
-        <SidebarFooter>
-          <div className="px-3 py-2">
-            <Button 
-              variant="ghost" 
-              className="w-full flex justify-start" 
-              onClick={() => navigate('/auth')}
-            >
-              Sign In
-            </Button>
-          </div>
-        </SidebarFooter>
-      )}
+      <SidebarFooter>
+        <div className="px-3 py-2">
+          <Button 
+            variant="ghost" 
+            className="w-full flex justify-start" 
+            onClick={handleSignOut}
+          >
+            <LogOut size={20} className="mr-2" />
+            Sign Out
+          </Button>
+        </div>
+      </SidebarFooter>
     </Sidebar>
   );
 };
