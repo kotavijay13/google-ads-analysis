@@ -1,5 +1,5 @@
 
-import { LayoutDashboard, TrendingUp, Facebook, ListChecks, Users, Settings, LogOut, Link, MessageSquare } from "lucide-react";
+import { LayoutDashboard, TrendingUp, Facebook, ListChecks, Users, Settings, LogOut, Link, MessageSquare, FileText } from "lucide-react";
 import { useNavigate, useLocation } from "react-router-dom";
 import { useAuth } from "@/context/AuthContext";
 import {
@@ -53,7 +53,12 @@ const navigationItems = [
     icon: Users,
   },
   {
-    title: "Admin",
+    title: "Forms",
+    path: "/forms",
+    icon: FileText,
+  },
+  {
+    title: "Lead Admin",
     path: "/admin",
     icon: Settings,
   }
@@ -69,7 +74,6 @@ export const MainSidebar = () => {
     try {
       await signOut();
       toast.success("Signed out successfully");
-      // Don't need to navigate here, the ProtectedRoute will handle it
     } catch (error) {
       toast.error("Failed to sign out");
       console.error(error);
@@ -77,7 +81,7 @@ export const MainSidebar = () => {
   };
 
   // Don't render sidebar during loading or if no user
-  if (loading || !user) return null;
+  if (!user) return null;
 
   // Don't render sidebar on auth pages
   if (location.pathname === '/auth') return null;

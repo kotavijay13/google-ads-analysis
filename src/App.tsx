@@ -15,12 +15,12 @@ import LeadsPage from "./pages/LeadsPage";
 import AdminPage from "./pages/AdminPage";
 import AuthPage from "./pages/AuthPage";
 import IntegrationsPage from "./pages/IntegrationsPage";
+import FormsPage from "./pages/FormsPage";
 import GoogleCallback from "./pages/GoogleCallback";
 import MetaCallback from "./pages/MetaCallback";
 import NotFound from "./pages/NotFound";
 import MainSidebar from "./components/Sidebar";
 import ProtectedRoute from "./components/ProtectedRoute";
-import { useAuth } from "@/context/AuthContext";
 
 const queryClient = new QueryClient();
 
@@ -87,6 +87,11 @@ const App = () => (
               <Route path="/leads" element={
                 <Layout>
                   <ProtectedRoute><LeadsPage /></ProtectedRoute>
+                </Layout>
+              } />
+              <Route path="/forms" element={
+                <Layout>
+                  <ProtectedRoute><FormsPage /></ProtectedRoute>
                 </Layout>
               } />
               <Route path="/admin" element={

@@ -14,7 +14,9 @@ const ProtectedRoute = ({ children }: ProtectedRouteProps) => {
   const location = useLocation();
 
   useEffect(() => {
+    // Only redirect if we're done loading and there's no user
     if (!loading && !user && location.pathname !== '/auth') {
+      console.log('No user detected, redirecting to auth page');
       navigate('/auth', { replace: true });
     }
   }, [user, loading, navigate, location.pathname]);
@@ -23,14 +25,14 @@ const ProtectedRoute = ({ children }: ProtectedRouteProps) => {
     return (
       <div className="flex justify-center items-center h-screen">
         <Loader2 className="h-8 w-8 animate-spin text-primary" />
+        <span className="ml-2">Loading...</span>
       </div>
     );
   }
 
-  // Wait until we're not loading before rendering children
-  if (!loading && !user) return null;
-
-  return <>{children}</>;
+  // Only render children if user is authenticated
+  // This prevents flashing content before redirect
+  return user ? <>{children}</> : null;
 };
 
 export default ProtectedRoute;
