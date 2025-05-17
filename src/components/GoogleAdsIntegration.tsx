@@ -77,9 +77,9 @@ const GoogleAdsIntegration = () => {
     // Save the state in localStorage to verify later
     localStorage.setItem('googleOAuthState', state);
     
-    // Create the OAuth URL, replace with your own credentials
+    // Create the OAuth URL using the environment variable
     const oauthEndpoint = 'https://accounts.google.com/o/oauth2/v2/auth';
-    const clientId = ''; // You'll need to get this from Google Cloud Console
+    const clientId = '174740180735-pq1vkuf06dpu1n0n708iugi20rkupf49.apps.googleusercontent.com'; // Using the actual client ID
     const redirectUri = window.location.origin + '/google-callback';
     const scope = 'https://www.googleapis.com/auth/adwords';
     

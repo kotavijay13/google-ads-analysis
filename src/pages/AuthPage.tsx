@@ -8,11 +8,13 @@ import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle }
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { toast } from '@/components/ui/sonner';
 import { Label } from '@/components/ui/label';
+import { Loader2 } from 'lucide-react';
 
 const AuthPage = () => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [loading, setLoading] = useState(false);
+  const [authError, setAuthError] = useState<string | null>(null);
   const navigate = useNavigate();
 
   // Check if user is already logged in
@@ -41,6 +43,7 @@ const AuthPage = () => {
   const handleSignUp = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
+    setAuthError(null);
     
     const { data, error } = await supabase.auth.signUp({
       email,
@@ -50,6 +53,7 @@ const AuthPage = () => {
     setLoading(false);
     
     if (error) {
+      setAuthError(error.message);
       toast.error(error.message);
     } else {
       toast.success('Sign up successful! Please check your email for verification.');
@@ -61,6 +65,7 @@ const AuthPage = () => {
   const handleSignIn = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
+    setAuthError(null);
     
     const { data, error } = await supabase.auth.signInWithPassword({
       email,
@@ -70,6 +75,7 @@ const AuthPage = () => {
     setLoading(false);
     
     if (error) {
+      setAuthError(error.message);
       toast.error(error.message);
     } else {
       toast.success('Signed in successfully!');
@@ -78,7 +84,7 @@ const AuthPage = () => {
   };
 
   return (
-    <div className="flex items-center justify-center min-h-screen bg-gray-50">
+    <div className="flex items-center justify-center min-h-screen bg-gray-50 w-full p-4">
       <Card className="w-full max-w-md">
         <CardHeader className="text-center">
           <CardTitle className="text-2xl">Marketing Dashboard</CardTitle>
@@ -93,6 +99,11 @@ const AuthPage = () => {
           <TabsContent value="signin">
             <form onSubmit={handleSignIn}>
               <CardContent className="space-y-4 pt-4">
+                {authError && (
+                  <div className="p-3 bg-red-50 border border-red-200 text-red-700 rounded-md text-sm">
+                    {authError}
+                  </div>
+                )}
                 <div className="space-y-2">
                   <Label htmlFor="signin-email">Email</Label>
                   <Input 
@@ -122,7 +133,12 @@ const AuthPage = () => {
                   className="w-full" 
                   disabled={loading}
                 >
-                  {loading ? 'Signing In...' : 'Sign In'}
+                  {loading ? (
+                    <>
+                      <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                      Signing In...
+                    </>
+                  ) : 'Sign In'}
                 </Button>
               </CardFooter>
             </form>
@@ -131,6 +147,11 @@ const AuthPage = () => {
           <TabsContent value="signup">
             <form onSubmit={handleSignUp}>
               <CardContent className="space-y-4 pt-4">
+                {authError && (
+                  <div className="p-3 bg-red-50 border border-red-200 text-red-700 rounded-md text-sm">
+                    {authError}
+                  </div>
+                )}
                 <div className="space-y-2">
                   <Label htmlFor="signup-email">Email</Label>
                   <Input 
@@ -154,6 +175,9 @@ const AuthPage = () => {
                     minLength={6}
                   />
                 </div>
+                <p className="text-xs text-muted-foreground">
+                  By signing up, you agree to our Terms of Service and Privacy Policy.
+                </p>
               </CardContent>
               <CardFooter>
                 <Button 
@@ -161,7 +185,12 @@ const AuthPage = () => {
                   className="w-full" 
                   disabled={loading}
                 >
-                  {loading ? 'Signing Up...' : 'Sign Up'}
+                  {loading ? (
+                    <>
+                      <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                      Signing Up...
+                    </>
+                  ) : 'Sign Up'}
                 </Button>
               </CardFooter>
             </form>

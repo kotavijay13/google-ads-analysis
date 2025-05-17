@@ -77,9 +77,9 @@ const MetaAdsIntegration = () => {
     // Save the state in localStorage to verify later
     localStorage.setItem('metaOAuthState', state);
     
-    // Create the OAuth URL, replace with your own credentials
+    // Create the OAuth URL using the environment variable
     const oauthEndpoint = 'https://www.facebook.com/v19.0/dialog/oauth';
-    const clientId = ''; // You'll need to get this from Meta for Developers
+    const clientId = '374929952003490'; // Using the actual client ID
     const redirectUri = window.location.origin + '/meta-callback';
     const scope = 'ads_management,ads_read';
     
