@@ -7,6 +7,7 @@ import PerformanceChart from '@/components/PerformanceChart';
 import { useGoogleAdsAPI } from '@/hooks/use-google-ads-api';
 import { getOverviewMetrics, dailyPerformance } from '@/data/mockData';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { AlertTriangle, TrendingUp, Search, FileText, PieChart } from 'lucide-react';
 
 const Index = () => {
   const [metrics, setMetrics] = useState(getOverviewMetrics());
@@ -37,12 +38,56 @@ const Index = () => {
     console.log('Initial dashboard data fetch with date range:', dateRange);
   }, []);
 
+  // Mock top changes data
+  const topChanges = [
+    {
+      id: 1,
+      category: "Google Ads",
+      title: "Increase bid for 'digital marketing' keyword",
+      description: "Currently underperforming with high potential ROI",
+      impact: "High",
+      icon: TrendingUp
+    },
+    {
+      id: 2,
+      category: "SEO",
+      title: "Optimize meta descriptions for top 5 landing pages",
+      description: "Current CTR is below industry average",
+      impact: "Medium",
+      icon: Search
+    },
+    {
+      id: 3,
+      category: "Meta Ads",
+      title: "Refresh creative for Instagram Story campaign",
+      description: "Engagement dropping over the past week",
+      impact: "High",
+      icon: FileText
+    },
+    {
+      id: 4,
+      category: "Competition",
+      title: "Target competitor keyword 'marketing automation'",
+      description: "Competitor ranking dropped, opportunity to gain position",
+      impact: "Medium",
+      icon: PieChart
+    },
+    {
+      id: 5,
+      category: "Leads",
+      title: "Follow up with 12 high-value leads",
+      description: "Leads from last week's campaign waiting for response",
+      impact: "High",
+      icon: AlertTriangle
+    }
+  ];
+
   return (
     <div className="container mx-auto py-6 px-4 max-w-7xl">
       <Header onRefresh={handleRefresh} title="Marketing Dashboard" />
       
       <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-6 gap-4">
-        <h2 className="text-lg font-medium">Marketing Overview</h2>
+        <h2 className="text-lg font-medium">Merge Insights AI Overview</h2>
         <DateRangePicker onDateChange={handleDateChange} />
       </div>
 
@@ -97,22 +142,31 @@ const Index = () => {
       <div className="mt-8">
         <Card>
           <CardHeader>
-            <CardTitle>Recent Marketing Activity</CardTitle>
+            <CardTitle>Top 5 Changes To Be Done Today</CardTitle>
           </CardHeader>
           <CardContent>
             <div className="space-y-4">
-              {[
-                { channel: "Google Ads", event: "Campaign 'Summer Sale' started", time: "2 hours ago" },
-                { channel: "Meta Ads", event: "Ad set 'Product Launch' got 3,245 impressions", time: "5 hours ago" },
-                { channel: "SEO", event: "Keyword 'digital marketing services' ranked #3", time: "1 day ago" },
-                { channel: "Leads", event: "New lead from contact form: John Doe", time: "1 day ago" },
-              ].map((item, i) => (
-                <div key={i} className="flex justify-between items-start pb-2 border-b">
-                  <div>
-                    <div className="font-medium">{item.channel}</div>
-                    <div className="text-sm text-muted-foreground">{item.event}</div>
+              {topChanges.map((item) => (
+                <div key={item.id} className="flex justify-between items-start pb-2 border-b">
+                  <div className="flex items-start gap-3">
+                    <div className="mt-1 bg-primary/10 p-2 rounded-full">
+                      <item.icon className="h-5 w-5 text-primary" />
+                    </div>
+                    <div>
+                      <div className="font-medium">{item.title}</div>
+                      <div className="text-sm text-muted-foreground">{item.description}</div>
+                    </div>
                   </div>
-                  <div className="text-xs text-muted-foreground">{item.time}</div>
+                  <div className="text-right">
+                    <span className={`px-2 py-1 text-xs rounded-full ${
+                      item.impact === "High" 
+                        ? "bg-red-100 text-red-800" 
+                        : "bg-yellow-100 text-yellow-800"
+                    }`}>
+                      {item.impact} Impact
+                    </span>
+                    <div className="text-xs text-muted-foreground mt-1">{item.category}</div>
+                  </div>
                 </div>
               ))}
             </div>

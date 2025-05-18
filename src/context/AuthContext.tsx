@@ -29,26 +29,38 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
   const [loading, setLoading] = useState(true);
   
   useEffect(() => {
-    // Set up auth state listener FIRST to catch any changes during initialization
+    // Optimization: Add a timeout to prevent infinite loading
+    const loadingTimeout = setTimeout(() => {
+      if (loading) {
+        console.log('Auth loading timed out, forcing completion');
+        setLoading(false);
+      }
+    }, 3000); // 3 seconds max loading time
+    
+    // Set up auth state listener
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
       (event, currentSession) => {
         console.log('Auth state changed:', event, currentSession?.user?.email);
         
-        // Don't set loading to false right away on initial load
-        // This prevents flickering between pages
-        if (event !== 'INITIAL_SESSION') {
+        if (event === 'SIGNED_IN') {
           setSession(currentSession);
           setUser(currentSession?.user ?? null);
+          setLoading(false);
+        } else if (event === 'SIGNED_OUT') {
+          setSession(null);
+          setUser(null);
           setLoading(false);
         }
       }
     );
     
-    // Then check for existing session
+    // Initialize auth state
     const initializeAuth = async () => {
       try {
+        console.log('Initializing auth session...');
         const { data: { session: currentSession } } = await supabase.auth.getSession();
         console.log('Initial session check:', currentSession?.user?.email || 'No session');
+        
         setSession(currentSession);
         setUser(currentSession?.user ?? null);
       } catch (error) {
@@ -61,17 +73,19 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
     // Run the initialization
     initializeAuth();
     
-    return () => subscription.unsubscribe();
+    return () => {
+      clearTimeout(loadingTimeout);
+      subscription.unsubscribe();
+    };
   }, []);
 
   const signOut = async () => {
     try {
-      setLoading(true);
       await supabase.auth.signOut();
+      // Auth state listener will handle the state update
     } catch (error) {
       console.error('Error signing out:', error);
-    } finally {
-      setLoading(false);
+      throw error;
     }
   };
 

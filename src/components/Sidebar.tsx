@@ -1,5 +1,5 @@
 
-import { LayoutDashboard, TrendingUp, Facebook, ListChecks, Users, Settings, LogOut, Link, MessageSquare, FileText } from "lucide-react";
+import { LayoutDashboard, TrendingUp, Facebook, ListChecks, Users, Settings, LogOut, Link, MessageSquare, FileText, PieChart } from "lucide-react";
 import { useNavigate, useLocation } from "react-router-dom";
 import { useAuth } from "@/context/AuthContext";
 import {
@@ -58,9 +58,9 @@ const navigationItems = [
     icon: FileText,
   },
   {
-    title: "Lead Admin",
-    path: "/admin",
-    icon: Settings,
+    title: "Competition Analysis",
+    path: "/competition",
+    icon: PieChart,
   }
 ];
 

@@ -16,6 +16,7 @@ import AdminPage from "./pages/AdminPage";
 import AuthPage from "./pages/AuthPage";
 import IntegrationsPage from "./pages/IntegrationsPage";
 import FormsPage from "./pages/FormsPage";
+import CompetitionAnalysis from "./pages/CompetitionAnalysis";
 import GoogleCallback from "./pages/GoogleCallback";
 import MetaCallback from "./pages/MetaCallback";
 import NotFound from "./pages/NotFound";
@@ -102,6 +103,11 @@ const App = () => (
               <Route path="/integrations" element={
                 <Layout>
                   <ProtectedRoute><IntegrationsPage /></ProtectedRoute>
+                </Layout>
+              } />
+              <Route path="/competition" element={
+                <Layout>
+                  <ProtectedRoute><CompetitionAnalysis /></ProtectedRoute>
                 </Layout>
               } />
               <Route path="*" element={<NotFound />} />
