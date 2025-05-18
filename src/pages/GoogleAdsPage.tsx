@@ -23,6 +23,8 @@ import {
   adGroupsData,
   assetPerformanceData
 } from '@/data/mockData';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { useGoogleAccounts } from '@/hooks/use-google-accounts';
 
 const GoogleAdsPage = () => {
   const [metrics, setMetrics] = useState(getOverviewMetrics());
@@ -31,12 +33,14 @@ const GoogleAdsPage = () => {
     to: new Date()
   });
   
-  // Use the hook to fetch Google Ads data
+  // Use the hooks to fetch Google Ads data and accounts
   const { 
     fetchData, 
     isLoading, 
     error 
   } = useGoogleAdsAPI();
+  
+  const { accounts, currentAccount, setCurrentAccount } = useGoogleAccounts();
   
   const handleRefresh = () => {
     // Fetch fresh data from Google Ads API
@@ -47,7 +51,9 @@ const GoogleAdsPage = () => {
   const handleDateChange = useCallback((range: { from: Date; to: Date }) => {
     setDateRange(range);
     console.log('Date range changed:', range);
-  }, []);
+    // Fetch updated data with new date range
+    fetchData(range.from, range.to);
+  }, [fetchData]);
 
   // Initial data fetch when component mounts
   useEffect(() => {
@@ -59,7 +65,27 @@ const GoogleAdsPage = () => {
       <Header onRefresh={handleRefresh} title="Google Ads Dashboard" />
       
       <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-6 gap-4">
-        <h2 className="text-lg font-medium">Google Ads Overview</h2>
+        <div className="flex flex-col lg:flex-row items-start lg:items-center gap-4">
+          <h2 className="text-lg font-medium">Google Ads Overview</h2>
+          <Select 
+            value={currentAccount?.id || ''} 
+            onValueChange={(value) => {
+              const account = accounts.find(acc => acc.id === value);
+              if (account) setCurrentAccount(account);
+            }}
+          >
+            <SelectTrigger className="w-[250px]">
+              <SelectValue placeholder="Select ad account" />
+            </SelectTrigger>
+            <SelectContent>
+              {accounts.map(account => (
+                <SelectItem key={account.id} value={account.id}>
+                  {account.name} ({account.id})
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+        </div>
         <DateRangePicker onDateChange={handleDateChange} />
       </div>
 

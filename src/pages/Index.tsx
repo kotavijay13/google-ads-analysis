@@ -31,7 +31,9 @@ const Index = () => {
   const handleDateChange = useCallback((range: { from: Date; to: Date }) => {
     setDateRange(range);
     console.log('Date range changed:', range);
-  }, []);
+    // Fetch updated data with new date range
+    fetchData(range.from, range.to);
+  }, [fetchData]);
 
   // Initial data fetch when component mounts
   useEffect(() => {
@@ -84,7 +86,7 @@ const Index = () => {
 
   return (
     <div className="container mx-auto py-6 px-4 max-w-7xl">
-      <Header onRefresh={handleRefresh} title="Marketing Dashboard" />
+      <Header onRefresh={handleRefresh} title="Merge Insights AI" />
       
       <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-6 gap-4">
         <h2 className="text-lg font-medium">Merge Insights AI Overview</h2>
