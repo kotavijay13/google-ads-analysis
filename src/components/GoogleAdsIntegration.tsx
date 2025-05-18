@@ -77,14 +77,16 @@ const GoogleAdsIntegration = () => {
     // Save the state in localStorage to verify later
     localStorage.setItem('googleOAuthState', state);
     
-    // Create the OAuth URL using the environment variable
+    // Using the correct OAuth configuration
     const oauthEndpoint = 'https://accounts.google.com/o/oauth2/v2/auth';
-    const clientId = '174740180735-pq1vkuf06dpu1n0n708iugi20rkupf49.apps.googleusercontent.com'; // Using the actual client ID
-    const redirectUri = window.location.origin + '/google-callback';
-    const scope = 'https://www.googleapis.com/auth/adwords';
+    // Use web application client ID (not Android)
+    const clientId = '174740180735-pq1vkuf06dpu1n0n708iugi20rkupf49.apps.googleusercontent.com';
+    // Make sure redirect URI matches exactly what's configured in Google Cloud Console
+    const redirectUri = encodeURIComponent(window.location.origin + '/google-callback');
+    const scope = encodeURIComponent('https://www.googleapis.com/auth/adwords');
     
-    // Construct the OAuth URL
-    const oauthUrl = `${oauthEndpoint}?client_id=${clientId}&redirect_uri=${encodeURIComponent(redirectUri)}&response_type=code&scope=${encodeURIComponent(scope)}&state=${state}&access_type=offline&prompt=consent`;
+    // Construct the OAuth URL with all required parameters
+    const oauthUrl = `${oauthEndpoint}?client_id=${clientId}&redirect_uri=${redirectUri}&response_type=code&scope=${scope}&state=${state}&access_type=offline&prompt=consent&include_granted_scopes=true`;
     
     // Redirect to Google's OAuth page
     window.location.href = oauthUrl;
@@ -98,7 +100,12 @@ const GoogleAdsIntegration = () => {
       </CardHeader>
       <CardContent>
         {!connected ? (
-          <Button onClick={handleConnect}>Connect Google Ads</Button>
+          <div>
+            <p className="mb-4 text-sm text-muted-foreground">
+              Connect your Google Ads account to view and analyze your campaigns, keywords, and performance data.
+            </p>
+            <Button onClick={handleConnect}>Connect Google Ads</Button>
+          </div>
         ) : (
           <>
             <div className="flex items-center justify-between mb-4">

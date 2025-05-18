@@ -22,11 +22,39 @@ serve(async (req) => {
     const supabaseUrl = Deno.env.get('SUPABASE_URL');
     const supabaseKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY');
     
-    // Validate required data
-    if (!code || !redirectUri || !clientId || !clientSecret || !supabaseUrl || !supabaseKey) {
+    // Validate required data with detailed error messages
+    if (!code) {
       return new Response(
-        JSON.stringify({ error: 'Missing required parameters' }),
+        JSON.stringify({ error: 'Missing authorization code' }),
         { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      );
+    }
+    
+    if (!redirectUri) {
+      return new Response(
+        JSON.stringify({ error: 'Missing redirect URI' }),
+        { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      );
+    }
+    
+    if (!clientId) {
+      return new Response(
+        JSON.stringify({ error: 'Google Client ID not configured in environment variables' }),
+        { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      );
+    }
+    
+    if (!clientSecret) {
+      return new Response(
+        JSON.stringify({ error: 'Google Client Secret not configured in environment variables' }),
+        { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      );
+    }
+    
+    if (!supabaseUrl || !supabaseKey) {
+      return new Response(
+        JSON.stringify({ error: 'Supabase configuration missing' }),
+        { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
       );
     }
     
@@ -52,6 +80,8 @@ serve(async (req) => {
       );
     }
     
+    console.log(`Exchanging code for tokens for user ${user.email}`);
+    
     // Exchange the authorization code for access and refresh tokens
     const tokenResponse = await fetch('https://oauth2.googleapis.com/token', {
       method: 'POST',
@@ -72,10 +102,15 @@ serve(async (req) => {
     if (!tokenResponse.ok || !tokenData.access_token) {
       console.error('Google OAuth token error:', tokenData);
       return new Response(
-        JSON.stringify({ error: tokenData.error_description || 'Failed to get access token' }),
+        JSON.stringify({ 
+          error: tokenData.error_description || 'Failed to get access token',
+          details: tokenData
+        }),
         { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
       );
     }
+    
+    console.log('Successfully obtained access token');
     
     // Calculate token expiry time
     const expiresAt = new Date();
@@ -99,19 +134,27 @@ serve(async (req) => {
     if (tokenError) {
       console.error('Error storing tokens:', tokenError);
       return new Response(
-        JSON.stringify({ error: 'Failed to store access tokens' }),
+        JSON.stringify({ error: 'Failed to store access tokens', details: tokenError }),
         { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
       );
     }
     
     // Fetch Google Ads accounts using the new token
     try {
+      console.log('Attempting to fetch Google Ads accounts');
+      
       // This is a simplified example - in a real app, you would use the Google Ads API with proper version path
       const googleAdsUrl = 'https://googleads.googleapis.com/v15/customers:listAccessibleCustomers';
+      const developToken = Deno.env.get('GOOGLE_ADS_DEVELOPER_TOKEN');
+      
+      if (!developToken) {
+        console.warn('Google Ads Developer Token not configured');
+      }
+      
       const accountsResponse = await fetch(googleAdsUrl, {
         headers: {
           'Authorization': `Bearer ${tokenData.access_token}`,
-          'developer-token': Deno.env.get('GOOGLE_ADS_DEVELOPER_TOKEN') || '',
+          'developer-token': developToken || '',
         },
       });
       
@@ -120,6 +163,7 @@ serve(async (req) => {
       if (accountsResponse.ok && accountsData.resourceNames) {
         // Format: customers/{customer_id}
         const customerIds = accountsData.resourceNames.map((name: string) => name.split('/')[1]);
+        console.log(`Found ${customerIds.length} Google Ads accounts`);
         
         // Get account names - in a real app you would make additional API calls to get names
         // For simplicity, we'll just use IDs as names in this example
@@ -135,6 +179,8 @@ serve(async (req) => {
               onConflict: 'user_id,platform,account_id'
             });
         }
+      } else {
+        console.error('Error fetching Google Ads accounts:', accountsData);
       }
     } catch (error) {
       console.error('Error fetching Google Ads accounts:', error);
