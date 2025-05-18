@@ -81,20 +81,26 @@ serve(async (req) => {
     }
     
     console.log(`Exchanging code for tokens for user ${user.email}`);
+    console.log(`Using redirect URI: ${redirectUri}`);
+    console.log(`Using client ID: ${clientId.substring(0, 8)}...`);
     
     // Exchange the authorization code for access and refresh tokens
+    const tokenRequestBody = new URLSearchParams({
+      code,
+      client_id: clientId,
+      client_secret: clientSecret,
+      redirect_uri: redirectUri,
+      grant_type: 'authorization_code',
+    });
+    
+    console.log("Token request payload:", tokenRequestBody.toString());
+    
     const tokenResponse = await fetch('https://oauth2.googleapis.com/token', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/x-www-form-urlencoded',
       },
-      body: new URLSearchParams({
-        code,
-        client_id: clientId,
-        client_secret: clientSecret,
-        redirect_uri: redirectUri,
-        grant_type: 'authorization_code',
-      }),
+      body: tokenRequestBody,
     });
     
     const tokenData = await tokenResponse.json();
@@ -103,8 +109,10 @@ serve(async (req) => {
       console.error('Google OAuth token error:', tokenData);
       return new Response(
         JSON.stringify({ 
-          error: tokenData.error_description || 'Failed to get access token',
-          details: tokenData
+          error: tokenData.error_description || tokenData.error || 'Failed to get access token',
+          details: tokenData,
+          status: tokenResponse.status,
+          statusText: tokenResponse.statusText
         }),
         { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
       );

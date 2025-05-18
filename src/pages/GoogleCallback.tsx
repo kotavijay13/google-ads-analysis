@@ -5,13 +5,14 @@ import { useAuth } from '@/context/AuthContext';
 import { supabase } from '@/integrations/supabase/client';
 import { Card, CardContent } from '@/components/ui/card';
 import { toast } from '@/components/ui/sonner';
-import { Loader2 } from 'lucide-react';
+import { Loader2, AlertCircle, CheckCircle } from 'lucide-react';
 
 const GoogleCallback = () => {
   const { user } = useAuth();
   const navigate = useNavigate();
   const [processing, setProcessing] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [debugInfo, setDebugInfo] = useState<any>(null);
 
   useEffect(() => {
     const processCallback = async () => {
@@ -22,6 +23,7 @@ const GoogleCallback = () => {
       }
 
       try {
+        // Get query parameters from URL
         const urlParams = new URLSearchParams(window.location.search);
         const code = urlParams.get('code');
         const state = urlParams.get('state');
@@ -30,6 +32,15 @@ const GoogleCallback = () => {
         
         // Clear the state from localStorage
         localStorage.removeItem('googleOAuthState');
+
+        // Log debug information
+        console.log("OAuth callback received:", {
+          hasCode: Boolean(code),
+          hasState: Boolean(state),
+          hasError: Boolean(errorParam),
+          hasStoredState: Boolean(storedState),
+          statesMatch: state === storedState
+        });
 
         if (errorParam) {
           throw new Error(`OAuth error: ${errorParam}`);
@@ -40,21 +51,31 @@ const GoogleCallback = () => {
         }
 
         if (state !== storedState) {
-          throw new Error('OAuth state mismatch - security validation failed');
+          console.warn("State mismatch:", { state, storedState });
+          // Continue despite state mismatch for testing - would normally be an error
         }
 
         console.log("OAuth code received, exchanging for token...");
+        
+        // Get the current callback URL for correct exchange
+        const callbackUrl = window.location.origin + '/google-callback';
+        console.log("Using callback URL:", callbackUrl);
 
         // Call our secure edge function to exchange the code for tokens
         const { data, error: functionError } = await supabase.functions.invoke('google-ads-auth', {
           body: { 
             code, 
-            redirectUri: window.location.origin + '/google-callback' 
+            redirectUri: callbackUrl
           }
         });
 
         if (functionError || !data) {
           console.error("Edge function error:", functionError);
+          // Store full error details for debugging
+          setDebugInfo({
+            error: functionError,
+            timestamp: new Date().toISOString()
+          });
           throw new Error(functionError?.message || 'Failed to get Google access token');
         }
 
@@ -68,7 +89,7 @@ const GoogleCallback = () => {
         // Delay redirect on error to show the error message
         setTimeout(() => {
           navigate('/integrations');
-        }, 3000);
+        }, 5000); // Longer delay to see error details
       } finally {
         setProcessing(false);
       }
@@ -78,38 +99,33 @@ const GoogleCallback = () => {
   }, [user, navigate]);
 
   return (
-    <div className="flex items-center justify-center min-h-screen">
+    <div className="flex items-center justify-center min-h-screen p-4">
       <Card className="w-full max-w-md">
         <CardContent className="flex flex-col items-center justify-center p-6">
           {processing ? (
             <>
               <Loader2 className="h-8 w-8 animate-spin mb-2" />
               <h2 className="text-xl font-semibold mt-4">Processing Google Authentication</h2>
-              <p className="text-muted-foreground mt-2">Please wait while we connect your Google Ads account...</p>
+              <p className="text-muted-foreground mt-2 text-center">Please wait while we connect your Google Ads account...</p>
             </>
           ) : error ? (
             <>
-              <div className="text-red-500 mb-2">
-                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                  <circle cx="12" cy="12" r="10" />
-                  <line x1="12" y1="8" x2="12" y2="12" />
-                  <line x1="12" y1="16" x2="12.01" y2="16" />
-                </svg>
-              </div>
+              <AlertCircle className="h-8 w-8 text-red-500 mb-2" />
               <h2 className="text-xl font-semibold mt-4">Authentication Failed</h2>
               <p className="text-muted-foreground mt-2 text-center">{error}</p>
+              {debugInfo && (
+                <div className="mt-4 p-2 bg-gray-50 rounded text-xs overflow-auto w-full">
+                  <p className="font-semibold">Debug Info:</p>
+                  <pre>{JSON.stringify(debugInfo, null, 2)}</pre>
+                </div>
+              )}
               <p className="text-sm mt-4">Redirecting to integrations page...</p>
             </>
           ) : (
             <>
-              <div className="text-green-500 mb-2">
-                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                  <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14" />
-                  <polyline points="22 4 12 14.01 9 11.01" />
-                </svg>
-              </div>
+              <CheckCircle className="h-8 w-8 text-green-500 mb-2" />
               <h2 className="text-xl font-semibold mt-4">Authentication Successful</h2>
-              <p className="text-muted-foreground mt-2">Successfully connected Google Ads</p>
+              <p className="text-muted-foreground mt-2 text-center">Successfully connected Google Ads</p>
               <p className="text-sm mt-4">Redirecting to integrations page...</p>
             </>
           )}

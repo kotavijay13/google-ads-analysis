@@ -18,6 +18,7 @@ const GoogleAdsIntegration = () => {
   const [loading, setLoading] = useState(false);
   const [accounts, setAccounts] = useState<GoogleAdsAccount[]>([]);
   const [connected, setConnected] = useState(false);
+  const [configError, setConfigError] = useState<string | null>(null);
 
   useEffect(() => {
     if (user) {
@@ -29,15 +30,20 @@ const GoogleAdsIntegration = () => {
   const checkConnection = async () => {
     if (!user) return;
     
-    const { data, error } = await supabase
-      .from('api_tokens')
-      .select('*')
-      .eq('user_id', user.id)
-      .eq('provider', 'google')
-      .single();
-    
-    if (data) {
-      setConnected(true);
+    try {
+      const { data, error } = await supabase
+        .from('api_tokens')
+        .select('*')
+        .eq('user_id', user.id)
+        .eq('provider', 'google')
+        .single();
+      
+      if (data) {
+        setConnected(true);
+        setConfigError(null);
+      }
+    } catch (error) {
+      console.error("Error checking connection:", error);
     }
   };
 
@@ -72,24 +78,37 @@ const GoogleAdsIntegration = () => {
   };
 
   const handleConnect = async () => {
-    // Generate a random state for OAuth security
-    const state = Math.random().toString(36).substring(2);
-    // Save the state in localStorage to verify later
-    localStorage.setItem('googleOAuthState', state);
-    
-    // Using the correct OAuth configuration
-    const oauthEndpoint = 'https://accounts.google.com/o/oauth2/v2/auth';
-    // Use web application client ID (not Android)
-    const clientId = '174740180735-pq1vkuf06dpu1n0n708iugi20rkupf49.apps.googleusercontent.com';
-    // Make sure redirect URI matches exactly what's configured in Google Cloud Console
-    const redirectUri = encodeURIComponent(window.location.origin + '/google-callback');
-    const scope = encodeURIComponent('https://www.googleapis.com/auth/adwords');
-    
-    // Construct the OAuth URL with all required parameters
-    const oauthUrl = `${oauthEndpoint}?client_id=${clientId}&redirect_uri=${redirectUri}&response_type=code&scope=${scope}&state=${state}&access_type=offline&prompt=consent&include_granted_scopes=true`;
-    
-    // Redirect to Google's OAuth page
-    window.location.href = oauthUrl;
+    try {
+      // Generate a random state for OAuth security
+      const state = Math.random().toString(36).substring(2);
+      // Save the state in localStorage to verify later
+      localStorage.setItem('googleOAuthState', state);
+      
+      // Using the correct OAuth configuration
+      const oauthEndpoint = 'https://accounts.google.com/o/oauth2/v2/auth';
+      // Use web application client ID shown in the screenshot
+      const clientId = '463775925601-8i7gv5qhham5b5f60mjvhusp6jg6qfd8.apps.googleusercontent.com';
+      
+      // Use the exact redirect URI as configured in Google Cloud Console
+      const redirectUri = window.location.origin + '/google-callback';
+      const scope = encodeURIComponent('https://www.googleapis.com/auth/adwords');
+      
+      console.log("Starting Google OAuth with:", {
+        clientId,
+        redirectUri,
+        state
+      });
+      
+      // Construct the OAuth URL with all required parameters
+      const oauthUrl = `${oauthEndpoint}?client_id=${clientId}&redirect_uri=${encodeURIComponent(redirectUri)}&response_type=code&scope=${scope}&state=${state}&access_type=offline&prompt=consent&include_granted_scopes=true`;
+      
+      // Redirect to Google's OAuth page
+      window.location.href = oauthUrl;
+    } catch (error) {
+      console.error("Error initiating Google OAuth:", error);
+      setConfigError("OAuth initialization failed. Check console for details.");
+      toast.error("Failed to connect to Google");
+    }
   };
 
   return (
@@ -104,6 +123,11 @@ const GoogleAdsIntegration = () => {
             <p className="mb-4 text-sm text-muted-foreground">
               Connect your Google Ads account to view and analyze your campaigns, keywords, and performance data.
             </p>
+            {configError && (
+              <div className="mb-4 p-2 bg-red-50 text-red-700 rounded border border-red-200 text-sm">
+                {configError}
+              </div>
+            )}
             <Button onClick={handleConnect}>Connect Google Ads</Button>
           </div>
         ) : (
