@@ -33,7 +33,7 @@ const Layout = ({ children }: { children: React.ReactNode }) => {
   const isCallbackPage = location.pathname.includes('callback');
   
   if (isAuthPage || isCallbackPage) {
-    return <div className="w-full">{children}</div>;
+    return <>{children}</>;
   }
   
   // For all other routes, use the normal layout with sidebar

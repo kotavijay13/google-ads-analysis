@@ -81,7 +81,7 @@ export const MainSidebar = () => {
   };
 
   // Don't render sidebar during loading or if no user
-  if (!user) return null;
+  if (loading || !user) return null;
 
   // Don't render sidebar on auth pages
   if (location.pathname === '/auth') return null;

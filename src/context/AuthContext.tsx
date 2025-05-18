@@ -33,9 +33,14 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
       (event, currentSession) => {
         console.log('Auth state changed:', event, currentSession?.user?.email);
-        setSession(currentSession);
-        setUser(currentSession?.user ?? null);
-        setLoading(false);
+        
+        // Don't set loading to false right away on initial load
+        // This prevents flickering between pages
+        if (event !== 'INITIAL_SESSION') {
+          setSession(currentSession);
+          setUser(currentSession?.user ?? null);
+          setLoading(false);
+        }
       }
     );
     
