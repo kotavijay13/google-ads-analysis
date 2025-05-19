@@ -10,6 +10,15 @@ export interface Campaign {
   cpc: number;
   conversionRate: number;
   costPerConversion: number;
+  servingStatus?: string;
+  startDate?: string;
+  endDate?: string;
+  channelType?: string;
+  channelSubType?: string;
+  budget?: number;
+  allConversions?: number;
+  conversionValue?: number;
+  cpm?: number;
 }
 
 export interface AdGroup {
@@ -17,6 +26,18 @@ export interface AdGroup {
   name: string;
   campaignId: string;
   campaignName: string;
+  status?: string;
+  type?: string;
+  cpcBid?: number;
+  impressions?: number;
+  clicks?: number;
+  cost?: number;
+  ctr?: number;
+  cpc?: number;
+  conversions?: number;
+  conversionRate?: number;
+  conversionValue?: number;
+  costPerConversion?: number;
 }
 
 export interface DailyData {
@@ -55,6 +76,12 @@ export interface KeywordData {
   conversions: number;
   costPerConversion: number;
   performanceScore: 'high' | 'medium' | 'low';
+  matchType?: string;
+  status?: string;
+  qualityScore?: number;
+  expectedCtr?: string;
+  adRelevance?: string;
+  landingPageExp?: string;
 }
 
 export interface AdCopyData {
@@ -105,6 +132,15 @@ export const campaignsData: Campaign[] = [
     cpc: 0.38,
     conversionRate: 4.84,
     costPerConversion: 7.93,
+    servingStatus: 'Eligible',
+    startDate: '2023-05-01',
+    endDate: '2023-08-31',
+    channelType: 'Search',
+    channelSubType: 'Standard Search',
+    budget: 2000.00,
+    allConversions: 165,
+    conversionValue: 8756.45,
+    cpm: 25.44
   },
   {
     id: '2',
@@ -118,6 +154,15 @@ export const campaignsData: Campaign[] = [
     cpc: 0.53,
     conversionRate: 4.73,
     costPerConversion: 11.12,
+    servingStatus: 'Eligible',
+    startDate: '2023-04-15',
+    endDate: '2023-12-31',
+    channelType: 'Display',
+    channelSubType: 'Standard Display',
+    budget: 5000.00,
+    allConversions: 345,
+    conversionValue: 12450.75,
+    cpm: 28.64
   },
   {
     id: '3',
@@ -131,6 +176,15 @@ export const campaignsData: Campaign[] = [
     cpc: 1.00,
     conversionRate: 5.12,
     costPerConversion: 19.54,
+    servingStatus: 'Eligible',
+    startDate: '2023-06-01',
+    endDate: '2023-12-31',
+    channelType: 'Search',
+    channelSubType: 'Standard Search',
+    budget: 6000.00,
+    allConversions: 295,
+    conversionValue: 15678.90,
+    cpm: 61.97
   },
   {
     id: '4',
@@ -144,6 +198,15 @@ export const campaignsData: Campaign[] = [
     cpc: 0.52,
     conversionRate: 6.38,
     costPerConversion: 8.12,
+    servingStatus: 'Paused',
+    startDate: '2023-03-01',
+    endDate: '2023-11-30',
+    channelType: 'Display',
+    channelSubType: 'Remarketing',
+    budget: 3000.00,
+    allConversions: 312,
+    conversionValue: 9876.54,
+    cpm: 67.95
   },
   {
     id: '5',
@@ -157,6 +220,15 @@ export const campaignsData: Campaign[] = [
     cpc: 1.00,
     conversionRate: 5.35,
     costPerConversion: 18.71,
+    servingStatus: 'Ended',
+    startDate: '2022-11-01',
+    endDate: '2023-01-15',
+    channelType: 'Search',
+    channelSubType: 'Standard Search',
+    budget: 5000.00,
+    allConversions: 245,
+    conversionValue: 11345.67,
+    cpm: 76.09
   },
 ];
 
@@ -262,7 +334,13 @@ export const keywordPerformanceData: KeywordData[] = [
     spend: 245.32,
     conversions: 21,
     costPerConversion: 11.68,
-    performanceScore: 'high'
+    performanceScore: 'high',
+    matchType: 'Exact',
+    status: 'Active',
+    qualityScore: 8,
+    expectedCtr: 'Above average',
+    adRelevance: 'Above average',
+    landingPageExp: 'Average'
   },
   {
     id: '2',
@@ -277,7 +355,13 @@ export const keywordPerformanceData: KeywordData[] = [
     spend: 187.45,
     conversions: 13,
     costPerConversion: 14.42,
-    performanceScore: 'medium'
+    performanceScore: 'medium',
+    matchType: 'Phrase',
+    status: 'Active',
+    qualityScore: 7,
+    expectedCtr: 'Average',
+    adRelevance: 'Above average',
+    landingPageExp: 'Average'
   },
   {
     id: '3',
@@ -292,7 +376,13 @@ export const keywordPerformanceData: KeywordData[] = [
     spend: 157.89,
     conversions: 8,
     costPerConversion: 19.74,
-    performanceScore: 'low'
+    performanceScore: 'low',
+    matchType: 'Broad',
+    status: 'Active',
+    qualityScore: 5,
+    expectedCtr: 'Below average',
+    adRelevance: 'Average',
+    landingPageExp: 'Below average'
   },
   {
     id: '4',
@@ -307,7 +397,13 @@ export const keywordPerformanceData: KeywordData[] = [
     spend: 432.67,
     conversions: 32,
     costPerConversion: 13.52,
-    performanceScore: 'high'
+    performanceScore: 'high',
+    matchType: 'Exact',
+    status: 'Active',
+    qualityScore: 9,
+    expectedCtr: 'Above average',
+    adRelevance: 'Above average',
+    landingPageExp: 'Above average'
   },
   {
     id: '5',
@@ -322,7 +418,13 @@ export const keywordPerformanceData: KeywordData[] = [
     spend: 312.45,
     conversions: 18,
     costPerConversion: 17.36,
-    performanceScore: 'medium'
+    performanceScore: 'medium',
+    matchType: 'Phrase',
+    status: 'Active',
+    qualityScore: 7,
+    expectedCtr: 'Average',
+    adRelevance: 'Above average',
+    landingPageExp: 'Average'
   },
   {
     id: '6',
@@ -337,7 +439,13 @@ export const keywordPerformanceData: KeywordData[] = [
     spend: 621.34,
     conversions: 43,
     costPerConversion: 14.45,
-    performanceScore: 'high'
+    performanceScore: 'high',
+    matchType: 'Exact',
+    status: 'Active',
+    qualityScore: 8,
+    expectedCtr: 'Above average',
+    adRelevance: 'Above average',
+    landingPageExp: 'Above average'
   },
   {
     id: '7',
@@ -352,7 +460,13 @@ export const keywordPerformanceData: KeywordData[] = [
     spend: 345.67,
     conversions: 21,
     costPerConversion: 16.46,
-    performanceScore: 'medium'
+    performanceScore: 'medium',
+    matchType: 'Phrase',
+    status: 'Active',
+    qualityScore: 7,
+    expectedCtr: 'Average',
+    adRelevance: 'Above average',
+    landingPageExp: 'Average'
   },
   {
     id: '8',
@@ -367,7 +481,13 @@ export const keywordPerformanceData: KeywordData[] = [
     spend: 276.54,
     conversions: 32,
     costPerConversion: 8.64,
-    performanceScore: 'high'
+    performanceScore: 'high',
+    matchType: 'Broad',
+    status: 'Active',
+    qualityScore: 8,
+    expectedCtr: 'Above average',
+    adRelevance: 'Average',
+    landingPageExp: 'Above average'
   },
   {
     id: '9',
@@ -382,7 +502,13 @@ export const keywordPerformanceData: KeywordData[] = [
     spend: 543.21,
     conversions: 35,
     costPerConversion: 15.52,
-    performanceScore: 'high'
+    performanceScore: 'high',
+    matchType: 'Exact',
+    status: 'Active',
+    qualityScore: 9,
+    expectedCtr: 'Above average',
+    adRelevance: 'Above average',
+    landingPageExp: 'Above average'
   },
   {
     id: '10',
@@ -397,7 +523,13 @@ export const keywordPerformanceData: KeywordData[] = [
     spend: 387.65,
     conversions: 24,
     costPerConversion: 16.15,
-    performanceScore: 'medium'
+    performanceScore: 'medium',
+    matchType: 'Phrase',
+    status: 'Active',
+    qualityScore: 6,
+    expectedCtr: 'Average',
+    adRelevance: 'Average',
+    landingPageExp: 'Average'
   }
 ];
 
