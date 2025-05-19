@@ -1,3 +1,4 @@
+
 import { useState, useCallback, useEffect } from 'react';
 import Header from '@/components/Header';
 import DateRangePicker from '@/components/DateRangePicker';
@@ -13,7 +14,7 @@ import {
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { toast } from "@/components/ui/sonner";
-import { Search, ExternalLink, ArrowUpRight, ArrowDownRight, Minus, Loader2 } from 'lucide-react';
+import { Search, ExternalLink, ArrowUpRight, ArrowDownRight, Minus, Loader2, AlertTriangle } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 
 // Define the keyword data type
@@ -32,6 +33,12 @@ interface OverviewStats {
   estTraffic: number;
 }
 
+interface AnalysisResponse {
+  keywords: KeywordData[];
+  stats: OverviewStats;
+  note?: string;
+}
+
 const CompetitionAnalysis = () => {
   const [dateRange, setDateRange] = useState<{ from: Date; to: Date }>({
     from: new Date(new Date().setDate(new Date().getDate() - 30)),
@@ -48,6 +55,8 @@ const CompetitionAnalysis = () => {
     avgPosition: '0.0',
     estTraffic: 0
   });
+  const [usingMockData, setUsingMockData] = useState(false);
+  const [mockDataNote, setMockDataNote] = useState<string | null>(null);
   
   const handleRefresh = () => {
     if (websiteUrl) {
@@ -72,6 +81,8 @@ const CompetitionAnalysis = () => {
     
     setIsLoading(true);
     toast.info(`Analyzing competitor website: ${websiteUrl}`);
+    setUsingMockData(false);
+    setMockDataNote(null);
     
     try {
       const { data, error } = await supabase.functions.invoke('serp-api', {
@@ -90,6 +101,15 @@ const CompetitionAnalysis = () => {
         return;
       }
       
+      // Check if using mock data
+      if (data.note) {
+        setUsingMockData(true);
+        setMockDataNote(data.note);
+        toast.warning("Using demonstration data - SERP API key not configured");
+      } else {
+        toast.success("Competitor analysis complete!");
+      }
+      
       // Update state with the API response data
       setCompetitorKeywords(data.keywords || []);
       setOverviewStats(data.stats || {
@@ -99,7 +119,6 @@ const CompetitionAnalysis = () => {
         estTraffic: 0
       });
       setHasAnalyzed(true);
-      toast.success("Competitor analysis complete!");
       
     } catch (error) {
       console.error('Exception during analysis:', error);
@@ -150,6 +169,16 @@ const CompetitionAnalysis = () => {
               )}
             </Button>
           </div>
+          
+          {usingMockData && (
+            <div className="mt-4 p-3 bg-yellow-50 border border-yellow-200 rounded-md flex items-start gap-2">
+              <AlertTriangle className="h-5 w-5 text-yellow-500 flex-shrink-0 mt-0.5" />
+              <div className="text-sm text-yellow-700">
+                <p className="font-medium">Using demonstration data</p>
+                <p className="text-xs mt-1">{mockDataNote || "SERP API key is not configured. Add a SERP API key to the Supabase Edge Function secrets for real-time data."}</p>
+              </div>
+            </div>
+          )}
         </CardContent>
       </Card>
 
