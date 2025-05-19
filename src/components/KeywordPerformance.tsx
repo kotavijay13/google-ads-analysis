@@ -19,6 +19,7 @@ import { Badge } from "@/components/ui/badge";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { KeywordData, Campaign, AdGroup } from '../data/mockData';
 import { Tag } from "lucide-react";
+import ColumnSelector from './ColumnSelector';
 
 interface KeywordPerformanceProps {
   keywords: KeywordData[];
@@ -30,6 +31,41 @@ const KeywordPerformance = ({ keywords, campaigns, adGroups }: KeywordPerformanc
   const [selectedCampaign, setSelectedCampaign] = useState<string>('all');
   const [selectedAdGroup, setSelectedAdGroup] = useState<string>('all');
   
+  const allColumns = [
+    { key: 'keyword', label: 'Keyword Text' },
+    { key: 'id', label: 'Keyword ID' },
+    { key: 'matchType', label: 'Match Type' },
+    { key: 'adGroupId', label: 'Ad Group ID' },
+    { key: 'adGroupName', label: 'Ad Group Name' },
+    { key: 'campaignName', label: 'Campaign Name' },
+    { key: 'status', label: 'Status' },
+    { key: 'qualityScore', label: 'Quality Score' },
+    { key: 'expectedCtr', label: 'Expected CTR' },
+    { key: 'adRelevance', label: 'Ad Relevance' },
+    { key: 'landingPageExp', label: 'Landing Page Experience' },
+    { key: 'clicks', label: 'Clicks' },
+    { key: 'impressions', label: 'Impressions' },
+    { key: 'ctr', label: 'CTR' },
+    { key: 'cpc', label: 'Avg. CPC' },
+    { key: 'spend', label: 'Cost' },
+    { key: 'conversions', label: 'Conversions' },
+    { key: 'conversionRate', label: 'Conversion Rate' },
+    { key: 'costPerConversion', label: 'Cost/Conversion' }
+  ];
+
+  const [visibleColumns, setVisibleColumns] = useState([
+    'keyword', 'campaignName', 'adGroupName', 'status', 'clicks', 'impressions', 
+    'ctr', 'spend', 'conversions', 'costPerConversion', 'qualityScore', 'performanceScore'
+  ]);
+  
+  const toggleColumn = (columnKey: string) => {
+    setVisibleColumns(prev => 
+      prev.includes(columnKey) 
+        ? prev.filter(key => key !== columnKey) 
+        : [...prev, columnKey]
+    );
+  };
+
   // Filter keywords first by campaign
   const campaignFilteredKeywords = selectedCampaign === 'all' 
     ? keywords
@@ -84,7 +120,12 @@ const KeywordPerformance = ({ keywords, campaigns, adGroups }: KeywordPerformanc
             <CardDescription>Campaign-wise keyword performance analysis</CardDescription>
           </div>
         </div>
-        <div className="flex flex-col sm:flex-row gap-2">
+        <div className="flex flex-col sm:flex-row gap-2 items-center">
+          <ColumnSelector 
+            columns={allColumns} 
+            visibleColumns={visibleColumns} 
+            onColumnToggle={toggleColumn} 
+          />
           <Select value={selectedCampaign} onValueChange={(value) => {
             setSelectedCampaign(value);
             setSelectedAdGroup('all'); // Reset ad group filter when campaign changes
@@ -118,31 +159,84 @@ const KeywordPerformance = ({ keywords, campaigns, adGroups }: KeywordPerformanc
           <Table>
             <TableHeader>
               <TableRow>
-                <TableHead>Keyword</TableHead>
-                <TableHead>Campaign</TableHead>
-                <TableHead>Ad Group</TableHead>
-                <TableHead>Clicks</TableHead>
-                <TableHead className="hidden md:table-cell">Impressions</TableHead>
-                <TableHead>CTR</TableHead>
-                <TableHead>Spend</TableHead>
-                <TableHead className="hidden md:table-cell">Conversions</TableHead>
-                <TableHead>Cost/Conv</TableHead>
-                <TableHead>Performance</TableHead>
+                {allColumns
+                  .filter(column => visibleColumns.includes(column.key))
+                  .map((column) => (
+                    <TableHead key={column.key}>{column.label}</TableHead>
+                  ))
+                }
+                {visibleColumns.includes('performanceScore') && (
+                  <TableHead>Performance</TableHead>
+                )}
               </TableRow>
             </TableHeader>
             <TableBody>
               {filteredKeywords.map((keyword) => (
                 <TableRow key={keyword.id}>
-                  <TableCell className="font-medium">{keyword.keyword}</TableCell>
-                  <TableCell>{keyword.campaignName}</TableCell>
-                  <TableCell>{keyword.adGroupName}</TableCell>
-                  <TableCell>{formatNumber(keyword.clicks)}</TableCell>
-                  <TableCell className="hidden md:table-cell">{formatNumber(keyword.impressions)}</TableCell>
-                  <TableCell>{formatPercent(keyword.ctr)}</TableCell>
-                  <TableCell>{formatCurrency(keyword.spend)}</TableCell>
-                  <TableCell className="hidden md:table-cell">{formatNumber(keyword.conversions)}</TableCell>
-                  <TableCell>{formatCurrency(keyword.costPerConversion)}</TableCell>
-                  <TableCell>{getPerformanceBadge(keyword.performanceScore)}</TableCell>
+                  {visibleColumns.includes('keyword') && (
+                    <TableCell className="font-medium">{keyword.keyword}</TableCell>
+                  )}
+                  {visibleColumns.includes('id') && (
+                    <TableCell>{keyword.id}</TableCell>
+                  )}
+                  {visibleColumns.includes('matchType') && (
+                    <TableCell>{keyword.matchType || 'Broad'}</TableCell>
+                  )}
+                  {visibleColumns.includes('adGroupId') && (
+                    <TableCell>{keyword.adGroupId}</TableCell>
+                  )}
+                  {visibleColumns.includes('adGroupName') && (
+                    <TableCell>{keyword.adGroupName}</TableCell>
+                  )}
+                  {visibleColumns.includes('campaignName') && (
+                    <TableCell>{keyword.campaignName}</TableCell>
+                  )}
+                  {visibleColumns.includes('status') && (
+                    <TableCell>
+                      <Badge variant={keyword.status === 'Active' ? 'default' : 'secondary'}>
+                        {keyword.status}
+                      </Badge>
+                    </TableCell>
+                  )}
+                  {visibleColumns.includes('qualityScore') && (
+                    <TableCell>{keyword.qualityScore || 7}/10</TableCell>
+                  )}
+                  {visibleColumns.includes('expectedCtr') && (
+                    <TableCell>{keyword.expectedCtr || 'Above average'}</TableCell>
+                  )}
+                  {visibleColumns.includes('adRelevance') && (
+                    <TableCell>{keyword.adRelevance || 'Average'}</TableCell>
+                  )}
+                  {visibleColumns.includes('landingPageExp') && (
+                    <TableCell>{keyword.landingPageExp || 'Above average'}</TableCell>
+                  )}
+                  {visibleColumns.includes('clicks') && (
+                    <TableCell>{formatNumber(keyword.clicks)}</TableCell>
+                  )}
+                  {visibleColumns.includes('impressions') && (
+                    <TableCell>{formatNumber(keyword.impressions)}</TableCell>
+                  )}
+                  {visibleColumns.includes('ctr') && (
+                    <TableCell>{formatPercent(keyword.ctr)}</TableCell>
+                  )}
+                  {visibleColumns.includes('cpc') && (
+                    <TableCell>{formatCurrency(keyword.spend / keyword.clicks)}</TableCell>
+                  )}
+                  {visibleColumns.includes('spend') && (
+                    <TableCell>{formatCurrency(keyword.spend)}</TableCell>
+                  )}
+                  {visibleColumns.includes('conversions') && (
+                    <TableCell>{formatNumber(keyword.conversions)}</TableCell>
+                  )}
+                  {visibleColumns.includes('conversionRate') && (
+                    <TableCell>{formatPercent((keyword.conversions / keyword.clicks) * 100)}</TableCell>
+                  )}
+                  {visibleColumns.includes('costPerConversion') && (
+                    <TableCell>{formatCurrency(keyword.costPerConversion)}</TableCell>
+                  )}
+                  {visibleColumns.includes('performanceScore') && (
+                    <TableCell>{getPerformanceBadge(keyword.performanceScore)}</TableCell>
+                  )}
                 </TableRow>
               ))}
             </TableBody>
