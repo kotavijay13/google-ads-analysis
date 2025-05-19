@@ -201,10 +201,10 @@ const DateRangePicker = ({ onDateChange }: DateRangePickerProps) => {
             <ChevronDown className="ml-auto h-4 w-4 opacity-50" />
           </Button>
         </PopoverTrigger>
-        <PopoverContent className="w-auto p-0" align="start">
-          <div className="flex">
+        <PopoverContent className="w-auto p-0 max-h-[80vh] overflow-auto" align="start">
+          <div className="flex flex-col sm:flex-row max-w-[600px]">
             {showPresets && (
-              <div className="border-r min-w-[200px]">
+              <div className="border-r sm:min-w-[200px] w-full sm:w-auto">
                 <div className="p-2 border-b">
                   <Button 
                     variant="ghost" 
@@ -215,7 +215,7 @@ const DateRangePicker = ({ onDateChange }: DateRangePickerProps) => {
                   </Button>
                 </div>
                 
-                <div className="py-2">
+                <div className="py-2 max-h-[300px] overflow-y-auto">
                   {datePresets.map((preset) => (
                     <Button
                       key={preset.name}
@@ -309,7 +309,7 @@ const DateRangePicker = ({ onDateChange }: DateRangePickerProps) => {
                   }
                 }}
                 initialFocus
-                numberOfMonths={2}
+                numberOfMonths={1}
                 className="p-3 pointer-events-auto"
               />
             </div>
