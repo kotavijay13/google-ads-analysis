@@ -99,13 +99,13 @@ const DateRangePicker = ({ onDateChange }: DateRangePickerProps) => {
     {
       name: 'last-month',
       label: 'Last month',
-      getValue: () => ({
+      getValue: () => {
         const lastMonth = subDays(startOfMonth(today), 1);
         return {
           from: startOfMonth(lastMonth),
           to: endOfMonth(lastMonth)
         };
-      })
+      }
     },
     {
       name: 'all-time',
