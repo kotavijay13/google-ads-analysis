@@ -1,4 +1,3 @@
-
 import { useState, useCallback, useEffect } from 'react';
 import Header from '@/components/Header';
 import DateRangePicker from '@/components/DateRangePicker';
@@ -15,7 +14,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { toast } from "@/components/ui/sonner";
 import { Search, ExternalLink, ArrowUpRight, ArrowDownRight, Minus, Loader2 } from 'lucide-react';
-import { useSupabaseClient } from '@supabase/supabase-js';
+import { supabase } from '@/integrations/supabase/client';
 
 // Define the keyword data type
 interface KeywordData {
@@ -49,8 +48,6 @@ const CompetitionAnalysis = () => {
     avgPosition: '0.0',
     estTraffic: 0
   });
-  
-  const supabase = useSupabaseClient();
   
   const handleRefresh = () => {
     if (websiteUrl) {
