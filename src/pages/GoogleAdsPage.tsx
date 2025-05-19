@@ -1,4 +1,3 @@
-
 import { useState, useCallback, useEffect } from 'react';
 import Header from '@/components/Header';
 import DateRangePicker from '@/components/DateRangePicker';
@@ -40,7 +39,7 @@ const GoogleAdsPage = () => {
     error 
   } = useGoogleAdsAPI();
   
-  const { accounts, currentAccount, setCurrentAccount } = useGoogleAccounts();
+  const { accounts, currentAccount, switchAccount, setCurrentAccount } = useGoogleAccounts();
   
   const handleRefresh = () => {
     // Fetch fresh data from Google Ads API

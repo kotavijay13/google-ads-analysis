@@ -44,5 +44,6 @@ export function useGoogleAccounts() {
     accounts,
     currentAccount,
     switchAccount,
+    setCurrentAccount, // Expose the setCurrentAccount function
   };
 }
