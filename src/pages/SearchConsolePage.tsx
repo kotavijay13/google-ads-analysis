@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from 'react';
 import { useAuth } from '@/context/AuthContext';
 import { supabase } from '@/integrations/supabase/client';
@@ -7,9 +6,14 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Button } from '@/components/ui/button';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts';
-import { Input } from '@/components/ui/input';
 import { toast } from '@/components/ui/sonner';
 import { Loader2, LinkIcon, ExternalLink } from 'lucide-react';
+
+// Define a type for our properties
+interface SearchConsoleProperty {
+  name: string;
+  url: string;
+}
 
 const searchConsoleData = [
   { date: '2025-04-20', clicks: 420, impressions: 8500, ctr: 4.9, position: 18 },
@@ -36,7 +40,7 @@ const SearchConsolePage = () => {
   const [isLoading, setIsLoading] = useState(false);
   const [websiteUrl, setWebsiteUrl] = useState('');
   const [connected, setConnected] = useState(false);
-  const [properties, setProperties] = useState<{name: string, url: string}[]>([]);
+  const [properties, setProperties] = useState<SearchConsoleProperty[]>([]);
   const [activeMetric, setActiveMetric] = useState('clicks');
   const [selectedProperty, setSelectedProperty] = useState<string | null>(null);
 
@@ -62,18 +66,19 @@ const SearchConsolePage = () => {
       if (tokenData) {
         setConnected(true);
         
-        // Fetch properties
+        // Fetch properties from ad_accounts table with google_search_console platform
         const { data: propertiesData, error: propertiesError } = await supabase
-          .from('search_console_properties')
+          .from('ad_accounts')
           .select('*')
-          .eq('user_id', user.id);
+          .eq('user_id', user.id)
+          .eq('platform', 'google_search_console');
         
         if (propertiesError) throw propertiesError;
         
         if (propertiesData && propertiesData.length > 0) {
           const formattedProperties = propertiesData.map(property => ({
-            name: property.domain || property.site_url,
-            url: property.site_url
+            name: property.account_name || property.account_id,
+            url: property.account_id // We're storing the URL in account_id field
           }));
           
           setProperties(formattedProperties);

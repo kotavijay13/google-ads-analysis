@@ -8,10 +8,10 @@ import { Input } from '@/components/ui/input';
 import { toast } from '@/components/ui/sonner';
 import { Loader2, LinkIcon, ExternalLink } from 'lucide-react';
 
-interface SearchConsoleIntegration {
-  connected: boolean;
-  website_url: string;
-  last_synced: string;
+// Define a type for our properties
+interface SearchConsoleProperty {
+  name: string;
+  url: string;
 }
 
 const GoogleSearchConsoleIntegration = () => {
@@ -19,12 +19,11 @@ const GoogleSearchConsoleIntegration = () => {
   const [isLoading, setIsLoading] = useState(false);
   const [websiteUrl, setWebsiteUrl] = useState('');
   const [connected, setConnected] = useState(false);
-  const [properties, setProperties] = useState<{name: string, url: string}[]>([]);
+  const [properties, setProperties] = useState<SearchConsoleProperty[]>([]);
 
   useEffect(() => {
     if (user) {
       checkConnection();
-      fetchProperties();
     }
   }, [user]);
 
@@ -41,6 +40,10 @@ const GoogleSearchConsoleIntegration = () => {
       
       if (data) {
         setConnected(true);
+        
+        // For now, we'll use ad_accounts table with a specific platform value
+        // to temporarily store search console properties
+        fetchProperties();
       }
     } catch (error) {
       console.error("Error checking connection:", error);
@@ -52,16 +55,17 @@ const GoogleSearchConsoleIntegration = () => {
     
     try {
       const { data, error } = await supabase
-        .from('search_console_properties')
+        .from('ad_accounts')
         .select('*')
-        .eq('user_id', user.id);
+        .eq('user_id', user.id)
+        .eq('platform', 'google_search_console');
       
       if (error) throw error;
       
       if (data && data.length > 0) {
         setProperties(data.map(property => ({
-          name: property.domain || property.site_url,
-          url: property.site_url
+          name: property.account_name || property.account_id,
+          url: property.account_id // We'll store the URL in account_id field
         })));
       }
     } catch (error) {
@@ -143,15 +147,16 @@ const GoogleSearchConsoleIntegration = () => {
         formattedUrl = `https://${formattedUrl}`;
       }
       
-      // In a real implementation, this would call the Google Search Console API
-      // For now, we'll simulate adding a property
+      // For now, we'll use ad_accounts table with a specific platform value
+      // to temporarily store search console properties
       const { data, error } = await supabase
-        .from('search_console_properties')
+        .from('ad_accounts')
         .insert([
           { 
             user_id: user.id,
-            site_url: formattedUrl,
-            domain: new URL(formattedUrl).hostname
+            platform: 'google_search_console',
+            account_id: formattedUrl,
+            account_name: new URL(formattedUrl).hostname
           }
         ]);
       
