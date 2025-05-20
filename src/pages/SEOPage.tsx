@@ -5,7 +5,6 @@ import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts';
-import { useSupabaseClient } from '@supabase/supabase-js';
 import { CalendarIcon } from 'lucide-react';
 import { format } from 'date-fns';
 import { cn } from '@/lib/utils';
@@ -149,7 +148,10 @@ const SEOPage = () => {
                 selected={date}
                 onSelect={(selectedDate) => {
                   if (selectedDate?.from && selectedDate?.to) {
-                    setDate(selectedDate);
+                    setDate({
+                      from: selectedDate.from,
+                      to: selectedDate.to
+                    });
                   }
                 }}
                 numberOfMonths={2}
