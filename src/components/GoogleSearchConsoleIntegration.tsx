@@ -15,6 +15,7 @@ const GoogleSearchConsoleIntegration = () => {
     connected,
     properties,
     selectedProperty,
+    connectionError,
     setWebsiteUrl,
     handleConnect,
     handleDisconnect,
@@ -33,7 +34,11 @@ const GoogleSearchConsoleIntegration = () => {
       </CardHeader>
       <CardContent>
         {!connected ? (
-          <ConnectButton isLoading={isLoading} onConnect={handleConnect} />
+          <ConnectButton 
+            isLoading={isLoading} 
+            onConnect={handleConnect} 
+            error={connectionError}
+          />
         ) : (
           <div className="space-y-4">
             <ConnectionStatus 

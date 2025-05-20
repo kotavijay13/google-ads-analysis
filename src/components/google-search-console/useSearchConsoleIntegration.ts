@@ -12,6 +12,7 @@ export const useSearchConsoleIntegration = () => {
   const [connected, setConnected] = useState(false);
   const [properties, setProperties] = useState<SearchConsoleProperty[]>([]);
   const [selectedProperty, setSelectedProperty] = useState<string | null>(null);
+  const [connectionError, setConnectionError] = useState<string | null>(null);
 
   useEffect(() => {
     if (user) {
@@ -23,6 +24,7 @@ export const useSearchConsoleIntegration = () => {
     if (!user) return;
     
     try {
+      setIsLoading(true);
       const { data, error } = await supabase
         .from('api_tokens')
         .select('*')
@@ -36,6 +38,8 @@ export const useSearchConsoleIntegration = () => {
       }
     } catch (error) {
       console.error("Error checking connection:", error);
+    } finally {
+      setIsLoading(false);
     }
   };
 
@@ -43,6 +47,7 @@ export const useSearchConsoleIntegration = () => {
     if (!user || !connected) return;
     
     try {
+      setIsLoading(true);
       const { data, error } = await supabase
         .from('ad_accounts')
         .select('*')
@@ -78,11 +83,16 @@ export const useSearchConsoleIntegration = () => {
       }
     } catch (error) {
       console.error('Error fetching properties:', error);
+    } finally {
+      setIsLoading(false);
     }
   };
 
   const handleConnect = async () => {
     try {
+      setConnectionError(null);
+      setIsLoading(true);
+      
       // Generate a random state for OAuth security
       const state = Math.random().toString(36).substring(2);
       // Save the state in localStorage to verify later
@@ -90,11 +100,13 @@ export const useSearchConsoleIntegration = () => {
       
       // Using the correct OAuth configuration
       const oauthEndpoint = 'https://accounts.google.com/o/oauth2/v2/auth';
-      // Use web application client ID shown in the screenshot
+      
+      // Google client ID - ensure this is correctly configured in Supabase secrets
       const clientId = '463775925601-8i7gv5qhham5b5f60mjvhusp6jg6qfd8.apps.googleusercontent.com';
       
       // Use the exact redirect URI as configured in Google Cloud Console
       const redirectUri = window.location.origin + '/google-callback';
+      
       // Include the Search Console scope
       const scope = encodeURIComponent('https://www.googleapis.com/auth/webmasters.readonly');
       
@@ -111,7 +123,10 @@ export const useSearchConsoleIntegration = () => {
       window.location.href = oauthUrl;
     } catch (error) {
       console.error("Error initiating Google OAuth:", error);
+      setConnectionError("Failed to connect to Google Search Console");
       toast.error("Failed to connect to Google Search Console");
+    } finally {
+      setIsLoading(false);
     }
   };
 
@@ -211,6 +226,7 @@ export const useSearchConsoleIntegration = () => {
     connected,
     properties,
     selectedProperty,
+    connectionError,
     setWebsiteUrl,
     handleConnect,
     handleDisconnect,
