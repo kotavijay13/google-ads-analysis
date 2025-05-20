@@ -1,4 +1,3 @@
-
 import { useState, useCallback, useEffect } from 'react';
 import Header from '@/components/Header';
 import { Card, CardContent, CardHeader, CardTitle, CardFooter } from '@/components/ui/card';
@@ -12,7 +11,7 @@ import {
 } from "@/components/ui/table";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { toast } from "@/components/sonner";
+import { toast } from "@/components/ui/sonner";
 import { 
   Search, 
   ExternalLink, 
