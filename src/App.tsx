@@ -11,6 +11,7 @@ import GoogleAdsPage from "./pages/GoogleAdsPage";
 import MetaAdsPage from "./pages/MetaAdsPage";
 import WhatsAppPage from "./pages/WhatsAppPage";
 import SEOPage from "./pages/SEOPage";
+import SearchConsolePage from "./pages/SearchConsolePage";
 import LeadsPage from "./pages/LeadsPage";
 import AdminPage from "./pages/AdminPage";
 import AuthPage from "./pages/AuthPage";
@@ -83,6 +84,11 @@ const App = () => (
               <Route path="/seo" element={
                 <Layout>
                   <ProtectedRoute><SEOPage /></ProtectedRoute>
+                </Layout>
+              } />
+              <Route path="/search-console" element={
+                <Layout>
+                  <ProtectedRoute><SearchConsolePage /></ProtectedRoute>
                 </Layout>
               } />
               <Route path="/leads" element={

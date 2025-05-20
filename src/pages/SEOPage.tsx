@@ -1,11 +1,16 @@
 
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import Header from '@/components/Header';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts';
-import GoogleSearchConsoleIntegration from '@/components/GoogleSearchConsoleIntegration';
+import { useSupabaseClient } from '@supabase/supabase-js';
+import { CalendarIcon } from 'lucide-react';
+import { format } from 'date-fns';
+import { cn } from '@/lib/utils';
+import { Calendar } from '@/components/ui/calendar';
+import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 
 // Sample SEO data for visualization
 const seoData = [
@@ -59,16 +64,23 @@ const topPages = [
 
 // Top keywords sample data
 const topKeywords = [
-  { keyword: 'digital marketing', impressions: 2800, clicks: 260, ctr: 9.3, position: 2.1 },
-  { keyword: 'seo services', impressions: 2400, clicks: 220, ctr: 9.2, position: 2.3 },
-  { keyword: 'ppc management', impressions: 2100, clicks: 190, ctr: 9.0, position: 2.7 },
-  { keyword: 'social media marketing', impressions: 1900, clicks: 170, ctr: 8.9, position: 2.9 },
-  { keyword: 'content strategy', impressions: 1500, clicks: 130, ctr: 8.7, position: 3.2 },
+  { keyword: 'digital marketing agency', impressions: 5400, clicks: 260, ctr: 9.3, position: 3, change: '+2' },
+  { keyword: 'social media services', impressions: 3200, clicks: 220, ctr: 9.2, position: 5, change: '-1' },
+  { keyword: 'ppc management', impressions: 2800, clicks: 190, ctr: 9.0, position: 2, change: '+4' },
+  { keyword: 'content marketing', impressions: 1900, clicks: 170, ctr: 8.9, position: 6, change: '+1' },
+  { keyword: 'seo services', impressions: 1500, clicks: 130, ctr: 8.7, position: 4, change: '+3' },
 ];
 
 const SEOPage = () => {
-  const [activeTab, setActiveTab] = useState('overview');
+  const [date, setDate] = useState<{
+    from: Date;
+    to: Date;
+  }>({
+    from: new Date(2025, 3, 20), // April 20, 2025
+    to: new Date(2025, 4, 20),   // May 20, 2025
+  });
   const [activeMetric, setActiveMetric] = useState('organicTraffic');
+  const [activeTab, setActiveTab] = useState('keywords');
 
   // For demo purposes only - would connect to actual SEO data API
   const handleRefresh = () => {
@@ -80,48 +92,171 @@ const SEOPage = () => {
 
   return (
     <div className="container mx-auto py-6 px-4 max-w-7xl">
-      <Header title="SEO Performance" onRefresh={handleRefresh} />
+      <div className="flex items-center justify-between mb-6">
+        <div className="flex items-center space-x-4">
+          <div className="text-primary p-2 bg-primary/10 rounded-lg">
+            <LineChart className="w-6 h-6" />
+          </div>
+          <div>
+            <h1 className="text-2xl font-bold">SEO Dashboard</h1>
+            <p className="text-muted-foreground text-sm">
+              Last updated: {format(new Date(), "dd/MM/yyyy, HH:mm:ss")}
+            </p>
+          </div>
+        </div>
+        <div className="flex items-center gap-2">
+          <Button variant="outline">
+            <span className="mr-2">Reports</span>
+          </Button>
+          <Button variant="outline">
+            <span className="mr-2">Analytics</span>
+          </Button>
+          <Button onClick={handleRefresh}>
+            Refresh Data
+          </Button>
+        </div>
+      </div>
 
-      <div className="flex flex-col lg:flex-row gap-6 mb-6">
-        <div className="lg:w-2/3">
-          <Card className="w-full">
-            <CardHeader>
-              <CardTitle>SEO Performance Overview</CardTitle>
-              <CardDescription>
-                Track your organic search performance
-              </CardDescription>
-              <div className="flex gap-2 mt-2">
-                <Button 
-                  size="sm" 
-                  variant={activeMetric === 'organicTraffic' ? 'default' : 'outline'}
-                  onClick={() => setActiveMetric('organicTraffic')}
-                >
-                  Traffic
-                </Button>
-                <Button 
-                  size="sm" 
-                  variant={activeMetric === 'impressions' ? 'default' : 'outline'}
-                  onClick={() => setActiveMetric('impressions')}
-                >
-                  Impressions
-                </Button>
-                <Button 
-                  size="sm" 
-                  variant={activeMetric === 'clicks' ? 'default' : 'outline'}
-                  onClick={() => setActiveMetric('clicks')}
-                >
-                  Clicks
-                </Button>
-                <Button 
-                  size="sm" 
-                  variant={activeMetric === 'position' ? 'default' : 'outline'}
-                  onClick={() => setActiveMetric('position')}
-                >
-                  Position
-                </Button>
+      <div className="mb-6">
+        <h2 className="text-xl font-semibold mb-4">SEO Overview</h2>
+        
+        <div className="flex justify-end mb-4">
+          <Popover>
+            <PopoverTrigger asChild>
+              <Button
+                variant={"outline"}
+                className={"w-full md:w-auto justify-start text-left font-normal"}
+              >
+                <CalendarIcon className="mr-2 h-4 w-4" />
+                {date.from ? (
+                  date.to ? (
+                    <>
+                      {format(date.from, "dd MMM yyyy")} - {format(date.to, "dd MMM yyyy")}
+                    </>
+                  ) : (
+                    format(date.from, "dd MMM yyyy")
+                  )
+                ) : (
+                  <span>Pick a date range</span>
+                )}
+              </Button>
+            </PopoverTrigger>
+            <PopoverContent className="w-auto p-0" align="end">
+              <Calendar
+                initialFocus
+                mode="range"
+                defaultMonth={date.from}
+                selected={date}
+                onSelect={(selectedDate) => {
+                  if (selectedDate?.from && selectedDate?.to) {
+                    setDate(selectedDate);
+                  }
+                }}
+                numberOfMonths={2}
+              />
+            </PopoverContent>
+          </Popover>
+        </div>
+
+        <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+          <Card>
+            <CardContent className="pt-6">
+              <div className="space-y-2">
+                <p className="text-sm font-medium text-muted-foreground">Organic Traffic</p>
+                <p className="text-3xl font-bold">5,238</p>
+                <p className="text-sm text-green-500">+12% from last month</p>
               </div>
-            </CardHeader>
-            <CardContent>
+            </CardContent>
+          </Card>
+          
+          <Card>
+            <CardContent className="pt-6">
+              <div className="space-y-2">
+                <p className="text-sm font-medium text-muted-foreground">Keywords Ranked</p>
+                <p className="text-3xl font-bold">143</p>
+                <p className="text-sm text-green-500">+5 new this month</p>
+              </div>
+            </CardContent>
+          </Card>
+          
+          <Card>
+            <CardContent className="pt-6">
+              <div className="space-y-2">
+                <p className="text-sm font-medium text-muted-foreground">Average Position</p>
+                <p className="text-3xl font-bold">12.4</p>
+                <p className="text-sm text-green-500">Improved by 1.2</p>
+              </div>
+            </CardContent>
+          </Card>
+          
+          <Card>
+            <CardContent className="pt-6">
+              <div className="space-y-2">
+                <p className="text-sm font-medium text-muted-foreground">Revenue Generated</p>
+                <p className="text-3xl font-bold">$24,680</p>
+                <p className="text-sm text-green-500">+18% from last month</p>
+              </div>
+            </CardContent>
+          </Card>
+        </div>
+      </div>
+
+      <Tabs defaultValue="keywords" className="mt-6" onValueChange={setActiveTab} value={activeTab}>
+        <TabsList className="mb-6">
+          <TabsTrigger value="keywords">Keywords</TabsTrigger>
+          <TabsTrigger value="pages">Pages</TabsTrigger>
+          <TabsTrigger value="urlData">URL Meta Data</TabsTrigger>
+          <TabsTrigger value="sitePerformance">Site Performance</TabsTrigger>
+        </TabsList>
+
+        <TabsContent value="keywords" className="space-y-4">
+          <div className="bg-white rounded-lg shadow">
+            <div className="p-4 border-b">
+              <h3 className="text-lg font-semibold">Top Ranking Keywords</h3>
+            </div>
+            <div className="overflow-x-auto">
+              <table className="w-full">
+                <thead>
+                  <tr className="border-b bg-muted/50">
+                    <th className="text-left py-3 px-4">Keyword</th>
+                    <th className="text-center py-3 px-4">Position</th>
+                    <th className="text-center py-3 px-4">Change</th>
+                    <th className="text-center py-3 px-4">Search Volume</th>
+                    <th className="text-right py-3 px-4">Difficulty</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {topKeywords.map((keyword, index) => (
+                    <tr key={index} className="border-b hover:bg-muted/20">
+                      <td className="py-3 px-4">{keyword.keyword}</td>
+                      <td className="py-3 px-4 text-center">{keyword.position}</td>
+                      <td className="py-3 px-4 text-center">
+                        <span className={cn(
+                          "font-medium",
+                          keyword.change.startsWith("+") ? "text-green-500" : "text-red-500"
+                        )}>
+                          {keyword.change}
+                        </span>
+                      </td>
+                      <td className="py-3 px-4 text-center">{keyword.impressions.toLocaleString()}</td>
+                      <td className="py-3 px-4 text-right">
+                        <span className={cn(
+                          "px-2 py-1 rounded text-xs font-medium",
+                          keyword.position <= 3 ? "bg-red-100 text-red-700" : "bg-yellow-100 text-yellow-700"
+                        )}>
+                          {keyword.position <= 3 ? "High" : "Medium"}
+                        </span>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          </div>
+
+          <Card className="mt-6">
+            <CardContent className="pt-6">
+              <h3 className="text-lg font-semibold mb-4">Keyword Performance over Time</h3>
               <div className="h-[350px]">
                 <ResponsiveContainer width="100%" height="100%">
                   <LineChart
@@ -174,78 +309,12 @@ const SEOPage = () => {
               </div>
             </CardContent>
           </Card>
+        </TabsContent>
 
-          <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mt-6">
-            <Card>
-              <CardHeader className="pb-2">
-                <CardTitle className="text-sm font-medium">Organic Traffic</CardTitle>
-              </CardHeader>
-              <CardContent>
-                <div className="text-2xl font-bold">{last30Days[last30Days.length - 1].organicTraffic.toLocaleString()}</div>
-                <p className="text-xs text-muted-foreground">
-                  +{((last30Days[last30Days.length - 1].organicTraffic - last30Days[0].organicTraffic) / last30Days[0].organicTraffic * 100).toFixed(1)}% from last month
-                </p>
-              </CardContent>
-            </Card>
-            
-            <Card>
-              <CardHeader className="pb-2">
-                <CardTitle className="text-sm font-medium">Impressions</CardTitle>
-              </CardHeader>
-              <CardContent>
-                <div className="text-2xl font-bold">{last30Days[last30Days.length - 1].impressions.toLocaleString()}</div>
-                <p className="text-xs text-muted-foreground">
-                  +{((last30Days[last30Days.length - 1].impressions - last30Days[0].impressions) / last30Days[0].impressions * 100).toFixed(1)}% from last month
-                </p>
-              </CardContent>
-            </Card>
-            
-            <Card>
-              <CardHeader className="pb-2">
-                <CardTitle className="text-sm font-medium">Clicks</CardTitle>
-              </CardHeader>
-              <CardContent>
-                <div className="text-2xl font-bold">{last30Days[last30Days.length - 1].clicks.toLocaleString()}</div>
-                <p className="text-xs text-muted-foreground">
-                  +{((last30Days[last30Days.length - 1].clicks - last30Days[0].clicks) / last30Days[0].clicks * 100).toFixed(1)}% from last month
-                </p>
-              </CardContent>
-            </Card>
-            
-            <Card>
-              <CardHeader className="pb-2">
-                <CardTitle className="text-sm font-medium">Avg. Position</CardTitle>
-              </CardHeader>
-              <CardContent>
-                <div className="text-2xl font-bold">{last30Days[last30Days.length - 1].position.toFixed(1)}</div>
-                <p className="text-xs text-muted-foreground">
-                  {last30Days[0].position - last30Days[last30Days.length - 1].position > 0 ? '+' : ''}
-                  {(last30Days[0].position - last30Days[last30Days.length - 1].position).toFixed(1)} from last month
-                </p>
-              </CardContent>
-            </Card>
-          </div>
-        </div>
-        
-        <div className="lg:w-1/3">
-          <GoogleSearchConsoleIntegration />
-        </div>
-      </div>
-
-      <Tabs defaultValue="topPages" className="mt-6">
-        <TabsList>
-          <TabsTrigger value="topPages">Top Pages</TabsTrigger>
-          <TabsTrigger value="topKeywords">Top Keywords</TabsTrigger>
-        </TabsList>
-        <TabsContent value="topPages">
+        <TabsContent value="pages">
           <Card>
-            <CardHeader>
-              <CardTitle>Top Performing Pages</CardTitle>
-              <CardDescription>
-                Pages with the highest search visibility
-              </CardDescription>
-            </CardHeader>
-            <CardContent>
+            <CardContent className="pt-6">
+              <h3 className="text-lg font-semibold mb-4">Top Performing Pages</h3>
               <div className="overflow-x-auto">
                 <table className="w-full">
                   <thead>
@@ -273,38 +342,26 @@ const SEOPage = () => {
             </CardContent>
           </Card>
         </TabsContent>
-        <TabsContent value="topKeywords">
+        
+        <TabsContent value="urlData">
           <Card>
-            <CardHeader>
-              <CardTitle>Top Keywords</CardTitle>
-              <CardDescription>
-                Keywords driving the most traffic to your site
-              </CardDescription>
-            </CardHeader>
-            <CardContent>
-              <div className="overflow-x-auto">
-                <table className="w-full">
-                  <thead>
-                    <tr className="border-b">
-                      <th className="text-left pb-2">Keyword</th>
-                      <th className="text-right pb-2">Impressions</th>
-                      <th className="text-right pb-2">Clicks</th>
-                      <th className="text-right pb-2">CTR</th>
-                      <th className="text-right pb-2">Position</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {topKeywords.map((keyword, index) => (
-                      <tr key={index} className="border-b last:border-0">
-                        <td className="py-3">{keyword.keyword}</td>
-                        <td className="py-3 text-right">{keyword.impressions.toLocaleString()}</td>
-                        <td className="py-3 text-right">{keyword.clicks.toLocaleString()}</td>
-                        <td className="py-3 text-right">{keyword.ctr.toFixed(1)}%</td>
-                        <td className="py-3 text-right">{keyword.position.toFixed(1)}</td>
-                      </tr>
-                    ))}
-                  </tbody>
-                </table>
+            <CardContent className="pt-6">
+              <h3 className="text-lg font-semibold">URL Meta Data Analysis</h3>
+              <p className="text-muted-foreground mb-6">Meta title and description optimization status</p>
+              <div className="p-6 border rounded-lg bg-muted/20">
+                <p>Connect your site to analyze URL meta data</p>
+              </div>
+            </CardContent>
+          </Card>
+        </TabsContent>
+        
+        <TabsContent value="sitePerformance">
+          <Card>
+            <CardContent className="pt-6">
+              <h3 className="text-lg font-semibold">Site Performance Metrics</h3>
+              <p className="text-muted-foreground mb-6">Page speed and core web vitals</p>
+              <div className="p-6 border rounded-lg bg-muted/20">
+                <p>Connect your site to analyze performance metrics</p>
               </div>
             </CardContent>
           </Card>
