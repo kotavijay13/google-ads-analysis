@@ -7,39 +7,46 @@ interface MetaAuthButtonProps {
   connected: boolean;
   onConnect: () => void;
   onRefreshAccounts: () => void;
+  error?: string | null;
 }
 
 const MetaAuthButton = ({
   connected,
   onConnect,
-  onRefreshAccounts
+  onRefreshAccounts,
+  error: externalError
 }: MetaAuthButtonProps) => {
-  const [error, setError] = useState<string | null>(null);
+  const [internalError, setInternalError] = useState<string | null>(null);
   
   const handleConnect = () => {
     // Reset any previous errors
-    setError(null);
+    setInternalError(null);
     // Call parent's onConnect function
     try {
       onConnect();
     } catch (err) {
-      setError('Failed to connect to Meta. Please try again.');
+      setInternalError('Failed to connect to Meta. Please try again.');
       console.error('Meta connect error:', err);
     }
   };
+
+  // Determine which error to show - external takes precedence
+  const errorToShow = externalError || internalError;
 
   if (!connected) {
     return (
       <div>
         <Button onClick={handleConnect}>Connect Meta Ads</Button>
-        {error && (
+        {errorToShow && (
           <div className="flex items-center mt-2 text-red-500 text-sm">
             <AlertCircle className="h-4 w-4 mr-1" />
-            <span>{error}</span>
+            <span>{errorToShow}</span>
           </div>
         )}
         <p className="mt-3 text-xs text-muted-foreground">
           You'll be redirected to Facebook to authorize access to your Meta Ads accounts.
+          <br />
+          Make sure you've created a Meta for Developers app and configured it properly.
         </p>
       </div>
     );

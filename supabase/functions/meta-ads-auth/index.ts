@@ -23,10 +23,24 @@ serve(async (req) => {
     const supabaseKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY');
     
     // Validate required data
-    if (!code || !redirectUri || !clientId || !clientSecret || !supabaseUrl || !supabaseKey) {
+    if (!code || !redirectUri) {
       return new Response(
-        JSON.stringify({ error: 'Missing required parameters' }),
+        JSON.stringify({ error: 'Missing code or redirectUri' }),
         { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      );
+    }
+    
+    if (!clientId || !clientSecret) {
+      return new Response(
+        JSON.stringify({ error: 'Missing Meta API credentials. Check META_APP_ID and META_APP_SECRET in Supabase secrets.' }),
+        { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      );
+    }
+    
+    if (!supabaseUrl || !supabaseKey) {
+      return new Response(
+        JSON.stringify({ error: 'Missing Supabase configuration' }),
+        { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
       );
     }
     
@@ -71,7 +85,10 @@ serve(async (req) => {
     if (!tokenResponse.ok || !tokenData.access_token) {
       console.error('Meta OAuth token error:', tokenData);
       return new Response(
-        JSON.stringify({ error: tokenData.error?.message || 'Failed to get access token' }),
+        JSON.stringify({ 
+          error: tokenData.error?.message || 'Failed to get access token',
+          details: tokenData.error || 'Unknown error' 
+        }),
         { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
       );
     }

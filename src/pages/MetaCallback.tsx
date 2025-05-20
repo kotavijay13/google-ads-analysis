@@ -5,12 +5,13 @@ import { useAuth } from '@/context/AuthContext';
 import { supabase } from '@/integrations/supabase/client';
 import { Card, CardContent } from '@/components/ui/card';
 import { toast } from '@/components/ui/sonner';
-import { Loader2 } from 'lucide-react';
+import { AlertCircle, Loader2 } from 'lucide-react';
 
 const MetaCallback = () => {
   const { user } = useAuth();
   const navigate = useNavigate();
   const [processing, setProcessing] = useState(true);
+  const [errorMessage, setErrorMessage] = useState<string | null>(null);
 
   useEffect(() => {
     const processCallback = async () => {
@@ -24,13 +25,14 @@ const MetaCallback = () => {
         const code = urlParams.get('code');
         const state = urlParams.get('state');
         const error = urlParams.get('error');
+        const errorDescription = urlParams.get('error_description');
         const storedState = localStorage.getItem('metaOAuthState');
         
         // Clear the state from localStorage
         localStorage.removeItem('metaOAuthState');
 
         if (error) {
-          throw new Error(`OAuth error: ${error}`);
+          throw new Error(`Meta OAuth error: ${error}${errorDescription ? ` - ${errorDescription}` : ''}`);
         }
 
         if (!code) {
@@ -54,8 +56,14 @@ const MetaCallback = () => {
         navigate('/integrations');
       } catch (error) {
         console.error('Meta OAuth callback error:', error);
-        toast.error((error as Error).message || 'Failed to connect to Meta Ads');
-        navigate('/integrations');
+        const errorMsg = (error as Error).message || 'Failed to connect to Meta Ads';
+        setErrorMessage(errorMsg);
+        toast.error(errorMsg);
+        
+        // Still navigate after a short delay to show the error
+        setTimeout(() => {
+          navigate('/integrations');
+        }, 3000);
       } finally {
         setProcessing(false);
       }
@@ -68,9 +76,20 @@ const MetaCallback = () => {
     <div className="flex items-center justify-center min-h-screen">
       <Card className="w-full max-w-md">
         <CardContent className="flex flex-col items-center justify-center p-6">
-          <Loader2 className="h-8 w-8 animate-spin mb-2" />
-          <h2 className="text-xl font-semibold mt-4">Processing Meta Authentication</h2>
-          <p className="text-muted-foreground mt-2">Please wait while we connect your Meta Ads account...</p>
+          {processing ? (
+            <>
+              <Loader2 className="h-8 w-8 animate-spin mb-2" />
+              <h2 className="text-xl font-semibold mt-4">Processing Meta Authentication</h2>
+              <p className="text-muted-foreground mt-2">Please wait while we connect your Meta Ads account...</p>
+            </>
+          ) : errorMessage ? (
+            <>
+              <AlertCircle className="h-8 w-8 text-red-500 mb-2" />
+              <h2 className="text-xl font-semibold mt-4 text-red-500">Authentication Failed</h2>
+              <p className="text-muted-foreground mt-2">{errorMessage}</p>
+              <p className="text-sm mt-4">Redirecting to integrations page...</p>
+            </>
+          ) : null}
         </CardContent>
       </Card>
     </div>
