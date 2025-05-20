@@ -61,14 +61,32 @@ serve(async (req) => {
     // Extract organic results and transform them into keywords data
     const organicResults = data.organic_results || [];
     
-    // Transform organic results into keyword format
-    const keywordData = organicResults.map((result, index) => ({
-      keyword: result.title || `Result ${index + 1}`,
-      position: index + 1,
-      searchVolume: Math.floor(Math.random() * 3000) + 500, // Estimate search volume
-      competitorUrl: result.link || websiteUrl,
-      change: Math.floor(Math.random() * 5) - 2 // Random change in ranking
-    }));
+    // Transform organic results into keyword format with better keyword extraction
+    const keywordData = organicResults.map((result, index) => {
+      // Extract keywords from the title by removing common words
+      const keywordText = result.title ? 
+        result.title.replace(/\b(and|the|of|in|on|at|to|for|with|by|as|a|an)\b/gi, '').trim() : 
+        `Result ${index + 1}`;
+      
+      // Calculate a fake difficulty score (1-100)
+      const difficulty = Math.floor(Math.random() * 100) + 1;
+      const difficultyLevel = difficulty > 70 ? "High" : difficulty > 40 ? "Medium" : "Low";
+      
+      // Estimate visits based on position and search volume
+      const searchVolume = Math.floor(Math.random() * 3000) + 500;
+      const estimatedVisits = Math.floor(searchVolume * (100 - Math.min(index, 20)) / 100);
+      
+      return {
+        keyword: keywordText,
+        position: index + 1,
+        searchVolume: searchVolume,
+        competitorUrl: result.link || websiteUrl,
+        change: Math.floor(Math.random() * 5) - 2, // Random change in ranking
+        estimatedVisits: estimatedVisits,
+        difficulty: difficulty,
+        difficultyLevel: difficultyLevel
+      };
+    });
 
     // Add overview stats based on the data
     const overviewStats = {
