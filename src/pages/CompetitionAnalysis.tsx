@@ -36,7 +36,6 @@ interface OverviewStats {
 interface AnalysisResponse {
   keywords: KeywordData[];
   stats: OverviewStats;
-  note?: string;
 }
 
 const CompetitionAnalysis = () => {
@@ -55,8 +54,7 @@ const CompetitionAnalysis = () => {
     avgPosition: '0.0',
     estTraffic: 0
   });
-  const [usingMockData, setUsingMockData] = useState(false);
-  const [mockDataNote, setMockDataNote] = useState<string | null>(null);
+  const [error, setError] = useState<string | null>(null);
   
   const handleRefresh = () => {
     if (websiteUrl) {
@@ -80,34 +78,28 @@ const CompetitionAnalysis = () => {
     if (!websiteUrl) return;
     
     setIsLoading(true);
+    setError(null);
     toast.info(`Analyzing competitor website: ${websiteUrl}`);
-    setUsingMockData(false);
-    setMockDataNote(null);
     
     try {
-      const { data, error } = await supabase.functions.invoke('serp-api', {
+      const { data, error: supabaseError } = await supabase.functions.invoke('serp-api', {
         body: { websiteUrl }
       });
       
-      if (error) {
-        console.error('Error fetching SERP data:', error);
-        toast.error(`Error: ${error.message || 'Failed to analyze competitor'}`);
+      if (supabaseError) {
+        console.error('Supabase function error:', supabaseError);
+        setError(`Error: ${supabaseError.message || 'Failed to analyze competitor'}`);
+        toast.error(`Error: ${supabaseError.message || 'Failed to analyze competitor'}`);
+        setHasAnalyzed(false);
         return;
       }
       
       if (data.error) {
         console.error('SERP API error:', data.error);
-        toast.error(`Error: ${data.error}`);
+        setError(data.error);
+        toast.error(data.error);
+        setHasAnalyzed(false);
         return;
-      }
-      
-      // Check if using mock data
-      if (data.note) {
-        setUsingMockData(true);
-        setMockDataNote(data.note);
-        toast.warning("Using demonstration data - SERP API key not configured");
-      } else {
-        toast.success("Competitor analysis complete!");
       }
       
       // Update state with the API response data
@@ -119,10 +111,13 @@ const CompetitionAnalysis = () => {
         estTraffic: 0
       });
       setHasAnalyzed(true);
+      toast.success("Competitor analysis complete!");
       
-    } catch (error) {
+    } catch (error: any) {
       console.error('Exception during analysis:', error);
+      setError(`Failed to analyze competitor: ${error.message || 'Unknown error'}`);
       toast.error("Failed to analyze competitor. Please try again later.");
+      setHasAnalyzed(false);
     } finally {
       setIsLoading(false);
     }
@@ -169,16 +164,6 @@ const CompetitionAnalysis = () => {
               )}
             </Button>
           </div>
-          
-          {usingMockData && (
-            <div className="mt-4 p-3 bg-yellow-50 border border-yellow-200 rounded-md flex items-start gap-2">
-              <AlertTriangle className="h-5 w-5 text-yellow-500 flex-shrink-0 mt-0.5" />
-              <div className="text-sm text-yellow-700">
-                <p className="font-medium">Using demonstration data</p>
-                <p className="text-xs mt-1">{mockDataNote || "SERP API key is not configured. Add a SERP API key to the Supabase Edge Function secrets for real-time data."}</p>
-              </div>
-            </div>
-          )}
         </CardContent>
       </Card>
 
@@ -187,6 +172,23 @@ const CompetitionAnalysis = () => {
           <Loader2 className="h-10 w-10 animate-spin text-muted-foreground" />
           <p className="ml-4 text-lg text-muted-foreground">Analyzing competitor data...</p>
         </div>
+      )}
+      
+      {error && (
+        <Card className="mb-6 border-red-200">
+          <CardHeader className="pb-2 text-red-600">
+            <CardTitle className="flex items-center gap-2">
+              <AlertTriangle className="h-5 w-5" />
+              Analysis Error
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            <p>{error}</p>
+            <p className="text-sm mt-2 text-muted-foreground">
+              Please check that your SERP API key is correctly configured and try again.
+            </p>
+          </CardContent>
+        </Card>
       )}
 
       {hasAnalyzed && (
