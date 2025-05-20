@@ -1,7 +1,7 @@
 
 import { useState } from 'react';
 import { Button } from "@/components/ui/button";
-import { ChartColumnBig, ChartBar, LineChart, Settings, User, ChevronDown } from "lucide-react";
+import { LineChart, Settings, User } from "lucide-react";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -58,14 +58,6 @@ const Header = ({ onRefresh, title }: HeaderProps) => {
         </div>
       </div>
       <div className="flex items-center gap-3">
-        <Button variant="outline" size="sm" className="flex items-center gap-2">
-          <ChartBar size={16} />
-          <span>Reports</span>
-        </Button>
-        <Button variant="outline" size="sm" className="flex items-center gap-2">
-          <ChartColumnBig size={16} />
-          <span>Analytics</span>
-        </Button>
         <Button onClick={handleRefresh} size="sm">Refresh Data</Button>
         <DropdownMenu>
           <DropdownMenuTrigger asChild>

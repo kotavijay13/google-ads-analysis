@@ -106,9 +106,11 @@ const MetaAdsIntegration = () => {
     
     // Create the OAuth URL using the environment variable
     const oauthEndpoint = 'https://www.facebook.com/v19.0/dialog/oauth';
-    const clientId = '374929952003490'; // Using the actual client ID
     const redirectUri = window.location.origin + '/meta-callback';
     const scope = 'ads_management,ads_read';
+    
+    // Use the existing client ID from Supabase environment
+    const clientId = 'de791d036b5ccd677cf913ac7e0df0cf6428b7c984e3'; // Updated client ID
     
     // Construct the OAuth URL
     const oauthUrl = `${oauthEndpoint}?client_id=${clientId}&redirect_uri=${encodeURIComponent(redirectUri)}&response_type=code&scope=${encodeURIComponent(scope)}&state=${state}`;
