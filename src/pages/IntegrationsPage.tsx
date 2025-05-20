@@ -2,6 +2,7 @@
 import Header from '@/components/Header';
 import GoogleAdsIntegration from '@/components/GoogleAdsIntegration';
 import MetaAdsIntegration from '@/components/MetaAdsIntegration';
+import GoogleSearchConsoleIntegration from '@/components/GoogleSearchConsoleIntegration';
 import { Card, CardContent, CardDescription } from '@/components/ui/card';
 
 const IntegrationsPage = () => {
@@ -30,6 +31,7 @@ const IntegrationsPage = () => {
       
       <div className="grid gap-8 mt-8">
         <GoogleAdsIntegration />
+        <GoogleSearchConsoleIntegration />
         <MetaAdsIntegration />
       </div>
     </div>

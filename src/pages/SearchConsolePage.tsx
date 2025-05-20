@@ -1,5 +1,7 @@
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
+import { useAuth } from '@/context/AuthContext';
+import { supabase } from '@/integrations/supabase/client';
 import Header from '@/components/Header';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -30,45 +32,74 @@ const formatDate = (dateStr: string) => {
 };
 
 const SearchConsolePage = () => {
+  const { user } = useAuth();
   const [isLoading, setIsLoading] = useState(false);
   const [websiteUrl, setWebsiteUrl] = useState('');
   const [connected, setConnected] = useState(false);
   const [properties, setProperties] = useState<{name: string, url: string}[]>([]);
   const [activeMetric, setActiveMetric] = useState('clicks');
+  const [selectedProperty, setSelectedProperty] = useState<string | null>(null);
 
-  // This would be replaced with actual integration if the Google Search Console API was implemented
-  const handleConnect = () => {
-    if (!websiteUrl) {
-      toast.error("Please enter a website URL");
-      return;
+  useEffect(() => {
+    if (user) {
+      checkConnection();
     }
-    
+  }, [user]);
+
+  const checkConnection = async () => {
+    if (!user) return;
     setIsLoading(true);
     
-    // Normally this would use Google OAuth flow and APIs
-    // This is a simulated implementation for UI purposes
-    setTimeout(() => {
-      setConnected(true);
-      setProperties([
-        { 
-          name: websiteUrl,
-          url: websiteUrl.startsWith('http') ? websiteUrl : `https://${websiteUrl}`
+    try {
+      // Check if user has connected to Google Search Console
+      const { data: tokenData, error: tokenError } = await supabase
+        .from('api_tokens')
+        .select('*')
+        .eq('user_id', user.id)
+        .eq('provider', 'google_search_console')
+        .maybeSingle();
+      
+      if (tokenData) {
+        setConnected(true);
+        
+        // Fetch properties
+        const { data: propertiesData, error: propertiesError } = await supabase
+          .from('search_console_properties')
+          .select('*')
+          .eq('user_id', user.id);
+        
+        if (propertiesError) throw propertiesError;
+        
+        if (propertiesData && propertiesData.length > 0) {
+          const formattedProperties = propertiesData.map(property => ({
+            name: property.domain || property.site_url,
+            url: property.site_url
+          }));
+          
+          setProperties(formattedProperties);
+          
+          // Set the first property as selected by default
+          if (formattedProperties.length > 0 && !selectedProperty) {
+            setSelectedProperty(formattedProperties[0].url);
+          }
         }
-      ]);
-      toast.success(`Connected to Google Search Console for ${websiteUrl}`);
+      }
+    } catch (error) {
+      console.error("Error checking connection:", error);
+    } finally {
       setIsLoading(false);
-    }, 2000);
-  };
-
-  const handleDisconnect = () => {
-    setConnected(false);
-    setProperties([]);
-    toast.success("Disconnected from Google Search Console");
+    }
   };
 
   // For demo purposes only - would connect to actual SEO data API
   const handleRefresh = () => {
     toast.success("Refreshing Search Console data...");
+    checkConnection();
+  };
+
+  // Redirect to integrations page to connect
+  const goToIntegrations = () => {
+    window.location.href = '/integrations';
   };
 
   return (
@@ -175,33 +206,14 @@ const SearchConsolePage = () => {
                 </CardDescription>
               </CardHeader>
               <CardContent className="space-y-4">
-                <p>Connect your website to Google Search Console to view detailed search performance data.</p>
-                <div className="flex flex-col md:flex-row gap-4">
-                  <div className="flex-1">
-                    <Input
-                      placeholder="Enter your website URL (e.g., example.com)"
-                      value={websiteUrl}
-                      onChange={(e) => setWebsiteUrl(e.target.value)}
-                    />
-                  </div>
-                  <Button 
-                    onClick={handleConnect} 
-                    disabled={isLoading || !websiteUrl}
-                    className="gap-2"
-                  >
-                    {isLoading ? (
-                      <>
-                        <Loader2 className="h-4 w-4 animate-spin" />
-                        Connecting...
-                      </>
-                    ) : (
-                      <>
-                        <LinkIcon className="h-4 w-4" />
-                        Connect
-                      </>
-                    )}
-                  </Button>
-                </div>
+                <p>To view Search Console data, connect your Google account in the Integrations page.</p>
+                <Button 
+                  onClick={goToIntegrations}
+                  className="gap-2"
+                >
+                  <LinkIcon className="h-4 w-4" />
+                  Go to Integrations
+                </Button>
               </CardContent>
             </Card>
           )}
@@ -276,8 +288,16 @@ const SearchConsolePage = () => {
                     No properties connected yet.
                   </p>
                   <p className="mt-2 text-sm">
-                    Connect a website to get started.
+                    Connect your Google account in the Integrations page.
                   </p>
+                  <Button 
+                    onClick={goToIntegrations}
+                    className="mt-4 gap-2"
+                    variant="outline"
+                  >
+                    <LinkIcon className="h-4 w-4" />
+                    Go to Integrations
+                  </Button>
                 </div>
               ) : (
                 <div className="space-y-4">
@@ -286,35 +306,57 @@ const SearchConsolePage = () => {
                     <Button 
                       variant="outline" 
                       size="sm" 
-                      onClick={handleDisconnect}
+                      onClick={goToIntegrations}
                     >
-                      Disconnect
+                      Manage
                     </Button>
                   </div>
                   
                   <div className="bg-muted/50 p-4 rounded-md">
                     <h3 className="text-sm font-medium mb-2">Connected Properties</h3>
-                    {properties.map((property, index) => (
-                      <div key={index} className="flex items-center justify-between py-2 border-b last:border-0">
-                        <span className="font-medium">{property.name}</span>
-                        <a 
-                          href={property.url} 
-                          target="_blank" 
-                          rel="noopener noreferrer"
-                          className="text-blue-600 hover:text-blue-800 flex items-center text-sm"
+                    {properties.length > 0 ? (
+                      properties.map((property, index) => (
+                        <div 
+                          key={index} 
+                          className={`flex items-center justify-between py-2 border-b last:border-0 ${selectedProperty === property.url ? 'bg-muted/90 -mx-2 px-2 rounded' : ''}`}
+                          onClick={() => setSelectedProperty(property.url)}
+                          style={{ cursor: 'pointer' }}
                         >
-                          Visit <ExternalLink className="h-3 w-3 ml-1" />
-                        </a>
-                      </div>
-                    ))}
+                          <span className="font-medium">{property.name}</span>
+                          <a 
+                            href={property.url} 
+                            target="_blank" 
+                            rel="noopener noreferrer"
+                            className="text-blue-600 hover:text-blue-800 flex items-center text-sm"
+                            onClick={(e) => e.stopPropagation()}
+                          >
+                            Visit <ExternalLink className="h-3 w-3 ml-1" />
+                          </a>
+                        </div>
+                      ))
+                    ) : (
+                      <p className="text-center text-muted-foreground py-2">No properties found</p>
+                    )}
                   </div>
                   
                   <div className="flex justify-between items-center mt-4">
                     <span className="text-sm text-muted-foreground">
                       Last sync: Just now
                     </span>
-                    <Button variant="outline" size="sm">
-                      Sync data
+                    <Button 
+                      variant="outline" 
+                      size="sm"
+                      onClick={handleRefresh}
+                      disabled={isLoading}
+                    >
+                      {isLoading ? (
+                        <>
+                          <Loader2 className="h-4 w-4 animate-spin mr-2" />
+                          Syncing...
+                        </>
+                      ) : (
+                        "Sync data"
+                      )}
                     </Button>
                   </div>
                 </div>
@@ -403,11 +445,64 @@ const SearchConsolePage = () => {
                 </CardDescription>
               </CardHeader>
               <CardContent>
-                <div className="p-6 text-center border rounded-lg">
-                  <p className="text-muted-foreground">
-                    Connect your Search Console property to view top pages.
-                  </p>
-                </div>
+                {selectedProperty ? (
+                  <div className="overflow-x-auto">
+                    <table className="w-full">
+                      <thead>
+                        <tr className="border-b">
+                          <th className="text-left pb-2">Page</th>
+                          <th className="text-right pb-2">Clicks</th>
+                          <th className="text-right pb-2">Impressions</th>
+                          <th className="text-right pb-2">CTR</th>
+                          <th className="text-right pb-2">Position</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        <tr className="border-b">
+                          <td className="py-3">/services</td>
+                          <td className="py-3 text-right">245</td>
+                          <td className="py-3 text-right">3,870</td>
+                          <td className="py-3 text-right">6.3%</td>
+                          <td className="py-3 text-right">4.1</td>
+                        </tr>
+                        <tr className="border-b">
+                          <td className="py-3">/about</td>
+                          <td className="py-3 text-right">189</td>
+                          <td className="py-3 text-right">2,980</td>
+                          <td className="py-3 text-right">6.3%</td>
+                          <td className="py-3 text-right">5.2</td>
+                        </tr>
+                        <tr className="border-b">
+                          <td className="py-3">/blog/seo-tips</td>
+                          <td className="py-3 text-right">156</td>
+                          <td className="py-3 text-right">2,450</td>
+                          <td className="py-3 text-right">6.4%</td>
+                          <td className="py-3 text-right">3.8</td>
+                        </tr>
+                        <tr className="border-b">
+                          <td className="py-3">/contact</td>
+                          <td className="py-3 text-right">132</td>
+                          <td className="py-3 text-right">1,980</td>
+                          <td className="py-3 text-right">6.7%</td>
+                          <td className="py-3 text-right">5.5</td>
+                        </tr>
+                        <tr className="border-b">
+                          <td className="py-3">/testimonials</td>
+                          <td className="py-3 text-right">105</td>
+                          <td className="py-3 text-right">1,650</td>
+                          <td className="py-3 text-right">6.4%</td>
+                          <td className="py-3 text-right">7.2</td>
+                        </tr>
+                      </tbody>
+                    </table>
+                  </div>
+                ) : (
+                  <div className="p-6 text-center border rounded-lg">
+                    <p className="text-muted-foreground">
+                      Select a property to view top pages.
+                    </p>
+                  </div>
+                )}
               </CardContent>
             </Card>
           </TabsContent>
@@ -420,11 +515,64 @@ const SearchConsolePage = () => {
                 </CardDescription>
               </CardHeader>
               <CardContent>
-                <div className="p-6 text-center border rounded-lg">
-                  <p className="text-muted-foreground">
-                    Connect your Search Console property to view country data.
-                  </p>
-                </div>
+                {selectedProperty ? (
+                  <div className="overflow-x-auto">
+                    <table className="w-full">
+                      <thead>
+                        <tr className="border-b">
+                          <th className="text-left pb-2">Country</th>
+                          <th className="text-right pb-2">Clicks</th>
+                          <th className="text-right pb-2">Impressions</th>
+                          <th className="text-right pb-2">CTR</th>
+                          <th className="text-right pb-2">Position</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        <tr className="border-b">
+                          <td className="py-3">United States</td>
+                          <td className="py-3 text-right">2,145</td>
+                          <td className="py-3 text-right">38,700</td>
+                          <td className="py-3 text-right">5.5%</td>
+                          <td className="py-3 text-right">12.3</td>
+                        </tr>
+                        <tr className="border-b">
+                          <td className="py-3">United Kingdom</td>
+                          <td className="py-3 text-right">985</td>
+                          <td className="py-3 text-right">18,900</td>
+                          <td className="py-3 text-right">5.2%</td>
+                          <td className="py-3 text-right">13.8</td>
+                        </tr>
+                        <tr className="border-b">
+                          <td className="py-3">Canada</td>
+                          <td className="py-3 text-right">720</td>
+                          <td className="py-3 text-right">14,500</td>
+                          <td className="py-3 text-right">5.0%</td>
+                          <td className="py-3 text-right">14.2</td>
+                        </tr>
+                        <tr className="border-b">
+                          <td className="py-3">Australia</td>
+                          <td className="py-3 text-right">612</td>
+                          <td className="py-3 text-right">12,800</td>
+                          <td className="py-3 text-right">4.8%</td>
+                          <td className="py-3 text-right">15.1</td>
+                        </tr>
+                        <tr className="border-b">
+                          <td className="py-3">Germany</td>
+                          <td className="py-3 text-right">445</td>
+                          <td className="py-3 text-right">9,300</td>
+                          <td className="py-3 text-right">4.8%</td>
+                          <td className="py-3 text-right">16.7</td>
+                        </tr>
+                      </tbody>
+                    </table>
+                  </div>
+                ) : (
+                  <div className="p-6 text-center border rounded-lg">
+                    <p className="text-muted-foreground">
+                      Select a property to view country data.
+                    </p>
+                  </div>
+                )}
               </CardContent>
             </Card>
           </TabsContent>
@@ -437,11 +585,50 @@ const SearchConsolePage = () => {
                 </CardDescription>
               </CardHeader>
               <CardContent>
-                <div className="p-6 text-center border rounded-lg">
-                  <p className="text-muted-foreground">
-                    Connect your Search Console property to view device data.
-                  </p>
-                </div>
+                {selectedProperty ? (
+                  <div className="overflow-x-auto">
+                    <table className="w-full">
+                      <thead>
+                        <tr className="border-b">
+                          <th className="text-left pb-2">Device</th>
+                          <th className="text-right pb-2">Clicks</th>
+                          <th className="text-right pb-2">Impressions</th>
+                          <th className="text-right pb-2">CTR</th>
+                          <th className="text-right pb-2">Position</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        <tr className="border-b">
+                          <td className="py-3">Mobile</td>
+                          <td className="py-3 text-right">2,985</td>
+                          <td className="py-3 text-right">58,400</td>
+                          <td className="py-3 text-right">5.1%</td>
+                          <td className="py-3 text-right">14.8</td>
+                        </tr>
+                        <tr className="border-b">
+                          <td className="py-3">Desktop</td>
+                          <td className="py-3 text-right">1,745</td>
+                          <td className="py-3 text-right">32,100</td>
+                          <td className="py-3 text-right">5.4%</td>
+                          <td className="py-3 text-right">13.7</td>
+                        </tr>
+                        <tr className="border-b">
+                          <td className="py-3">Tablet</td>
+                          <td className="py-3 text-right">400</td>
+                          <td className="py-3 text-right">6,000</td>
+                          <td className="py-3 text-right">6.7%</td>
+                          <td className="py-3 text-right">15.2</td>
+                        </tr>
+                      </tbody>
+                    </table>
+                  </div>
+                ) : (
+                  <div className="p-6 text-center border rounded-lg">
+                    <p className="text-muted-foreground">
+                      Select a property to view device data.
+                    </p>
+                  </div>
+                )}
               </CardContent>
             </Card>
           </TabsContent>
