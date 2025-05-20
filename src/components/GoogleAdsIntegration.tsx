@@ -6,7 +6,14 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { toast } from '@/components/ui/sonner';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
-import { Loader2 } from 'lucide-react';
+import { Loader2, Check } from 'lucide-react';
+import { 
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue
+} from '@/components/ui/select';
 
 interface GoogleAdsAccount {
   id: string;
@@ -19,6 +26,7 @@ const GoogleAdsIntegration = () => {
   const [accounts, setAccounts] = useState<GoogleAdsAccount[]>([]);
   const [connected, setConnected] = useState(false);
   const [configError, setConfigError] = useState<string | null>(null);
+  const [selectedAccount, setSelectedAccount] = useState<string | null>(null);
 
   useEffect(() => {
     if (user) {
@@ -64,10 +72,29 @@ const GoogleAdsIntegration = () => {
       }
       
       if (data) {
-        setAccounts(data.map(account => ({
+        const accountsData = data.map(account => ({
           id: account.account_id,
           name: account.account_name || account.account_id
-        })));
+        }));
+        
+        setAccounts(accountsData);
+        
+        // If there's a previously selected account in localStorage, use that
+        const savedAccountId = localStorage.getItem('selectedGoogleAdsAccount');
+        if (savedAccountId && accountsData.length > 0) {
+          const savedAccount = accountsData.find(acc => acc.id === savedAccountId);
+          if (savedAccount) {
+            setSelectedAccount(savedAccount.id);
+          } else {
+            // If saved account not found, use the first account
+            setSelectedAccount(accountsData[0].id);
+            localStorage.setItem('selectedGoogleAdsAccount', accountsData[0].id);
+          }
+        } else if (accountsData.length > 0) {
+          // If no saved account, default to first
+          setSelectedAccount(accountsData[0].id);
+          localStorage.setItem('selectedGoogleAdsAccount', accountsData[0].id);
+        }
       }
     } catch (error) {
       console.error('Error fetching Google Ads accounts:', error);
@@ -110,6 +137,17 @@ const GoogleAdsIntegration = () => {
       toast.error("Failed to connect to Google");
     }
   };
+  
+  const handleSelectAccount = (accountId: string) => {
+    setSelectedAccount(accountId);
+    localStorage.setItem('selectedGoogleAdsAccount', accountId);
+    
+    // Find the selected account to show in toast
+    const account = accounts.find(acc => acc.id === accountId);
+    if (account) {
+      toast.success(`Selected account: ${account.name}`);
+    }
+  };
 
   return (
     <Card className="w-full">
@@ -137,6 +175,37 @@ const GoogleAdsIntegration = () => {
               <Button onClick={fetchAccounts} size="sm">Refresh Accounts</Button>
             </div>
             
+            {accounts.length > 0 && (
+              <div className="mb-4">
+                <h3 className="text-sm font-medium mb-2">Select Google Ads Account</h3>
+                <Select 
+                  value={selectedAccount || undefined}
+                  onValueChange={handleSelectAccount}
+                >
+                  <SelectTrigger className="w-full">
+                    <SelectValue placeholder="Select an account" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {accounts.map((account) => (
+                      <SelectItem key={account.id} value={account.id}>
+                        {account.name}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+            )}
+            
+            {selectedAccount && (
+              <div className="mb-4 bg-primary/10 p-3 rounded-md">
+                <p className="text-sm font-medium">Current Selection:</p>
+                <h4 className="text-lg font-bold">
+                  {accounts.find(a => a.id === selectedAccount)?.name}
+                </h4>
+                <p className="text-xs text-muted-foreground">ID: {selectedAccount}</p>
+              </div>
+            )}
+            
             {loading ? (
               <div className="flex justify-center my-4">
                 <Loader2 className="h-6 w-6 animate-spin" />
@@ -145,13 +214,24 @@ const GoogleAdsIntegration = () => {
               <Table>
                 <TableHeader>
                   <TableRow>
+                    <TableHead>Selected</TableHead>
                     <TableHead>Account ID</TableHead>
                     <TableHead>Account Name</TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
                   {accounts.map((account) => (
-                    <TableRow key={account.id}>
+                    <TableRow 
+                      key={account.id}
+                      className={selectedAccount === account.id ? "bg-muted/80" : ""}
+                      onClick={() => handleSelectAccount(account.id)}
+                      style={{ cursor: 'pointer' }}
+                    >
+                      <TableCell>
+                        {selectedAccount === account.id && (
+                          <Check className="h-4 w-4 text-green-500" />
+                        )}
+                      </TableCell>
                       <TableCell>{account.id}</TableCell>
                       <TableCell>{account.name}</TableCell>
                     </TableRow>

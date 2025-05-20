@@ -6,7 +6,14 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { toast } from '@/components/ui/sonner';
-import { Loader2, LinkIcon, ExternalLink } from 'lucide-react';
+import { Loader2, LinkIcon, ExternalLink, Check } from 'lucide-react';
+import { 
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue
+} from '@/components/ui/select';
 
 // Define a type for our properties
 interface SearchConsoleProperty {
@@ -20,6 +27,7 @@ const GoogleSearchConsoleIntegration = () => {
   const [websiteUrl, setWebsiteUrl] = useState('');
   const [connected, setConnected] = useState(false);
   const [properties, setProperties] = useState<SearchConsoleProperty[]>([]);
+  const [selectedProperty, setSelectedProperty] = useState<string | null>(null);
 
   useEffect(() => {
     if (user) {
@@ -63,10 +71,29 @@ const GoogleSearchConsoleIntegration = () => {
       if (error) throw error;
       
       if (data && data.length > 0) {
-        setProperties(data.map(property => ({
-          name: property.account_name || property.account_id,
+        const propertiesData = data.map(property => ({
+          name: property.account_name || new URL(property.account_id).hostname,
           url: property.account_id // We'll store the URL in account_id field
-        })));
+        }));
+        
+        setProperties(propertiesData);
+        
+        // If there's a previously selected property in localStorage, use that
+        const savedPropertyUrl = localStorage.getItem('selectedSearchConsoleProperty');
+        if (savedPropertyUrl && propertiesData.length > 0) {
+          const savedProperty = propertiesData.find(prop => prop.url === savedPropertyUrl);
+          if (savedProperty) {
+            setSelectedProperty(savedProperty.url);
+          } else {
+            // If saved property not found, use the first property
+            setSelectedProperty(propertiesData[0].url);
+            localStorage.setItem('selectedSearchConsoleProperty', propertiesData[0].url);
+          }
+        } else if (propertiesData.length > 0) {
+          // If no saved property, default to first
+          setSelectedProperty(propertiesData[0].url);
+          localStorage.setItem('selectedSearchConsoleProperty', propertiesData[0].url);
+        }
       }
     } catch (error) {
       console.error('Error fetching properties:', error);
@@ -123,6 +150,8 @@ const GoogleSearchConsoleIntegration = () => {
       
       setConnected(false);
       setProperties([]);
+      setSelectedProperty(null);
+      localStorage.removeItem('selectedSearchConsoleProperty');
       toast.success("Disconnected from Google Search Console");
     } catch (error) {
       console.error('Error disconnecting:', error);
@@ -170,6 +199,17 @@ const GoogleSearchConsoleIntegration = () => {
       toast.error("Failed to add property");
     } finally {
       setIsLoading(false);
+    }
+  };
+
+  const handleSelectProperty = (value: string) => {
+    setSelectedProperty(value);
+    localStorage.setItem('selectedSearchConsoleProperty', value);
+    
+    // Find the selected property to show in toast
+    const property = properties.find(p => p.url === value);
+    if (property) {
+      toast.success(`Selected property: ${property.name}`);
     }
   };
 
@@ -230,6 +270,27 @@ const GoogleSearchConsoleIntegration = () => {
               </Button>
             </div>
             
+            {properties.length > 0 && (
+              <div className="pt-4 border-t">
+                <h3 className="text-sm font-medium mb-2">Select Search Console Property</h3>
+                <Select 
+                  value={selectedProperty || undefined}
+                  onValueChange={handleSelectProperty}
+                >
+                  <SelectTrigger className="w-full">
+                    <SelectValue placeholder="Select a property" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {properties.map((property) => (
+                      <SelectItem key={property.url} value={property.url} className="flex items-center justify-between">
+                        {property.name}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+            )}
+            
             <div className="pt-4 border-t">
               <h3 className="text-sm font-medium mb-2">Add Search Console Property</h3>
               <div className="flex flex-col md:flex-row gap-4 mb-4">
@@ -254,7 +315,14 @@ const GoogleSearchConsoleIntegration = () => {
               {properties.length > 0 ? (
                 properties.map((property, index) => (
                   <div key={index} className="flex items-center justify-between py-2 border-b last:border-0">
-                    <span className="font-medium">{property.name}</span>
+                    <div className="flex items-center gap-2">
+                      {selectedProperty === property.url && (
+                        <Check className="h-4 w-4 text-green-500" />
+                      )}
+                      <span className={`font-medium ${selectedProperty === property.url ? 'text-green-600' : ''}`}>
+                        {property.name}
+                      </span>
+                    </div>
                     <a 
                       href={property.url} 
                       target="_blank" 
@@ -278,7 +346,7 @@ const GoogleSearchConsoleIntegration = () => {
                 variant="outline" 
                 size="sm" 
                 onClick={handleSyncData}
-                disabled={isLoading}
+                disabled={isLoading || !selectedProperty}
               >
                 {isLoading ? (
                   <>

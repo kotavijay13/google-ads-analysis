@@ -3,7 +3,8 @@ import Header from '@/components/Header';
 import GoogleAdsIntegration from '@/components/GoogleAdsIntegration';
 import MetaAdsIntegration from '@/components/MetaAdsIntegration';
 import GoogleSearchConsoleIntegration from '@/components/GoogleSearchConsoleIntegration';
-import { Card, CardContent, CardDescription } from '@/components/ui/card';
+import { Card, CardContent, CardDescription, CardTitle, CardHeader } from '@/components/ui/card';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 
 const IntegrationsPage = () => {
   const handleRefresh = () => {
@@ -15,25 +16,42 @@ const IntegrationsPage = () => {
       <Header title="API Integrations" onRefresh={handleRefresh} />
       
       <Card className="mb-8">
-        <CardContent className="pt-6">
+        <CardHeader>
+          <CardTitle>Manage Data Sources</CardTitle>
+          <CardDescription>
+            Connect to ad platforms and analytics sources to import your data
+          </CardDescription>
+        </CardHeader>
+        <CardContent>
           <CardDescription className="text-sm">
             <p className="mb-4">
-              <strong>Important Note for App Users:</strong> You do not need to create Google Cloud or Meta developer apps.
-              Merge Insights AI allows you to simply log in with your existing Google/Meta accounts to access your ad accounts.
+              <strong>Important Note:</strong> You do not need to create Google Cloud or Meta developer apps.
+              Simply log in with your existing Google/Meta accounts to access your ad accounts and analytics data.
             </p>
             <p>
-              Once you connect your accounts using the buttons below, this dashboard will pull and display 
-              all ad accounts associated with your Google and Meta accounts automatically.
+              Once you connect your accounts, you can select specific ad accounts or properties from the dropdown menus.
+              Your selection will determine what data is displayed in the corresponding dashboards.
             </p>
           </CardDescription>
         </CardContent>
       </Card>
       
-      <div className="grid gap-8 mt-8">
-        <GoogleAdsIntegration />
-        <GoogleSearchConsoleIntegration />
-        <MetaAdsIntegration />
-      </div>
+      <Tabs defaultValue="google-ads" className="w-full">
+        <TabsList className="grid grid-cols-3 mb-8">
+          <TabsTrigger value="google-ads">Google Ads</TabsTrigger>
+          <TabsTrigger value="search-console">Search Console</TabsTrigger>
+          <TabsTrigger value="meta-ads">Meta Ads</TabsTrigger>
+        </TabsList>
+        <TabsContent value="google-ads" className="mt-0">
+          <GoogleAdsIntegration />
+        </TabsContent>
+        <TabsContent value="search-console" className="mt-0">
+          <GoogleSearchConsoleIntegration />
+        </TabsContent>
+        <TabsContent value="meta-ads" className="mt-0">
+          <MetaAdsIntegration />
+        </TabsContent>
+      </Tabs>
     </div>
   );
 };

@@ -6,7 +6,14 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { toast } from '@/components/ui/sonner';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
-import { Loader2 } from 'lucide-react';
+import { Loader2, Check } from 'lucide-react';
+import { 
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue
+} from '@/components/ui/select';
 
 interface MetaAdsAccount {
   id: string;
@@ -110,10 +117,13 @@ const MetaAdsIntegration = () => {
     window.location.href = oauthUrl;
   };
 
-  const handleSelectAccount = (account: MetaAdsAccount) => {
-    setSelectedAccount(account);
-    localStorage.setItem('selectedMetaAccount', account.id);
-    toast.success(`Meta Ads account "${account.name}" selected`);
+  const handleSelectAccount = (accountId: string) => {
+    const account = accounts.find(acc => acc.id === accountId);
+    if (account) {
+      setSelectedAccount(account);
+      localStorage.setItem('selectedMetaAccount', account.id);
+      toast.success(`Meta Ads account "${account.name}" selected`);
+    }
   };
 
   return (
@@ -132,16 +142,32 @@ const MetaAdsIntegration = () => {
               <Button onClick={fetchAccounts} size="sm">Refresh Accounts</Button>
             </div>
             
+            {accounts.length > 0 && (
+              <div className="mb-4">
+                <h3 className="text-sm font-medium mb-2">Select Meta Ads Account</h3>
+                <Select 
+                  value={selectedAccount?.id}
+                  onValueChange={handleSelectAccount}
+                >
+                  <SelectTrigger className="w-full">
+                    <SelectValue placeholder="Select an account" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {accounts.map((account) => (
+                      <SelectItem key={account.id} value={account.id}>
+                        {account.name}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+            )}
+            
             {selectedAccount && (
-              <div className="mb-4 bg-primary/10 p-3 rounded-md flex justify-between items-center">
-                <div>
-                  <span className="text-sm font-medium">Selected Account:</span>
-                  <h3 className="text-md font-bold">{selectedAccount.name}</h3>
-                  <p className="text-xs text-muted-foreground">ID: {selectedAccount.id}</p>
-                </div>
-                <Button variant="outline" size="sm" onClick={() => fetchAccounts()}>
-                  Change
-                </Button>
+              <div className="mb-4 bg-primary/10 p-3 rounded-md">
+                <p className="text-sm font-medium">Current Selection:</p>
+                <h4 className="text-lg font-bold">{selectedAccount.name}</h4>
+                <p className="text-xs text-muted-foreground">ID: {selectedAccount.id}</p>
               </div>
             )}
             
@@ -153,26 +179,26 @@ const MetaAdsIntegration = () => {
               <Table>
                 <TableHeader>
                   <TableRow>
+                    <TableHead>Selected</TableHead>
                     <TableHead>Account ID</TableHead>
                     <TableHead>Account Name</TableHead>
-                    <TableHead className="text-right">Action</TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
                   {accounts.map((account) => (
-                    <TableRow key={account.id} className={selectedAccount?.id === account.id ? "bg-muted/80" : ""}>
+                    <TableRow 
+                      key={account.id} 
+                      className={selectedAccount?.id === account.id ? "bg-muted/80" : ""}
+                      onClick={() => handleSelectAccount(account.id)}
+                      style={{ cursor: 'pointer' }}
+                    >
+                      <TableCell>
+                        {selectedAccount?.id === account.id && (
+                          <Check className="h-4 w-4 text-green-500" />
+                        )}
+                      </TableCell>
                       <TableCell>{account.id}</TableCell>
                       <TableCell>{account.name}</TableCell>
-                      <TableCell className="text-right">
-                        <Button 
-                          variant={selectedAccount?.id === account.id ? "default" : "outline"} 
-                          size="sm"
-                          onClick={() => handleSelectAccount(account)}
-                          disabled={selectedAccount?.id === account.id}
-                        >
-                          {selectedAccount?.id === account.id ? "Selected" : "Select"}
-                        </Button>
-                      </TableCell>
                     </TableRow>
                   ))}
                 </TableBody>
