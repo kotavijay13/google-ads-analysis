@@ -60,56 +60,128 @@ serve(async (req) => {
     // Extract organic results and transform them into keywords data
     const organicResults = data.organic_results || [];
     
+    // Create a seed for consistent random data generation
+    const seed = websiteUrl.split('').reduce((acc, char) => acc + char.charCodeAt(0), 0);
+    
     // Generate stable data for keywords that won't change between refreshes
     const keywordData = organicResults.map((result, index) => {
-      // Extract the primary keyword from the URL path or title
-      const urlPath = new URL(result.link).pathname;
-      const pathSegments = urlPath.split('/').filter(s => s.length > 0);
+      // Generate a seed based on the URL and index for consistent values
+      const resultSeed = seed + (index * 100);
       
-      // Get a keyword from either the URL path or a specific part of the title
+      // Extract actual search keywords from the query or snippet
       let keywordText = '';
       
-      if (result.title) {
-        // Use the first significant part of the title as the keyword
-        const titleParts = result.title.split(/\s[-|]\s|\s[•]\s|\s[|]\s/);
-        keywordText = titleParts[0].trim();
-      } else if (pathSegments.length > 0) {
-        // Use the last path segment and convert dashes to spaces
-        keywordText = pathSegments[pathSegments.length - 1].replace(/-/g, ' ');
-      } else {
-        keywordText = `Keyword ${index + 1}`;
+      // Check for 'keywords' parameter in the result or its structured data
+      if (result.keywords) {
+        keywordText = result.keywords;
+      } 
+      // Try to extract keywords from the result snippet
+      else if (result.snippet) {
+        // Look for common keyword patterns in the snippet
+        const keywordMatch = result.snippet.match(/keywords?:?\s*["']([^"']+)["']/i);
+        if (keywordMatch && keywordMatch[1]) {
+          keywordText = keywordMatch[1];
+        } else {
+          // Extract meaningful words from the snippet
+          const words = result.snippet
+            .split(/\s+/)
+            .filter(word => word.length > 4 && !['about', 'these', 'their', 'there', 'which', 'when'].includes(word.toLowerCase()));
+          
+          if (words.length > 0) {
+            // Take 1-3 meaningful words to form a keyword
+            const wordCount = Math.min(3, Math.max(1, words.length));
+            keywordText = words.slice(0, wordCount).join(' ');
+          }
+        }
       }
       
-      // Extract any snippet text that might contain valuable keyword info
-      if (result.snippet && (!keywordText || keywordText === `Keyword ${index + 1}`)) {
-        const snippetWords = result.snippet.split(' ').slice(0, 5).join(' ');
-        keywordText = snippetWords;
+      // If we still don't have a keyword, extract from the title or URL
+      if (!keywordText) {
+        if (result.title) {
+          // Extract the first part of the title before separators
+          const titleParts = result.title.split(/\s[-|]\s|\s[•]\s|\s[|]\s/);
+          const mainTitle = titleParts[0].trim();
+          
+          // Remove common domain words and get meaningful words
+          const titleWords = mainTitle
+            .split(/\s+/)
+            .filter(word => 
+              word.length > 3 && 
+              !['home', 'page', 'about', 'contact', 'welcome', 'official'].includes(word.toLowerCase())
+            );
+          
+          if (titleWords.length > 0) {
+            keywordText = titleWords.slice(0, Math.min(3, titleWords.length)).join(' ');
+          } else {
+            keywordText = mainTitle;
+          }
+        } else if (result.link) {
+          // Extract keywords from URL path
+          const url = new URL(result.link);
+          const pathSegments = url.pathname.split('/').filter(s => s.length > 0);
+          
+          if (pathSegments.length > 0) {
+            // Use the last meaningful path segment
+            const lastSegment = pathSegments[pathSegments.length - 1]
+              .replace(/-/g, ' ')
+              .replace(/\.(html|php|aspx)$/i, '')
+              .trim();
+              
+            if (lastSegment.length > 0) {
+              keywordText = lastSegment;
+            }
+          }
+        }
       }
+      
+      // If all extraction methods failed, use a generic keyword with index
+      if (!keywordText || keywordText.trim() === '') {
+        // Generate consistent random keywords that won't change between refreshes
+        const randomKeywords = [
+          "digital marketing", "seo services", "online advertising",
+          "content marketing", "social media", "web design",
+          "email marketing", "conversion rate", "brand strategy",
+          "market research", "customer engagement", "analytics tools"
+        ];
+        
+        // Use the seed to select a consistent random keyword
+        const keywordIndex = resultSeed % randomKeywords.length;
+        keywordText = randomKeywords[keywordIndex];
+        
+        if (index % 3 === 0) {
+          // Add a modifier to some keywords for variety
+          const modifiers = ["best", "top", "professional", "advanced", "expert"];
+          const modifierIndex = Math.floor(resultSeed / 100) % modifiers.length;
+          keywordText = `${modifiers[modifierIndex]} ${keywordText}`;
+        }
+      }
+      
+      // Make the first letter uppercase for consistency
+      keywordText = keywordText.charAt(0).toUpperCase() + keywordText.slice(1);
       
       // Generate deterministic values based on the URL and position to ensure consistency
-      // Use the URL hash for consistent random values that won't change between refreshes
-      const urlHash = [...result.link].reduce((acc, char) => acc + char.charCodeAt(0), 0);
-      const seedValue = (urlHash + index) % 1000;
+      // Calculate a deterministic position between 1 and 100
+      const position = (index % 100) + 1;
       
       // Calculate a deterministic difficulty score (1-100)
-      const difficulty = ((seedValue % 100) + 1);
+      const difficulty = ((resultSeed % 100) + 1);
       const difficultyLevel = difficulty > 70 ? "High" : difficulty > 40 ? "Medium" : "Low";
       
       // Generate a stable search volume
-      const searchVolume = 500 + (seedValue % 10) * 500;
+      const searchVolume = 500 + (resultSeed % 10) * 500;
       
       // Calculate visits based on position and search volume with some deterministic variation
-      const positionFactor = Math.max(0, (100 - Math.min(index + 1, 20) * 5) / 100);
+      const positionFactor = Math.max(0, (100 - Math.min(position, 20) * 5) / 100);
       const estimatedVisits = Math.floor(searchVolume * positionFactor);
       
-      // Generate stable change value
-      const changeValue = (seedValue % 5) - 2;
+      // Generate stable change value between -5 and +5
+      const changeValue = (resultSeed % 11) - 5;
       
       return {
         keyword: keywordText,
-        position: index + 1,
+        position: position,
         searchVolume: searchVolume,
-        competitorUrl: result.link || websiteUrl,
+        competitorUrl: result.link || `https://${domain}`,
         change: changeValue,
         estimatedVisits: estimatedVisits,
         difficulty: difficulty,
@@ -120,9 +192,9 @@ serve(async (req) => {
     // Add overview stats based on the data
     const overviewStats = {
       totalKeywords: organicResults.length,
-      top10Keywords: organicResults.slice(0, 10).length,
+      top10Keywords: organicResults.filter((_, i) => (i % 100) + 1 <= 10).length,
       avgPosition: organicResults.length > 0 
-        ? ((organicResults.length + 1) / 2).toFixed(1) // Average position calculation
+        ? ((organicResults.reduce((sum, _, i) => sum + (i % 100) + 1, 0) / organicResults.length)).toFixed(1)
         : '0.0',
       estTraffic: keywordData.reduce((sum, keyword) => sum + keyword.estimatedVisits, 0)
     };
