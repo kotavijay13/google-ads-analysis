@@ -1,5 +1,7 @@
 
 import { Button } from '@/components/ui/button';
+import { useState } from 'react';
+import { AlertCircle } from 'lucide-react';
 
 interface MetaAuthButtonProps {
   connected: boolean;
@@ -12,8 +14,35 @@ const MetaAuthButton = ({
   onConnect,
   onRefreshAccounts
 }: MetaAuthButtonProps) => {
+  const [error, setError] = useState<string | null>(null);
+  
+  const handleConnect = () => {
+    // Reset any previous errors
+    setError(null);
+    // Call parent's onConnect function
+    try {
+      onConnect();
+    } catch (err) {
+      setError('Failed to connect to Meta. Please try again.');
+      console.error('Meta connect error:', err);
+    }
+  };
+
   if (!connected) {
-    return <Button onClick={onConnect}>Connect Meta Ads</Button>;
+    return (
+      <div>
+        <Button onClick={handleConnect}>Connect Meta Ads</Button>
+        {error && (
+          <div className="flex items-center mt-2 text-red-500 text-sm">
+            <AlertCircle className="h-4 w-4 mr-1" />
+            <span>{error}</span>
+          </div>
+        )}
+        <p className="mt-3 text-xs text-muted-foreground">
+          You'll be redirected to Facebook to authorize access to your Meta Ads accounts.
+        </p>
+      </div>
+    );
   }
 
   return (

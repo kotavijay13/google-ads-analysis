@@ -27,8 +27,9 @@ const MetaAdsIntegration = () => {
     const redirectUri = window.location.origin + '/meta-callback';
     const scope = 'ads_management,ads_read';
     
-    // Use the existing client ID from Supabase environment
-    const clientId = 'de791d036b5ccd677cf913ac7e0df0cf6428b7c984e3'; // Updated client ID
+    // Use a valid Meta app client ID
+    // Note: This should match the APP_ID configured in your Supabase META_APP_ID secret
+    const clientId = '1293718141617053'; 
     
     // Construct the OAuth URL
     const oauthUrl = `${oauthEndpoint}?client_id=${clientId}&redirect_uri=${encodeURIComponent(redirectUri)}&response_type=code&scope=${encodeURIComponent(scope)}&state=${state}`;
