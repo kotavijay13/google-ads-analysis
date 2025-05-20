@@ -1,390 +1,313 @@
 
-import { useState, useCallback, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import Header from '@/components/Header';
-import DateRangePicker from '@/components/DateRangePicker';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { 
-  Table, 
-  TableBody, 
-  TableCell, 
-  TableHead, 
-  TableHeader, 
-  TableRow 
-} from "@/components/ui/table";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Button } from '@/components/ui/button';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import PerformanceChart from '@/components/PerformanceChart';
-import { dailyPerformance } from '@/data/mockData';
-import { Link } from 'lucide-react';
+import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts';
+import GoogleSearchConsoleIntegration from '@/components/GoogleSearchConsoleIntegration';
 
-// Mock SEO data
-const keywordRankings = [
-  { keyword: "digital marketing agency", position: 3, change: 2, volume: 5400, difficulty: "High" },
-  { keyword: "social media services", position: 5, change: -1, volume: 3200, difficulty: "Medium" },
-  { keyword: "ppc management", position: 2, change: 4, volume: 2800, difficulty: "Medium" },
-  { keyword: "seo consultant", position: 8, change: 0, volume: 1900, difficulty: "High" },
-  { keyword: "content marketing strategy", position: 4, change: 1, volume: 1600, difficulty: "Medium" },
+// Sample SEO data for visualization
+const seoData = [
+  { date: '2025-04-20', organicTraffic: 1200, impressions: 8500, clicks: 420, position: 18 },
+  { date: '2025-04-21', organicTraffic: 1250, impressions: 9000, clicks: 450, position: 17 },
+  { date: '2025-04-22', organicTraffic: 1300, impressions: 9200, clicks: 470, position: 16 },
+  { date: '2025-04-23', organicTraffic: 1320, impressions: 9400, clicks: 490, position: 15 },
+  { date: '2025-04-24', organicTraffic: 1400, impressions: 9600, clicks: 510, position: 15 },
+  { date: '2025-04-25', organicTraffic: 1450, impressions: 9800, clicks: 530, position: 14 },
+  { date: '2025-04-26', organicTraffic: 1500, impressions: 10000, clicks: 550, position: 14 },
+  { date: '2025-04-27', organicTraffic: 1550, impressions: 10200, clicks: 570, position: 13 },
+  { date: '2025-04-28', organicTraffic: 1600, impressions: 10400, clicks: 590, position: 13 },
+  { date: '2025-04-29', organicTraffic: 1650, impressions: 10600, clicks: 610, position: 12 },
+  { date: '2025-04-30', organicTraffic: 1700, impressions: 10800, clicks: 630, position: 12 },
+  { date: '2025-05-01', organicTraffic: 1750, impressions: 11000, clicks: 650, position: 11 },
+  { date: '2025-05-02', organicTraffic: 1800, impressions: 11200, clicks: 670, position: 11 },
+  { date: '2025-05-03', organicTraffic: 1850, impressions: 11400, clicks: 690, position: 10 },
+  { date: '2025-05-04', organicTraffic: 1900, impressions: 11600, clicks: 710, position: 10 },
+  { date: '2025-05-05', organicTraffic: 1950, impressions: 11800, clicks: 730, position: 9 },
+  { date: '2025-05-06', organicTraffic: 2000, impressions: 12000, clicks: 750, position: 9 },
+  { date: '2025-05-07', organicTraffic: 2050, impressions: 12200, clicks: 770, position: 8 },
+  { date: '2025-05-08', organicTraffic: 2100, impressions: 12400, clicks: 790, position: 8 },
+  { date: '2025-05-09', organicTraffic: 2150, impressions: 12600, clicks: 810, position: 7 },
+  { date: '2025-05-10', organicTraffic: 2200, impressions: 12800, clicks: 830, position: 7 },
+  { date: '2025-05-11', organicTraffic: 2250, impressions: 13000, clicks: 850, position: 6 },
+  { date: '2025-05-12', organicTraffic: 2300, impressions: 13200, clicks: 870, position: 6 },
+  { date: '2025-05-13', organicTraffic: 2350, impressions: 13400, clicks: 890, position: 5 },
+  { date: '2025-05-14', organicTraffic: 2400, impressions: 13600, clicks: 910, position: 5 },
+  { date: '2025-05-15', organicTraffic: 2450, impressions: 13800, clicks: 930, position: 4 },
+  { date: '2025-05-16', organicTraffic: 2500, impressions: 14000, clicks: 950, position: 4 },
+  { date: '2025-05-17', organicTraffic: 2550, impressions: 14200, clicks: 970, position: 3 },
+  { date: '2025-05-18', organicTraffic: 2600, impressions: 14400, clicks: 990, position: 3 },
+  { date: '2025-05-19', organicTraffic: 2650, impressions: 14600, clicks: 1010, position: 2 },
+  { date: '2025-05-20', organicTraffic: 2700, impressions: 14800, clicks: 1030, position: 2 },
 ];
 
-// Mock URL meta data
-const urlMetaData = [
-  { 
-    url: "/", 
-    title: "Digital Marketing Agency | Services for SMBs | YourCompany", 
-    description: "Full-service digital marketing agency specializing in SEO, PPC, social media marketing, and content strategy for small and medium businesses.",
-    pageSpeed: { mobile: 76, desktop: 92 },
-    wordCount: 1450,
-    h1Count: 1,
-    imageCount: 8
-  },
-  { 
-    url: "/services", 
-    title: "Marketing Services | SEO, PPC, Social Media | YourCompany", 
-    description: "Explore our digital marketing services including search engine optimization, paid advertising, social media management, and content creation.",
-    pageSpeed: { mobile: 82, desktop: 94 },
-    wordCount: 1280,
-    h1Count: 1,
-    imageCount: 6
-  },
-  { 
-    url: "/blog", 
-    title: "Digital Marketing Blog | Industry News & Tips | YourCompany", 
-    description: "Stay updated with the latest digital marketing trends, news, and actionable tips for growing your business online.",
-    pageSpeed: { mobile: 68, desktop: 88 },
-    wordCount: 950,
-    h1Count: 1,
-    imageCount: 12
-  },
-  { 
-    url: "/case-studies", 
-    title: "Case Studies | Client Success Stories | YourCompany", 
-    description: "Read our client success stories and learn how our digital marketing strategies have helped businesses achieve their growth goals.",
-    pageSpeed: { mobile: 71, desktop: 90 },
-    wordCount: 2100,
-    h1Count: 1,
-    imageCount: 14
-  },
-  { 
-    url: "/contact", 
-    title: "Contact Us | Get a Free Consultation | YourCompany", 
-    description: "Get in touch with our digital marketing experts for a free consultation. Find our contact details and office locations.",
-    pageSpeed: { mobile: 85, desktop: 97 },
-    wordCount: 450,
-    h1Count: 1,
-    imageCount: 3
-  },
+// Format date for display
+const formatDate = (dateStr: string) => {
+  const date = new Date(dateStr);
+  return `${(date.getMonth() + 1).toString().padStart(2, '0')}/${date.getDate().toString().padStart(2, '0')}`;
+};
+
+// Top pages sample data
+const topPages = [
+  { url: '/homepage', impressions: 3500, clicks: 320, ctr: 9.1, position: 2.3 },
+  { url: '/product', impressions: 2800, clicks: 240, ctr: 8.6, position: 3.1 },
+  { url: '/blog', impressions: 2200, clicks: 195, ctr: 8.9, position: 2.8 },
+  { url: '/contact', impressions: 1900, clicks: 175, ctr: 9.2, position: 2.2 },
+  { url: '/about', impressions: 1600, clicks: 140, ctr: 8.8, position: 3.0 },
+];
+
+// Top keywords sample data
+const topKeywords = [
+  { keyword: 'digital marketing', impressions: 2800, clicks: 260, ctr: 9.3, position: 2.1 },
+  { keyword: 'seo services', impressions: 2400, clicks: 220, ctr: 9.2, position: 2.3 },
+  { keyword: 'ppc management', impressions: 2100, clicks: 190, ctr: 9.0, position: 2.7 },
+  { keyword: 'social media marketing', impressions: 1900, clicks: 170, ctr: 8.9, position: 2.9 },
+  { keyword: 'content strategy', impressions: 1500, clicks: 130, ctr: 8.7, position: 3.2 },
 ];
 
 const SEOPage = () => {
-  const [dateRange, setDateRange] = useState<{ from: Date; to: Date }>({
-    from: new Date(new Date().setDate(new Date().getDate() - 30)),
-    to: new Date()
-  });
-  
-  const [isLoading, setIsLoading] = useState(false);
-  
+  const [activeTab, setActiveTab] = useState('overview');
+  const [activeMetric, setActiveMetric] = useState('organicTraffic');
+
+  // For demo purposes only - would connect to actual SEO data API
   const handleRefresh = () => {
-    setIsLoading(true);
-    // Simulate API call
-    setTimeout(() => {
-      setIsLoading(false);
-      console.log('Refreshing SEO data...');
-    }, 1000);
+    console.log('Refreshing SEO data...');
   };
 
-  const handleDateChange = useCallback((range: { from: Date; to: Date }) => {
-    setDateRange(range);
-    console.log('Date range changed:', range);
-  }, []);
-
-  // Initial data fetch when component mounts
-  useEffect(() => {
-    console.log('Initial SEO data fetch with date range:', dateRange);
-  }, []);
-
-  const getSpeedColor = (score: number) => {
-    if (score >= 90) return "bg-green-500";
-    if (score >= 70) return "bg-amber-500";
-    return "bg-red-500";
-  };
+  // Get last 30 days data
+  const last30Days = seoData.slice(-30);
 
   return (
     <div className="container mx-auto py-6 px-4 max-w-7xl">
-      <Header onRefresh={handleRefresh} title="SEO Dashboard" />
-      
-      <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-6 gap-4">
-        <h2 className="text-lg font-medium">SEO Overview</h2>
-        <DateRangePicker onDateChange={handleDateChange} />
-      </div>
+      <Header title="SEO Performance" onRefresh={handleRefresh} />
 
-      <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
-        <Card>
-          <CardHeader className="pb-2">
-            <CardTitle className="text-sm font-medium">Organic Traffic</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">5,238</div>
-            <p className="text-xs text-muted-foreground">+12% from last month</p>
-          </CardContent>
-        </Card>
-        
-        <Card>
-          <CardHeader className="pb-2">
-            <CardTitle className="text-sm font-medium">Keywords Ranked</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">143</div>
-            <p className="text-xs text-muted-foreground">+5 new this month</p>
-          </CardContent>
-        </Card>
-        
-        <Card>
-          <CardHeader className="pb-2">
-            <CardTitle className="text-sm font-medium">Average Position</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">12.4</div>
-            <p className="text-xs text-muted-foreground">Improved by 1.2</p>
-          </CardContent>
-        </Card>
-        
-        <Card>
-          <CardHeader className="pb-2">
-            <CardTitle className="text-sm font-medium">Revenue Generated</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">$24,680</div>
-            <p className="text-xs text-muted-foreground">+18% from last month</p>
-          </CardContent>
-        </Card>
-      </div>
-      
-      <Tabs defaultValue="keywords" className="mt-6">
-        <TabsList className="mb-4 w-full justify-start">
-          <TabsTrigger value="keywords">Keywords</TabsTrigger>
-          <TabsTrigger value="pages">Pages</TabsTrigger>
-          <TabsTrigger value="meta-data">URL Meta Data</TabsTrigger>
-          <TabsTrigger value="performance">Site Performance</TabsTrigger>
-        </TabsList>
-        
-        <TabsContent value="keywords" className="mt-0">
-          <Card>
+      <div className="flex flex-col lg:flex-row gap-6 mb-6">
+        <div className="lg:w-2/3">
+          <Card className="w-full">
             <CardHeader>
-              <CardTitle>Top Ranking Keywords</CardTitle>
+              <CardTitle>SEO Performance Overview</CardTitle>
+              <CardDescription>
+                Track your organic search performance
+              </CardDescription>
+              <div className="flex gap-2 mt-2">
+                <Button 
+                  size="sm" 
+                  variant={activeMetric === 'organicTraffic' ? 'default' : 'outline'}
+                  onClick={() => setActiveMetric('organicTraffic')}
+                >
+                  Traffic
+                </Button>
+                <Button 
+                  size="sm" 
+                  variant={activeMetric === 'impressions' ? 'default' : 'outline'}
+                  onClick={() => setActiveMetric('impressions')}
+                >
+                  Impressions
+                </Button>
+                <Button 
+                  size="sm" 
+                  variant={activeMetric === 'clicks' ? 'default' : 'outline'}
+                  onClick={() => setActiveMetric('clicks')}
+                >
+                  Clicks
+                </Button>
+                <Button 
+                  size="sm" 
+                  variant={activeMetric === 'position' ? 'default' : 'outline'}
+                  onClick={() => setActiveMetric('position')}
+                >
+                  Position
+                </Button>
+              </div>
             </CardHeader>
             <CardContent>
-              <Table>
-                <TableHeader>
-                  <TableRow>
-                    <TableHead>Keyword</TableHead>
-                    <TableHead className="text-right">Position</TableHead>
-                    <TableHead className="text-right">Change</TableHead>
-                    <TableHead className="text-right">Search Volume</TableHead>
-                    <TableHead>Difficulty</TableHead>
-                  </TableRow>
-                </TableHeader>
-                <TableBody>
-                  {keywordRankings.map((keyword) => (
-                    <TableRow key={keyword.keyword}>
-                      <TableCell className="font-medium">{keyword.keyword}</TableCell>
-                      <TableCell className="text-right">{keyword.position}</TableCell>
-                      <TableCell className="text-right">
-                        <span className={
-                          keyword.change > 0 
-                            ? "text-green-600" 
-                            : keyword.change < 0 
-                              ? "text-red-600" 
-                              : ""
-                        }>
-                          {keyword.change > 0 ? `+${keyword.change}` : keyword.change}
-                        </span>
-                      </TableCell>
-                      <TableCell className="text-right">{keyword.volume.toLocaleString()}</TableCell>
-                      <TableCell>
-                        <span className={
-                          keyword.difficulty === "High" 
-                            ? "bg-red-100 text-red-800 px-2 py-1 rounded text-xs" 
-                            : "bg-yellow-100 text-yellow-800 px-2 py-1 rounded text-xs"
-                        }>
-                          {keyword.difficulty}
-                        </span>
-                      </TableCell>
-                    </TableRow>
-                  ))}
-                </TableBody>
-              </Table>
-            </CardContent>
-          </Card>
-        </TabsContent>
-        
-        <TabsContent value="pages" className="mt-0">
-          <Card>
-            <CardHeader>
-              <CardTitle>Top Pages by Traffic</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="space-y-4">
-                {[
-                  { url: "/blog/seo-tips-2023", visits: 1245, bounce: "32%" },
-                  { url: "/services/digital-marketing", visits: 876, bounce: "41%" },
-                  { url: "/case-studies/ecommerce", visits: 654, bounce: "28%" },
-                  { url: "/contact", visits: 432, bounce: "18%" },
-                ].map((page, i) => (
-                  <div key={i} className="flex justify-between items-start py-2 border-b">
-                    <div className="max-w-[60%]">
-                      <div className="font-medium truncate">{page.url}</div>
-                    </div>
-                    <div className="text-right">
-                      <div>{page.visits.toLocaleString()} visits</div>
-                      <div className="text-sm text-muted-foreground">{page.bounce} bounce rate</div>
-                    </div>
-                  </div>
-                ))}
+              <div className="h-[350px]">
+                <ResponsiveContainer width="100%" height="100%">
+                  <LineChart
+                    data={last30Days}
+                    margin={{ top: 5, right: 30, left: 20, bottom: 5 }}
+                  >
+                    <CartesianGrid strokeDasharray="3 3" />
+                    <XAxis 
+                      dataKey="date" 
+                      tickFormatter={formatDate}
+                      tick={{ fontSize: 12 }}
+                      tickCount={7}
+                    />
+                    <YAxis 
+                      tickFormatter={(value) => 
+                        activeMetric === 'position' 
+                          ? value.toFixed(1) 
+                          : value >= 1000 
+                            ? `${(value/1000).toFixed(1)}k` 
+                            : value
+                      }
+                    />
+                    <Tooltip 
+                      formatter={(value: any) => [
+                        activeMetric === 'position' 
+                          ? value.toFixed(1) 
+                          : value.toLocaleString(),
+                        activeMetric === 'organicTraffic' 
+                          ? 'Organic Traffic' 
+                          : activeMetric.charAt(0).toUpperCase() + activeMetric.slice(1)
+                      ]}
+                      labelFormatter={(label) => new Date(label).toLocaleDateString()}
+                    />
+                    <Legend />
+                    <Line 
+                      type="monotone" 
+                      dataKey={activeMetric} 
+                      stroke="#3b82f6" 
+                      strokeWidth={2}
+                      dot={false}
+                      activeDot={{ r: 6 }}
+                      name={
+                        activeMetric === 'organicTraffic' 
+                          ? 'Organic Traffic' 
+                          : activeMetric.charAt(0).toUpperCase() + activeMetric.slice(1)
+                      }
+                    />
+                  </LineChart>
+                </ResponsiveContainer>
               </div>
             </CardContent>
           </Card>
-        </TabsContent>
-        
-        <TabsContent value="meta-data" className="mt-0">
-          <Card>
-            <CardHeader>
-              <CardTitle>URL Meta Data Analysis</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="overflow-auto">
-                <Table>
-                  <TableHeader>
-                    <TableRow>
-                      <TableHead>URL</TableHead>
-                      <TableHead>Meta Title</TableHead>
-                      <TableHead>Meta Description</TableHead>
-                      <TableHead className="text-center">Mobile Speed</TableHead>
-                      <TableHead className="text-center">Desktop Speed</TableHead>
-                    </TableRow>
-                  </TableHeader>
-                  <TableBody>
-                    {urlMetaData.map((page) => (
-                      <TableRow key={page.url}>
-                        <TableCell className="whitespace-nowrap">
-                          <div className="flex items-center gap-2">
-                            <Link size={14} />
-                            <span className="font-medium">{page.url}</span>
-                          </div>
-                        </TableCell>
-                        <TableCell className="max-w-xs">
-                          <div className="truncate" title={page.title}>{page.title}</div>
-                          <div className="text-xs text-muted-foreground">{page.title.length} chars</div>
-                        </TableCell>
-                        <TableCell className="max-w-xs">
-                          <div className="truncate" title={page.description}>{page.description}</div>
-                          <div className="text-xs text-muted-foreground">{page.description.length} chars</div>
-                        </TableCell>
-                        <TableCell className="text-center">
-                          <div className="flex justify-center">
-                            <div className="w-10 h-10 rounded-full flex items-center justify-center relative">
-                              <div className="absolute inset-0 rounded-full overflow-hidden">
-                                <div 
-                                  className={`${getSpeedColor(page.pageSpeed.mobile)} h-full`} 
-                                  style={{ width: `${page.pageSpeed.mobile}%` }}
-                                ></div>
-                              </div>
-                              <span className="relative text-xs font-medium">{page.pageSpeed.mobile}</span>
-                            </div>
-                          </div>
-                        </TableCell>
-                        <TableCell className="text-center">
-                          <div className="flex justify-center">
-                            <div className="w-10 h-10 rounded-full flex items-center justify-center relative">
-                              <div className="absolute inset-0 rounded-full overflow-hidden">
-                                <div 
-                                  className={`${getSpeedColor(page.pageSpeed.desktop)} h-full`} 
-                                  style={{ width: `${page.pageSpeed.desktop}%` }}
-                                ></div>
-                              </div>
-                              <span className="relative text-xs font-medium">{page.pageSpeed.desktop}</span>
-                            </div>
-                          </div>
-                        </TableCell>
-                      </TableRow>
-                    ))}
-                  </TableBody>
-                </Table>
-              </div>
-            </CardContent>
-          </Card>
-        </TabsContent>
-        
-        <TabsContent value="performance" className="mt-0">
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+
+          <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mt-6">
             <Card>
-              <CardHeader>
-                <CardTitle>Page Speed Insights</CardTitle>
+              <CardHeader className="pb-2">
+                <CardTitle className="text-sm font-medium">Organic Traffic</CardTitle>
               </CardHeader>
               <CardContent>
-                <div className="space-y-6">
-                  <div>
-                    <div className="flex justify-between mb-2">
-                      <span>Mobile</span>
-                      <span className="font-bold">76/100</span>
-                    </div>
-                    <div className="w-full bg-gray-200 h-2 rounded-full overflow-hidden">
-                      <div className="bg-amber-500 h-full" style={{ width: "76%" }}></div>
-                    </div>
-                  </div>
-                  <div>
-                    <div className="flex justify-between mb-2">
-                      <span>Desktop</span>
-                      <span className="font-bold">92/100</span>
-                    </div>
-                    <div className="w-full bg-gray-200 h-2 rounded-full overflow-hidden">
-                      <div className="bg-green-500 h-full" style={{ width: "92%" }}></div>
-                    </div>
-                  </div>
-                </div>
+                <div className="text-2xl font-bold">{last30Days[last30Days.length - 1].organicTraffic.toLocaleString()}</div>
+                <p className="text-xs text-muted-foreground">
+                  +{((last30Days[last30Days.length - 1].organicTraffic - last30Days[0].organicTraffic) / last30Days[0].organicTraffic * 100).toFixed(1)}% from last month
+                </p>
               </CardContent>
             </Card>
             
             <Card>
-              <CardHeader>
-                <CardTitle>Core Web Vitals</CardTitle>
+              <CardHeader className="pb-2">
+                <CardTitle className="text-sm font-medium">Impressions</CardTitle>
               </CardHeader>
               <CardContent>
-                <div className="space-y-6">
-                  <div>
-                    <div className="flex justify-between mb-1">
-                      <span>Largest Contentful Paint (LCP)</span>
-                      <span className="text-green-500 font-medium">2.1s</span>
-                    </div>
-                    <div className="w-full bg-gray-200 h-2 rounded-full overflow-hidden">
-                      <div className="bg-green-500 h-full" style={{ width: "70%" }}></div>
-                    </div>
-                    <p className="text-xs text-muted-foreground mt-1">Good: Under 2.5s</p>
-                  </div>
-                  
-                  <div>
-                    <div className="flex justify-between mb-1">
-                      <span>First Input Delay (FID)</span>
-                      <span className="text-green-500 font-medium">18ms</span>
-                    </div>
-                    <div className="w-full bg-gray-200 h-2 rounded-full overflow-hidden">
-                      <div className="bg-green-500 h-full" style={{ width: "90%" }}></div>
-                    </div>
-                    <p className="text-xs text-muted-foreground mt-1">Good: Under 100ms</p>
-                  </div>
-                  
-                  <div>
-                    <div className="flex justify-between mb-1">
-                      <span>Cumulative Layout Shift (CLS)</span>
-                      <span className="text-amber-500 font-medium">0.17</span>
-                    </div>
-                    <div className="w-full bg-gray-200 h-2 rounded-full overflow-hidden">
-                      <div className="bg-amber-500 h-full" style={{ width: "60%" }}></div>
-                    </div>
-                    <p className="text-xs text-muted-foreground mt-1">Needs Improvement: 0.1-0.25</p>
-                  </div>
-                </div>
+                <div className="text-2xl font-bold">{last30Days[last30Days.length - 1].impressions.toLocaleString()}</div>
+                <p className="text-xs text-muted-foreground">
+                  +{((last30Days[last30Days.length - 1].impressions - last30Days[0].impressions) / last30Days[0].impressions * 100).toFixed(1)}% from last month
+                </p>
+              </CardContent>
+            </Card>
+            
+            <Card>
+              <CardHeader className="pb-2">
+                <CardTitle className="text-sm font-medium">Clicks</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="text-2xl font-bold">{last30Days[last30Days.length - 1].clicks.toLocaleString()}</div>
+                <p className="text-xs text-muted-foreground">
+                  +{((last30Days[last30Days.length - 1].clicks - last30Days[0].clicks) / last30Days[0].clicks * 100).toFixed(1)}% from last month
+                </p>
+              </CardContent>
+            </Card>
+            
+            <Card>
+              <CardHeader className="pb-2">
+                <CardTitle className="text-sm font-medium">Avg. Position</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="text-2xl font-bold">{last30Days[last30Days.length - 1].position.toFixed(1)}</div>
+                <p className="text-xs text-muted-foreground">
+                  {last30Days[0].position - last30Days[last30Days.length - 1].position > 0 ? '+' : ''}
+                  {(last30Days[0].position - last30Days[last30Days.length - 1].position).toFixed(1)} from last month
+                </p>
               </CardContent>
             </Card>
           </div>
+        </div>
+        
+        <div className="lg:w-1/3">
+          <GoogleSearchConsoleIntegration />
+        </div>
+      </div>
+
+      <Tabs defaultValue="topPages" className="mt-6">
+        <TabsList>
+          <TabsTrigger value="topPages">Top Pages</TabsTrigger>
+          <TabsTrigger value="topKeywords">Top Keywords</TabsTrigger>
+        </TabsList>
+        <TabsContent value="topPages">
+          <Card>
+            <CardHeader>
+              <CardTitle>Top Performing Pages</CardTitle>
+              <CardDescription>
+                Pages with the highest search visibility
+              </CardDescription>
+            </CardHeader>
+            <CardContent>
+              <div className="overflow-x-auto">
+                <table className="w-full">
+                  <thead>
+                    <tr className="border-b">
+                      <th className="text-left pb-2">Page</th>
+                      <th className="text-right pb-2">Impressions</th>
+                      <th className="text-right pb-2">Clicks</th>
+                      <th className="text-right pb-2">CTR</th>
+                      <th className="text-right pb-2">Position</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {topPages.map((page, index) => (
+                      <tr key={index} className="border-b last:border-0">
+                        <td className="py-3 text-blue-600">{page.url}</td>
+                        <td className="py-3 text-right">{page.impressions.toLocaleString()}</td>
+                        <td className="py-3 text-right">{page.clicks.toLocaleString()}</td>
+                        <td className="py-3 text-right">{page.ctr.toFixed(1)}%</td>
+                        <td className="py-3 text-right">{page.position.toFixed(1)}</td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            </CardContent>
+          </Card>
+        </TabsContent>
+        <TabsContent value="topKeywords">
+          <Card>
+            <CardHeader>
+              <CardTitle>Top Keywords</CardTitle>
+              <CardDescription>
+                Keywords driving the most traffic to your site
+              </CardDescription>
+            </CardHeader>
+            <CardContent>
+              <div className="overflow-x-auto">
+                <table className="w-full">
+                  <thead>
+                    <tr className="border-b">
+                      <th className="text-left pb-2">Keyword</th>
+                      <th className="text-right pb-2">Impressions</th>
+                      <th className="text-right pb-2">Clicks</th>
+                      <th className="text-right pb-2">CTR</th>
+                      <th className="text-right pb-2">Position</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {topKeywords.map((keyword, index) => (
+                      <tr key={index} className="border-b last:border-0">
+                        <td className="py-3">{keyword.keyword}</td>
+                        <td className="py-3 text-right">{keyword.impressions.toLocaleString()}</td>
+                        <td className="py-3 text-right">{keyword.clicks.toLocaleString()}</td>
+                        <td className="py-3 text-right">{keyword.ctr.toFixed(1)}%</td>
+                        <td className="py-3 text-right">{keyword.position.toFixed(1)}</td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            </CardContent>
+          </Card>
         </TabsContent>
       </Tabs>
     </div>

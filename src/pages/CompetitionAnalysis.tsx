@@ -1,3 +1,4 @@
+
 import { useState, useCallback, useEffect } from 'react';
 import Header from '@/components/Header';
 import { Card, CardContent, CardHeader, CardTitle, CardFooter } from '@/components/ui/card';
@@ -249,6 +250,38 @@ const CompetitionAnalysis = () => {
     return "text-green-600 bg-green-50";
   };
 
+  // Render filter dropdown for a column
+  const renderFilterDropdown = (column: keyof KeywordData, label: string) => {
+    return (
+      <DropdownMenu>
+        <DropdownMenuTrigger asChild>
+          <Button variant="ghost" size="icon" className="h-8 w-8 ml-1 p-0">
+            <Filter className="h-3 w-3" />
+          </Button>
+        </DropdownMenuTrigger>
+        <DropdownMenuContent align={column === 'keyword' || column === 'competitorUrl' ? "start" : "end"} className="w-60">
+          <div className="p-2">
+            <Input 
+              placeholder={`Filter by ${label.toLowerCase()}...`} 
+              value={filters[column] || ''}
+              onChange={(e) => applyFilter(column, e.target.value)}
+              className="mb-2"
+            />
+            <div className="flex justify-between">
+              <Button 
+                variant="outline" 
+                size="sm"
+                onClick={() => resetFilter(column)}
+              >
+                Clear
+              </Button>
+            </div>
+          </div>
+        </DropdownMenuContent>
+      </DropdownMenu>
+    );
+  };
+
   return (
     <div className="container mx-auto py-6 px-4 max-w-7xl">
       <Header onRefresh={handleRefresh} title="Competition Analysis" />
@@ -380,120 +413,20 @@ const CompetitionAnalysis = () => {
                   <Table>
                     <TableHeader>
                       <TableRow>
-                        {visibleColumns.includes('keyword') && (
-                          <TableHead>
-                            <div className="flex items-center cursor-pointer" onClick={() => handleSortChange('keyword')}>
-                              Keyword
-                              {getSortIcon('keyword')}
-                              <DropdownMenu>
-                                <DropdownMenuTrigger asChild>
-                                  <Button variant="ghost" size="icon" className="h-8 w-8 ml-1 p-0">
-                                    <Filter className="h-3 w-3" />
-                                  </Button>
-                                </DropdownMenuTrigger>
-                                <DropdownMenuContent align="start" className="w-60">
-                                  <div className="p-2">
-                                    <Input 
-                                      placeholder="Filter keywords..." 
-                                      value={filters.keyword || ''}
-                                      onChange={(e) => applyFilter('keyword', e.target.value)}
-                                      className="mb-2"
-                                    />
-                                    <div className="flex justify-between">
-                                      <Button 
-                                        variant="outline" 
-                                        size="sm"
-                                        onClick={() => resetFilter('keyword')}
-                                      >
-                                        Clear
-                                      </Button>
-                                    </div>
-                                  </div>
-                                </DropdownMenuContent>
-                              </DropdownMenu>
-                            </div>
-                          </TableHead>
-                        )}
-                        
-                        {visibleColumns.includes('position') && (
-                          <TableHead className="text-right">
-                            <div className="flex items-center justify-end cursor-pointer" onClick={() => handleSortChange('position')}>
-                              Position
-                              {getSortIcon('position')}
-                              <DropdownMenu>
-                                <DropdownMenuTrigger asChild>
-                                  <Button variant="ghost" size="icon" className="h-8 w-8 ml-1 p-0">
-                                    <Filter className="h-3 w-3" />
-                                  </Button>
-                                </DropdownMenuTrigger>
-                                <DropdownMenuContent align="end" className="w-60">
-                                  <div className="p-2">
-                                    <Input 
-                                      placeholder="Filter by position..." 
-                                      value={filters.position || ''}
-                                      onChange={(e) => applyFilter('position', e.target.value)}
-                                      className="mb-2"
-                                    />
-                                    <div className="flex justify-between">
-                                      <Button 
-                                        variant="outline" 
-                                        size="sm"
-                                        onClick={() => resetFilter('position')}
-                                      >
-                                        Clear
-                                      </Button>
-                                    </div>
-                                  </div>
-                                </DropdownMenuContent>
-                              </DropdownMenu>
-                            </div>
-                          </TableHead>
-                        )}
-                        
-                        {visibleColumns.includes('change') && (
-                          <TableHead className="text-right">
-                            <div className="flex items-center justify-end cursor-pointer" onClick={() => handleSortChange('change')}>
-                              Change
-                              {getSortIcon('change')}
-                            </div>
-                          </TableHead>
-                        )}
-                        
-                        {visibleColumns.includes('searchVolume') && (
-                          <TableHead className="text-right">
-                            <div className="flex items-center justify-end cursor-pointer" onClick={() => handleSortChange('searchVolume')}>
-                              Search Volume
-                              {getSortIcon('searchVolume')}
-                            </div>
-                          </TableHead>
-                        )}
-                        
-                        {visibleColumns.includes('estimatedVisits') && (
-                          <TableHead className="text-right">
-                            <div className="flex items-center justify-end cursor-pointer" onClick={() => handleSortChange('estimatedVisits')}>
-                              Est. Visits
-                              {getSortIcon('estimatedVisits')}
-                            </div>
-                          </TableHead>
-                        )}
-                        
-                        {visibleColumns.includes('difficulty') && (
-                          <TableHead className="text-right">
-                            <div className="flex items-center justify-end cursor-pointer" onClick={() => handleSortChange('difficulty')}>
-                              SEO Difficulty
-                              {getSortIcon('difficulty')}
-                            </div>
-                          </TableHead>
-                        )}
-                        
-                        {visibleColumns.includes('competitorUrl') && (
-                          <TableHead>
-                            <div className="flex items-center cursor-pointer" onClick={() => handleSortChange('competitorUrl')}>
-                              URL
-                              {getSortIcon('competitorUrl')}
-                            </div>
-                          </TableHead>
-                        )}
+                        {allColumns.map(column => {
+                          if (!visibleColumns.includes(column.key)) return null;
+                          
+                          const columnKey = column.key as keyof KeywordData;
+                          return (
+                            <TableHead key={column.key} className={columnKey === 'keyword' || columnKey === 'competitorUrl' ? "" : "text-right"}>
+                              <div className={`flex items-center ${columnKey === 'keyword' || columnKey === 'competitorUrl' ? "" : "justify-end"} cursor-pointer`} onClick={() => handleSortChange(columnKey)}>
+                                {column.label}
+                                {getSortIcon(columnKey)}
+                                {renderFilterDropdown(columnKey, column.label)}
+                              </div>
+                            </TableHead>
+                          );
+                        })}
                       </TableRow>
                     </TableHeader>
                     <TableBody>

@@ -18,6 +18,7 @@ const MetaAdsIntegration = () => {
   const [loading, setLoading] = useState(false);
   const [accounts, setAccounts] = useState<MetaAdsAccount[]>([]);
   const [connected, setConnected] = useState(false);
+  const [selectedAccount, setSelectedAccount] = useState<MetaAdsAccount | null>(null);
 
   useEffect(() => {
     if (user) {
@@ -58,10 +59,29 @@ const MetaAdsIntegration = () => {
       }
       
       if (data) {
-        setAccounts(data.map(account => ({
+        const accountsData = data.map(account => ({
           id: account.account_id,
           name: account.account_name || account.account_id
-        })));
+        }));
+        
+        setAccounts(accountsData);
+        
+        // If there's a previously selected account in localStorage, use that
+        const savedAccountId = localStorage.getItem('selectedMetaAccount');
+        if (savedAccountId && accountsData.length > 0) {
+          const savedAccount = accountsData.find(acc => acc.id === savedAccountId);
+          if (savedAccount) {
+            setSelectedAccount(savedAccount);
+          } else {
+            // If saved account not found, use the first account
+            setSelectedAccount(accountsData[0]);
+            localStorage.setItem('selectedMetaAccount', accountsData[0].id);
+          }
+        } else if (accountsData.length > 0) {
+          // If no saved account, default to first
+          setSelectedAccount(accountsData[0]);
+          localStorage.setItem('selectedMetaAccount', accountsData[0].id);
+        }
       }
     } catch (error) {
       console.error('Error fetching Meta Ads accounts:', error);
@@ -90,6 +110,12 @@ const MetaAdsIntegration = () => {
     window.location.href = oauthUrl;
   };
 
+  const handleSelectAccount = (account: MetaAdsAccount) => {
+    setSelectedAccount(account);
+    localStorage.setItem('selectedMetaAccount', account.id);
+    toast.success(`Meta Ads account "${account.name}" selected`);
+  };
+
   return (
     <Card className="w-full">
       <CardHeader>
@@ -106,6 +132,19 @@ const MetaAdsIntegration = () => {
               <Button onClick={fetchAccounts} size="sm">Refresh Accounts</Button>
             </div>
             
+            {selectedAccount && (
+              <div className="mb-4 bg-primary/10 p-3 rounded-md flex justify-between items-center">
+                <div>
+                  <span className="text-sm font-medium">Selected Account:</span>
+                  <h3 className="text-md font-bold">{selectedAccount.name}</h3>
+                  <p className="text-xs text-muted-foreground">ID: {selectedAccount.id}</p>
+                </div>
+                <Button variant="outline" size="sm" onClick={() => fetchAccounts()}>
+                  Change
+                </Button>
+              </div>
+            )}
+            
             {loading ? (
               <div className="flex justify-center my-4">
                 <Loader2 className="h-6 w-6 animate-spin" />
@@ -116,13 +155,24 @@ const MetaAdsIntegration = () => {
                   <TableRow>
                     <TableHead>Account ID</TableHead>
                     <TableHead>Account Name</TableHead>
+                    <TableHead className="text-right">Action</TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
                   {accounts.map((account) => (
-                    <TableRow key={account.id}>
+                    <TableRow key={account.id} className={selectedAccount?.id === account.id ? "bg-muted/80" : ""}>
                       <TableCell>{account.id}</TableCell>
                       <TableCell>{account.name}</TableCell>
+                      <TableCell className="text-right">
+                        <Button 
+                          variant={selectedAccount?.id === account.id ? "default" : "outline"} 
+                          size="sm"
+                          onClick={() => handleSelectAccount(account)}
+                          disabled={selectedAccount?.id === account.id}
+                        >
+                          {selectedAccount?.id === account.id ? "Selected" : "Select"}
+                        </Button>
+                      </TableCell>
                     </TableRow>
                   ))}
                 </TableBody>
