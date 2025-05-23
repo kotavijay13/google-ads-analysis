@@ -74,3 +74,7 @@ secret = "env(GOOGLE_CLIENT_SECRET)"
 verify_jwt = true
 [functions.google-search-console-auth]
 verify_jwt = true
+[functions.google-ads-auth]
+verify_jwt = true
+[functions.serp-api]
+verify_jwt = true

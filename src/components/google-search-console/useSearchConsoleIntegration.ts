@@ -98,11 +98,17 @@ export const useSearchConsoleIntegration = () => {
       // Save the state in localStorage to verify later
       localStorage.setItem('googleSearchConsoleOAuthState', state);
       
-      // Using the correct OAuth configuration
-      const oauthEndpoint = 'https://accounts.google.com/o/oauth2/v2/auth';
+      // Get the Google client ID from environment variable
+      const { data: clientIdData, error: clientIdError } = await supabase.functions.invoke('google-search-console-auth', {
+        body: { action: 'get_client_id' }
+      });
       
-      // Google client ID - ensure this is correctly configured in Supabase secrets
-      const clientId = '463775925601-8i7gv5qhham5b5f60mjvhusp6jg6qfd8.apps.googleusercontent.com';
+      if (clientIdError || !clientIdData?.clientId) {
+        console.error("Failed to get client ID:", clientIdError, clientIdData);
+        throw new Error('Could not retrieve Google Client ID. Please check Supabase secrets configuration.');
+      }
+      
+      const clientId = clientIdData.clientId;
       
       // Use the exact redirect URI as configured in Google Cloud Console
       const redirectUri = window.location.origin + '/google-callback';
@@ -117,13 +123,13 @@ export const useSearchConsoleIntegration = () => {
       });
       
       // Construct the OAuth URL with all required parameters
-      const oauthUrl = `${oauthEndpoint}?client_id=${clientId}&redirect_uri=${encodeURIComponent(redirectUri)}&response_type=code&scope=${scope}&state=${state}&access_type=offline&prompt=consent&include_granted_scopes=true`;
+      const oauthUrl = `https://accounts.google.com/o/oauth2/v2/auth?client_id=${clientId}&redirect_uri=${encodeURIComponent(redirectUri)}&response_type=code&scope=${scope}&state=${state}&access_type=offline&prompt=consent&include_granted_scopes=true`;
       
       // Redirect to Google's OAuth page
       window.location.href = oauthUrl;
     } catch (error) {
       console.error("Error initiating Google OAuth:", error);
-      setConnectionError("Failed to connect to Google Search Console");
+      setConnectionError((error as Error).message || "Failed to connect to Google Search Console");
       toast.error("Failed to connect to Google Search Console");
     } finally {
       setIsLoading(false);
