@@ -1,4 +1,3 @@
-
 export const campaignColumns = [
   { key: 'selected', label: 'Selected' },
   { key: 'campaignId', label: 'Campaign ID' },
@@ -24,7 +23,8 @@ export const campaignColumns = [
   { key: 'addToCart', label: 'Add to Cart' },
   { key: 'landingPageViews', label: 'Landing Page Views' },
   { key: 'linkClicks', label: 'Link Clicks' },
-  { key: 'saves', label: 'Saves' }
+  { key: 'saves', label: 'Saves' },
+  { key: 'aiInsights', label: 'AI Insights' }
 ];
 
 export const adSetColumns = [
@@ -53,7 +53,8 @@ export const adSetColumns = [
   { key: 'addToCart', label: 'Add to Cart' },
   { key: 'initiatedCheckout', label: 'Initiated Checkout' },
   { key: 'purchases', label: 'Purchases' },
-  { key: 'purchaseValue', label: 'Purchase Value' }
+  { key: 'purchaseValue', label: 'Purchase Value' },
+  { key: 'aiInsights', label: 'AI Insights' }
 ];
 
 export const adColumns = [
@@ -80,11 +81,16 @@ export const adColumns = [
   { key: 'roas', label: 'ROAS' },
   { key: 'qualityRanking', label: 'Quality Ranking' },
   { key: 'engagementRateRanking', label: 'Engagement Rate Ranking' },
-  { key: 'conversionRateRanking', label: 'Conversion Rate Ranking' }
+  { key: 'conversionRateRanking', label: 'Conversion Rate Ranking' },
+  { key: 'aiInsights', label: 'AI Insights' }
 ];
 
 export const renderTableCell = (columnKey: string, account: any) => {
   if (columnKey === 'selected') {
+    return null; // Will be handled by the table component
+  }
+  
+  if (columnKey === 'aiInsights') {
     return null; // Will be handled by the table component
   }
   

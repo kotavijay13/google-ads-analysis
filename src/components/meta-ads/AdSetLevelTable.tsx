@@ -12,7 +12,7 @@ interface AdSetLevelTableProps {
 
 const AdSetLevelTable = ({ accounts, selectedAccount, onSelectAccount }: AdSetLevelTableProps) => {
   const [visibleColumns, setVisibleColumns] = useState([
-    'selected', 'adSetId', 'adSetName', 'delivery', 'optimizationGoal', 'budget', 'impressions', 'clicks', 'ctr', 'conversions'
+    'selected', 'adSetId', 'adSetName', 'delivery', 'optimizationGoal', 'budget', 'impressions', 'clicks', 'ctr', 'conversions', 'aiInsights'
   ]);
 
   const toggleColumn = (columnKey: string) => {

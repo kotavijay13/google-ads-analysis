@@ -3,6 +3,7 @@ import { Check } from 'lucide-react';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import ColumnSelector from '../ColumnSelector';
+import AIInsights from '../AIInsights';
 import { MetaAdsAccount } from './types';
 import { renderTableCell } from './tableUtils';
 
@@ -61,6 +62,8 @@ const MetaTableRenderer = ({
                     <TableCell key={column.key} className="whitespace-nowrap">
                       {column.key === 'selected' ? (
                         selectedAccount?.id === account.id && <Check className="h-4 w-4 text-green-500" />
+                      ) : column.key === 'aiInsights' ? (
+                        <AIInsights data={account} type={keyPrefix as 'campaign' | 'adset' | 'ad'} />
                       ) : (
                         renderTableCell(column.key, account)
                       )}

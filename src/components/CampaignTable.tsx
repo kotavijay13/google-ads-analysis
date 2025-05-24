@@ -1,4 +1,3 @@
-
 import { useState } from 'react';
 import {
   Table,
@@ -18,6 +17,7 @@ import {
 import { Campaign } from '../data/mockData';
 import { Badge } from "@/components/ui/badge";
 import ColumnSelector from './ColumnSelector';
+import AIInsights from './AIInsights';
 
 interface CampaignTableProps {
   campaigns: Campaign[];
@@ -44,13 +44,14 @@ const CampaignTable = ({ campaigns }: CampaignTableProps) => {
     { key: 'conversionRate', label: 'Conversion Rate' },
     { key: 'allConversions', label: 'All Conversions' },
     { key: 'conversionValue', label: 'Conversion Value' },
-    { key: 'costPerConversion', label: 'Cost/Conversion' }
+    { key: 'costPerConversion', label: 'Cost/Conversion' },
+    { key: 'aiInsights', label: 'AI Insights' }
   ];
 
-  // Default visible columns
+  // Default visible columns including AI insights
   const [visibleColumns, setVisibleColumns] = useState([
     'name', 'status', 'spend', 'impressions', 'clicks', 'ctr', 
-    'conversions', 'costPerConversion'
+    'conversions', 'costPerConversion', 'aiInsights'
   ]);
 
   const toggleColumn = (columnKey: string) => {
@@ -74,7 +75,6 @@ const CampaignTable = ({ campaigns }: CampaignTableProps) => {
   };
 
   const formatPercent = (value: number | undefined) => {
-    // Handle undefined or null values
     if (value === undefined || value === null) {
       return '0.00%';
     }
@@ -196,6 +196,11 @@ const CampaignTable = ({ campaigns }: CampaignTableProps) => {
                   )}
                   {visibleColumns.includes('costPerConversion') && (
                     <TableCell>{formatCurrency(campaign.costPerConversion)}</TableCell>
+                  )}
+                  {visibleColumns.includes('aiInsights') && (
+                    <TableCell>
+                      <AIInsights data={campaign} type="campaign" />
+                    </TableCell>
                   )}
                 </TableRow>
               ))}
