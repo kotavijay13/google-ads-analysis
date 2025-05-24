@@ -2,7 +2,7 @@
 import { useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { CheckCircle, Circle, AlertCircle, TrendingUp, Search, Facebook, Users, Target } from 'lucide-react';
+import { CheckCircle, Circle, AlertTriangle, TrendingUp, Search, Facebook, Users, Target, RefreshCw, Loader2 } from 'lucide-react';
 
 interface Change {
   id: string;
@@ -62,8 +62,76 @@ const initialChanges: Change[] = [
   }
 ];
 
+// Additional insights pool for refresh functionality
+const additionalInsights: Change[] = [
+  {
+    id: '6',
+    title: "Reduce CPC for 'online marketing' keywords",
+    description: 'Cost per click 40% above benchmark, adjust bid strategy',
+    priority: 'High Impact',
+    category: 'Google Ads',
+    completed: false,
+    icon: TrendingUp
+  },
+  {
+    id: '7',
+    title: 'Test new Facebook ad copy variations',
+    description: 'Current CTR declined 15% in past 3 days',
+    priority: 'Medium Impact',
+    category: 'Meta Ads',
+    completed: false,
+    icon: Facebook
+  },
+  {
+    id: '8',
+    title: 'Expand targeting to lookalike audiences',
+    description: 'Similar audience segments showing 3x higher conversion rate',
+    priority: 'High Impact',
+    category: 'Meta Ads',
+    completed: false,
+    icon: Users
+  },
+  {
+    id: '9',
+    title: 'Pause underperforming display campaigns',
+    description: 'ROI below 2.0, reallocate budget to search campaigns',
+    priority: 'Medium Impact',
+    category: 'Google Ads',
+    completed: false,
+    icon: AlertTriangle
+  },
+  {
+    id: '10',
+    title: 'Update negative keyword list',
+    description: 'Irrelevant traffic consuming 12% of daily budget',
+    priority: 'Medium Impact',
+    category: 'Google Ads',
+    completed: false,
+    icon: Search
+  },
+  {
+    id: '11',
+    title: 'A/B test video vs image creatives',
+    description: 'Video ads showing 25% higher engagement rate',
+    priority: 'High Impact',
+    category: 'Meta Ads',
+    completed: false,
+    icon: Facebook
+  },
+  {
+    id: '12',
+    title: 'Optimize landing page load speed',
+    description: 'Page speed affecting conversion rate by 8%',
+    priority: 'Medium Impact',
+    category: 'SEO',
+    completed: false,
+    icon: Search
+  }
+];
+
 const ChangeTracker = () => {
   const [changes, setChanges] = useState<Change[]>(initialChanges);
+  const [isRefreshing, setIsRefreshing] = useState(false);
 
   const toggleChange = (id: string) => {
     setChanges(prev => 
@@ -73,6 +141,26 @@ const ChangeTracker = () => {
           : change
       )
     );
+  };
+
+  const refreshInsights = async () => {
+    setIsRefreshing(true);
+    
+    // Simulate AI analysis across Google Ads and Meta Ads data
+    setTimeout(() => {
+      // Get random 5 insights from the pool (including initial ones)
+      const allInsights = [...initialChanges, ...additionalInsights];
+      const shuffled = allInsights.sort(() => 0.5 - Math.random());
+      const newInsights = shuffled.slice(0, 5).map((insight, index) => ({
+        ...insight,
+        id: `${Date.now()}-${index}`, // Generate new IDs to reset completion status
+        completed: false
+      }));
+      
+      setChanges(newInsights);
+      setIsRefreshing(false);
+      console.log('AI insights refreshed - analyzed Google Ads and Meta Ads performance data');
+    }, 2000);
   };
 
   const completedCount = changes.filter(change => change.completed).length;
@@ -100,7 +188,23 @@ const ChangeTracker = () => {
   return (
     <Card className="w-full">
       <CardHeader>
-        <CardTitle className="text-xl font-bold">Top 5 Changes To Be Done Today</CardTitle>
+        <div className="flex items-center justify-between">
+          <CardTitle className="text-xl font-bold">Top 5 AI Insights for Today</CardTitle>
+          <Button 
+            variant="outline" 
+            size="sm" 
+            onClick={refreshInsights}
+            disabled={isRefreshing}
+            className="flex items-center gap-2"
+          >
+            {isRefreshing ? (
+              <Loader2 className="h-4 w-4 animate-spin" />
+            ) : (
+              <RefreshCw className="h-4 w-4" />
+            )}
+            {isRefreshing ? 'Analyzing...' : 'Refresh'}
+          </Button>
+        </div>
       </CardHeader>
       <CardContent className="space-y-4">
         {changes.map((change) => {
