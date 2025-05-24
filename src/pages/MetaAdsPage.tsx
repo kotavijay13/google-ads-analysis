@@ -2,7 +2,7 @@
 import { useState, useCallback, useEffect } from 'react';
 import Header from '@/components/Header';
 import DateRangePicker from '@/components/DateRangePicker';
-import MetricsOverview from '@/components/MetricsOverview';
+import ChannelMetricsOverview from '@/components/ChannelMetricsOverview';
 import PerformanceChart from '@/components/PerformanceChart';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
@@ -225,7 +225,7 @@ const MetaAdsPage = () => {
         <DateRangePicker onDateChange={handleDateChange} />
       </div>
 
-      <MetricsOverview metrics={metrics} />
+      <ChannelMetricsOverview metrics={metrics} />
       
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
         <Card>
