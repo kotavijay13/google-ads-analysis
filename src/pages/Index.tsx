@@ -2,7 +2,6 @@
 import { useState } from 'react';
 import Header from '@/components/Header';
 import MetricsOverview from '@/components/MetricsOverview';
-import PerformanceChart from '@/components/PerformanceChart';
 import CampaignTable from '@/components/CampaignTable';
 import Top5AIInsights from '@/components/Top5AIInsights';
 import { getOverviewMetrics, getDailyPerformance, getCampaigns } from '@/data/mockData';
@@ -29,13 +28,8 @@ const Index = () => {
         <div className="space-y-8">
           <MetricsOverview metrics={metrics} />
           
-          <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-            <div className="lg:col-span-2">
-              <PerformanceChart data={dailyPerformance} />
-            </div>
-            <div className="lg:col-span-1">
-              <Top5AIInsights onInsightCompleted={handleInsightCompleted} />
-            </div>
+          <div className="w-full">
+            <Top5AIInsights onInsightCompleted={handleInsightCompleted} />
           </div>
           
           <CampaignTable campaigns={campaigns} />
