@@ -286,16 +286,33 @@ const MetaAdsPage = () => {
       <Tabs defaultValue="campaigns" className="mt-6">
         <TabsList className="mb-4 w-full justify-start">
           <TabsTrigger value="campaigns">Campaigns</TabsTrigger>
+          <TabsTrigger value="adsets">Ad Sets</TabsTrigger>
+          <TabsTrigger value="ads">Ads</TabsTrigger>
           <TabsTrigger value="audience">Audience</TabsTrigger>
           <TabsTrigger value="creative">Creative</TabsTrigger>
           <TabsTrigger value="budget">Budget & Bidding</TabsTrigger>
         </TabsList>
         
         <TabsContent value="campaigns" className="mt-0">
-          <MetaAccountsTable
+          <CampaignLevelTable
             accounts={mockMetaAccounts}
             selectedAccount={selectedAccount}
-            loading={isLoading}
+            onSelectAccount={handleSelectAccount}
+          />
+        </TabsContent>
+        
+        <TabsContent value="adsets" className="mt-0">
+          <AdSetLevelTable
+            accounts={mockMetaAccounts}
+            selectedAccount={selectedAccount}
+            onSelectAccount={handleSelectAccount}
+          />
+        </TabsContent>
+        
+        <TabsContent value="ads" className="mt-0">
+          <AdLevelTable
+            accounts={mockMetaAccounts}
+            selectedAccount={selectedAccount}
             onSelectAccount={handleSelectAccount}
           />
         </TabsContent>

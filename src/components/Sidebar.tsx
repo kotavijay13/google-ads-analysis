@@ -21,51 +21,61 @@ const navigationItems = [
     title: "Integrations",
     path: "/integrations",
     icon: Link,
+    color: "text-purple-600",
   },
   {
     title: "Dashboard",
     path: "/",
     icon: LayoutDashboard,
+    color: "text-blue-600",
   },
   {
     title: "Google Ads",
     path: "/google-ads",
     icon: TrendingUp,
+    color: "text-green-600",
   },
   {
     title: "Meta Ads",
     path: "/meta-ads",
     icon: Facebook,
+    color: "text-blue-700",
   },
   {
     title: "WhatsApp",
     path: "/whatsapp",
     icon: MessageSquare,
+    color: "text-green-500",
   },
   {
     title: "SEO",
     path: "/seo",
     icon: ListChecks,
+    color: "text-orange-600",
   },
   {
     title: "Search Console",
     path: "/search-console",
     icon: Search,
+    color: "text-red-600",
   },
   {
     title: "Leads",
     path: "/leads",
     icon: Users,
+    color: "text-indigo-600",
   },
   {
     title: "Forms",
     path: "/forms",
     icon: FileText,
+    color: "text-gray-600",
   },
   {
     title: "Competition Analysis",
     path: "/competition",
     icon: PieChart,
+    color: "text-pink-600",
   }
 ];
 
@@ -111,7 +121,7 @@ export const MainSidebar = () => {
                     )}
                     tooltip={item.title}
                   >
-                    <item.icon size={20} />
+                    <item.icon size={20} className={item.color} />
                     <span>{item.title}</span>
                   </SidebarMenuButton>
                 </SidebarMenuItem>
