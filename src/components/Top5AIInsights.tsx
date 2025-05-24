@@ -97,7 +97,6 @@ const Top5AIInsights = ({ onInsightCompleted }: Top5AIInsightsProps) => {
           icon: AlertTriangle,
           actionable: true
         },
-        // Keep some existing insights that are still relevant
         ...insights.slice(2, 5)
       ];
       
