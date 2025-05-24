@@ -12,29 +12,33 @@ import {
   getOverviewMetrics
 } from "@/data/mockData";
 
-// Mock campaigns data since getCampaigns is not available
+// Mock campaigns data with all required Campaign interface properties
 const mockCampaigns = [
   {
     id: "1",
     name: "Spring Collection Campaign",
-    status: "Active",
+    status: "Active" as const,
     impressions: 45000,
     clicks: 1200,
     ctr: 2.67,
     cpc: 0.85,
     conversions: 89,
-    spend: 1020
+    spend: 1020,
+    conversionRate: 7.42, // (89/1200) * 100
+    costPerConversion: 11.46 // 1020/89
   },
   {
     id: "2", 
     name: "Summer Promotion",
-    status: "Active",
+    status: "Active" as const,
     impressions: 32000,
     clicks: 890,
     ctr: 2.78,
     cpc: 0.92,
     conversions: 67,
-    spend: 819
+    spend: 819,
+    conversionRate: 7.53, // (67/890) * 100
+    costPerConversion: 12.22 // 819/67
   }
 ];
 
