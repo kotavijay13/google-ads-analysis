@@ -1,17 +1,16 @@
 
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import Header from '@/components/Header';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
+import { Card, CardContent } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Globe, ExternalLink, RefreshCw, Loader2, LinkIcon } from 'lucide-react';
-import { cn } from '@/lib/utils';
+import { Globe } from 'lucide-react';
 import GoogleSearchConsoleIntegration from '@/components/GoogleSearchConsoleIntegration';
 import { supabase } from '@/integrations/supabase/client';
-import { useAuth } from '@/context/AuthContext';
 import { toast } from '@/components/ui/sonner';
 import { useSearchConsoleIntegration } from '@/components/google-search-console/useSearchConsoleIntegration';
+import WebsiteSelector from '@/components/seo/WebsiteSelector';
+import SEOStatsCards from '@/components/seo/SEOStatsCards';
+import KeywordTable from '@/components/seo/KeywordTable';
 
 // Top pages sample data
 const topPages = [
@@ -40,7 +39,6 @@ const availableWebsites = [
 ];
 
 const SEOPage = () => {
-  const { user } = useAuth();
   const [activeTab, setActiveTab] = useState('keywords');
   const [isRefreshing, setIsRefreshing] = useState(false);
   const [selectedWebsite, setSelectedWebsite] = useState<string>('mergeinsights.ai');
@@ -116,124 +114,21 @@ const SEOPage = () => {
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-6">
         {/* Website Selection */}
         <div className="lg:col-span-1">
-          <Card>
-            <CardHeader>
-              <CardTitle className="text-lg">Website Details</CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-4">
-              <div>
-                <label className="text-sm font-medium text-muted-foreground mb-2 block">
-                  Select Website
-                </label>
-                <Select value={selectedWebsite} onValueChange={handleWebsiteChange}>
-                  <SelectTrigger className="w-full">
-                    <SelectValue placeholder="Choose a website" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {availableWebsites.map((website) => (
-                      <SelectItem key={website} value={website}>
-                        <div className="flex items-center gap-2">
-                          <Globe className="h-4 w-4" />
-                          {website}
-                        </div>
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              </div>
-              
-              <div className="flex items-center gap-2 pt-2">
-                <span className="text-lg font-semibold text-blue-600">{selectedWebsite}</span>
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  onClick={() => window.open(`https://${selectedWebsite}`, '_blank')}
-                  className="p-1 h-6 w-6"
-                >
-                  <ExternalLink className="h-4 w-4" />
-                </Button>
-              </div>
-
-              <div className="flex flex-col gap-2">
-                <Button 
-                  onClick={connected ? () => {} : handleConnect}
-                  disabled={gscLoading}
-                  variant={connected ? "secondary" : "default"}
-                  className="flex items-center gap-2 w-full"
-                >
-                  {gscLoading ? (
-                    <Loader2 className="h-4 w-4 animate-spin" />
-                  ) : (
-                    <LinkIcon className="h-4 w-4" />
-                  )}
-                  {connected ? 'Connected to GSC' : 'Connect Google Search Console'}
-                </Button>
-                
-                <Button 
-                  onClick={handleRefreshSerpData}
-                  disabled={isRefreshing}
-                  variant="outline"
-                  className="flex items-center gap-2 w-full"
-                >
-                  {isRefreshing ? (
-                    <Loader2 className="h-4 w-4 animate-spin" />
-                  ) : (
-                    <RefreshCw className="h-4 w-4" />
-                  )}
-                  {isRefreshing ? 'Refreshing...' : 'Refresh'}
-                </Button>
-              </div>
-            </CardContent>
-          </Card>
+          <WebsiteSelector
+            selectedWebsite={selectedWebsite}
+            availableWebsites={availableWebsites}
+            connected={connected}
+            gscLoading={gscLoading}
+            isRefreshing={isRefreshing}
+            onWebsiteChange={handleWebsiteChange}
+            onConnect={handleConnect}
+            onRefresh={handleRefreshSerpData}
+          />
         </div>
 
         {/* SEO Overview Stats */}
         <div className="lg:col-span-2">
-          <div className="mb-4">
-            <h2 className="text-xl font-semibold">SEO Overview</h2>
-          </div>
-          
-          <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-            <Card>
-              <CardContent className="pt-6">
-                <div className="space-y-2">
-                  <p className="text-sm font-medium text-muted-foreground">Organic Traffic</p>
-                  <p className="text-3xl font-bold">5,238</p>
-                  <p className="text-sm text-green-500">+12% from last month</p>
-                </div>
-              </CardContent>
-            </Card>
-            
-            <Card>
-              <CardContent className="pt-6">
-                <div className="space-y-2">
-                  <p className="text-sm font-medium text-muted-foreground">Keywords Ranked</p>
-                  <p className="text-3xl font-bold">{serpStats.totalKeywords}</p>
-                  <p className="text-sm text-green-500">+{serpStats.top10Keywords} in top 10</p>
-                </div>
-              </CardContent>
-            </Card>
-            
-            <Card>
-              <CardContent className="pt-6">
-                <div className="space-y-2">
-                  <p className="text-sm font-medium text-muted-foreground">Average Position</p>
-                  <p className="text-3xl font-bold">{serpStats.avgPosition}</p>
-                  <p className="text-sm text-green-500">Improved by 1.2</p>
-                </div>
-              </CardContent>
-            </Card>
-            
-            <Card>
-              <CardContent className="pt-6">
-                <div className="space-y-2">
-                  <p className="text-sm font-medium text-muted-foreground">Est. Traffic</p>
-                  <p className="text-3xl font-bold">{serpStats.estTraffic.toLocaleString()}</p>
-                  <p className="text-sm text-green-500">+18% from SERP data</p>
-                </div>
-              </CardContent>
-            </Card>
-          </div>
+          <SEOStatsCards serpStats={serpStats} />
         </div>
       </div>
 
@@ -251,50 +146,7 @@ const SEOPage = () => {
         </TabsList>
 
         <TabsContent value="keywords" className="space-y-4">
-          <div className="bg-white rounded-lg shadow">
-            <div className="p-4 border-b">
-              <h3 className="text-lg font-semibold">Top Ranking Keywords</h3>
-              <p className="text-sm text-muted-foreground">Data from SERP API analysis</p>
-            </div>
-            <div className="overflow-x-auto">
-              <table className="w-full">
-                <thead>
-                  <tr className="border-b bg-muted/50">
-                    <th className="text-left py-3 px-4">Keyword</th>
-                    <th className="text-center py-3 px-4">Position</th>
-                    <th className="text-center py-3 px-4">Change</th>
-                    <th className="text-center py-3 px-4">Search Volume</th>
-                    <th className="text-right py-3 px-4">Difficulty</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {serpKeywords.map((keyword, index) => (
-                    <tr key={index} className="border-b hover:bg-muted/20">
-                      <td className="py-3 px-4">{keyword.keyword}</td>
-                      <td className="py-3 px-4 text-center">{keyword.position}</td>
-                      <td className="py-3 px-4 text-center">
-                        <span className={cn(
-                          "font-medium",
-                          keyword.change.startsWith("+") ? "text-green-500" : "text-red-500"
-                        )}>
-                          {keyword.change}
-                        </span>
-                      </td>
-                      <td className="py-3 px-4 text-center">{keyword.impressions?.toLocaleString()}</td>
-                      <td className="py-3 px-4 text-right">
-                        <span className={cn(
-                          "px-2 py-1 rounded text-xs font-medium",
-                          keyword.position <= 3 ? "bg-red-100 text-red-700" : "bg-yellow-100 text-yellow-700"
-                        )}>
-                          {keyword.position <= 3 ? "High" : "Medium"}
-                        </span>
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
-          </div>
+          <KeywordTable keywords={serpKeywords} />
         </TabsContent>
 
         <TabsContent value="pages">
