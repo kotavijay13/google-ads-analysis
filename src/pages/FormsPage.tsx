@@ -1,6 +1,6 @@
-
 import { useState } from 'react';
 import Header from '@/components/Header';
+import WebsiteFormConnector from '@/components/WebsiteFormConnector';
 import { Card, CardContent, CardHeader, CardTitle, CardFooter } from '@/components/ui/card';
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -296,23 +296,26 @@ const FormsPage = () => {
         </TabsContent>
         
         <TabsContent value="website" className="mt-0">
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-            {forms
-              .filter(form => form.source === 'website')
-              .map(form => (
-                <Card key={form.id}>
-                  {/* Same card content as above */}
-                  <CardHeader className="pb-2">
-                    <CardTitle className="flex items-center">
-                      <LinkIcon className="mr-2 h-4 w-4 text-blue-500" />
-                      {form.name}
-                    </CardTitle>
-                  </CardHeader>
-                  <CardContent>
-                    <p className="text-sm text-muted-foreground mb-2">{form.description}</p>
-                  </CardContent>
-                </Card>
-              ))}
+          <div className="space-y-6">
+            <WebsiteFormConnector />
+            
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+              {forms
+                .filter(form => form.source === 'website')
+                .map(form => (
+                  <Card key={form.id}>
+                    <CardHeader className="pb-2">
+                      <CardTitle className="flex items-center">
+                        <LinkIcon className="mr-2 h-4 w-4 text-blue-500" />
+                        {form.name}
+                      </CardTitle>
+                    </CardHeader>
+                    <CardContent>
+                      <p className="text-sm text-muted-foreground mb-2">{form.description}</p>
+                    </CardContent>
+                  </Card>
+                ))}
+            </div>
           </div>
         </TabsContent>
         
@@ -322,7 +325,6 @@ const FormsPage = () => {
               .filter(form => form.source === 'facebook')
               .map(form => (
                 <Card key={form.id}>
-                  {/* Same card content as above */}
                   <CardHeader className="pb-2">
                     <CardTitle className="flex items-center">
                       <Facebook className="mr-2 h-4 w-4 text-blue-600" />
@@ -339,11 +341,22 @@ const FormsPage = () => {
         
         <TabsContent value="manual" className="mt-0">
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+            <Card className="border-dashed border-2 border-gray-200 bg-gray-50">
+              <CardContent className="pt-6 flex flex-col items-center justify-center h-full min-h-[12rem]">
+                <Button onClick={() => setIsCreating(true)} className="mb-4">
+                  <PlusCircle className="mr-2 h-4 w-4" />
+                  Create New Form
+                </Button>
+                <p className="text-sm text-muted-foreground text-center">
+                  Create a custom form manually
+                </p>
+              </CardContent>
+            </Card>
+            
             {forms
               .filter(form => form.source === 'manual')
               .map(form => (
                 <Card key={form.id}>
-                  {/* Same card content as above */}
                   <CardHeader className="pb-2">
                     <CardTitle className="flex items-center">
                       <FileText className="mr-2 h-4 w-4 text-gray-500" />
