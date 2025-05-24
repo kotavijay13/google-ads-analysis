@@ -1,15 +1,17 @@
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import Header from '@/components/Header';
-import { Card, CardContent } from '@/components/ui/card';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts';
-import { CalendarIcon } from 'lucide-react';
+import { Globe, ExternalLink, RefreshCw, Loader2 } from 'lucide-react';
 import { format } from 'date-fns';
 import { cn } from '@/lib/utils';
-import { Calendar } from '@/components/ui/calendar';
-import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
+import GoogleSearchConsoleIntegration from '@/components/GoogleSearchConsoleIntegration';
+import { supabase } from '@/integrations/supabase/client';
+import { useAuth } from '@/context/AuthContext';
+import { toast } from '@/components/ui/sonner';
 
 // Sample SEO data for visualization
 const seoData = [
@@ -61,8 +63,8 @@ const topPages = [
   { url: '/about', impressions: 1600, clicks: 140, ctr: 8.8, position: 3.0 },
 ];
 
-// Top keywords sample data
-const topKeywords = [
+// Initial sample keywords
+const initialKeywords = [
   { keyword: 'digital marketing agency', impressions: 5400, clicks: 260, ctr: 9.3, position: 3, change: '+2' },
   { keyword: 'social media services', impressions: 3200, clicks: 220, ctr: 9.2, position: 5, change: '-1' },
   { keyword: 'ppc management', impressions: 2800, clicks: 190, ctr: 9.0, position: 2, change: '+4' },
@@ -71,26 +73,111 @@ const topKeywords = [
 ];
 
 const SEOPage = () => {
-  const [date, setDate] = useState<{
-    from: Date;
-    to: Date;
-  }>({
-    from: new Date(2025, 3, 20), // April 20, 2025
-    to: new Date(2025, 4, 20),   // May 20, 2025
-  });
+  const { user } = useAuth();
   const [activeMetric, setActiveMetric] = useState('organicTraffic');
   const [activeTab, setActiveTab] = useState('keywords');
-
-  // For demo purposes only - would connect to actual SEO data API
-  const handleRefresh = () => {
-    console.log('Refreshing SEO data...');
-  };
+  const [isRefreshing, setIsRefreshing] = useState(false);
+  const [selectedWebsite, setSelectedWebsite] = useState<string>('mergeinsights.ai');
+  const [serpKeywords, setSerpKeywords] = useState(initialKeywords);
+  const [serpStats, setSerpStats] = useState({
+    totalKeywords: 5,
+    top10Keywords: 3,
+    avgPosition: '3.6',
+    estTraffic: 970
+  });
 
   // Get last 30 days data
   const last30Days = seoData.slice(-30);
 
+  const handleRefreshSerpData = async () => {
+    if (!selectedWebsite) {
+      toast.error('Please select a website to analyze');
+      return;
+    }
+
+    setIsRefreshing(true);
+    console.log(`Fetching SERP data for: ${selectedWebsite}`);
+
+    try {
+      const { data, error } = await supabase.functions.invoke('serp-api', {
+        body: { websiteUrl: selectedWebsite }
+      });
+
+      if (error) {
+        console.error('SERP API error:', error);
+        throw error;
+      }
+
+      if (data.keywords && data.keywords.length > 0) {
+        setSerpKeywords(data.keywords);
+        setSerpStats(data.stats);
+        toast.success(`Successfully loaded ${data.keywords.length} keywords from SERP analysis`);
+      } else {
+        toast.warning('No keyword data found for this website');
+      }
+    } catch (error) {
+      console.error('Error fetching SERP data:', error);
+      toast.error('Failed to fetch SERP data. Please try again.');
+    } finally {
+      setIsRefreshing(false);
+    }
+  };
+
+  const handleWebsiteChange = (website: string) => {
+    setSelectedWebsite(website);
+    console.log(`Selected website: ${website}`);
+  };
+
   return (
     <div className="container mx-auto py-6 px-4 max-w-7xl">
+      {/* Website Details Section */}
+      <div className="mb-6">
+        <Card>
+          <CardHeader>
+            <div className="flex items-center justify-between">
+              <div className="flex items-center space-x-4">
+                <div className="text-primary p-2 bg-primary/10 rounded-lg">
+                  <Globe className="w-6 h-6" />
+                </div>
+                <div>
+                  <CardTitle className="text-xl">Website Analysis</CardTitle>
+                  <div className="flex items-center gap-2 mt-1">
+                    <span className="text-lg font-semibold text-blue-600">{selectedWebsite}</span>
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      onClick={() => window.open(`https://${selectedWebsite}`, '_blank')}
+                      className="p-1 h-6 w-6"
+                    >
+                      <ExternalLink className="h-4 w-4" />
+                    </Button>
+                  </div>
+                </div>
+              </div>
+              <div className="flex items-center gap-2">
+                <Button 
+                  onClick={handleRefreshSerpData}
+                  disabled={isRefreshing}
+                  className="flex items-center gap-2"
+                >
+                  {isRefreshing ? (
+                    <Loader2 className="h-4 w-4 animate-spin" />
+                  ) : (
+                    <RefreshCw className="h-4 w-4" />
+                  )}
+                  {isRefreshing ? 'Analyzing...' : 'Refresh SERP Data'}
+                </Button>
+              </div>
+            </div>
+          </CardHeader>
+        </Card>
+      </div>
+
+      {/* Google Search Console Integration */}
+      <div className="mb-6">
+        <GoogleSearchConsoleIntegration />
+      </div>
+
       <div className="flex items-center justify-between mb-6">
         <div className="flex items-center space-x-4">
           <div className="text-primary p-2 bg-primary/10 rounded-lg">
@@ -103,63 +190,11 @@ const SEOPage = () => {
             </p>
           </div>
         </div>
-        <div className="flex items-center gap-2">
-          <Button variant="outline">
-            <span className="mr-2">Reports</span>
-          </Button>
-          <Button variant="outline">
-            <span className="mr-2">Analytics</span>
-          </Button>
-          <Button onClick={handleRefresh}>
-            Refresh Data
-          </Button>
-        </div>
       </div>
 
       <div className="mb-6">
         <h2 className="text-xl font-semibold mb-4">SEO Overview</h2>
         
-        <div className="flex justify-end mb-4">
-          <Popover>
-            <PopoverTrigger asChild>
-              <Button
-                variant={"outline"}
-                className={"w-full md:w-auto justify-start text-left font-normal"}
-              >
-                <CalendarIcon className="mr-2 h-4 w-4" />
-                {date.from ? (
-                  date.to ? (
-                    <>
-                      {format(date.from, "dd MMM yyyy")} - {format(date.to, "dd MMM yyyy")}
-                    </>
-                  ) : (
-                    format(date.from, "dd MMM yyyy")
-                  )
-                ) : (
-                  <span>Pick a date range</span>
-                )}
-              </Button>
-            </PopoverTrigger>
-            <PopoverContent className="w-auto p-0" align="end">
-              <Calendar
-                initialFocus
-                mode="range"
-                defaultMonth={date.from}
-                selected={date}
-                onSelect={(selectedDate) => {
-                  if (selectedDate?.from && selectedDate?.to) {
-                    setDate({
-                      from: selectedDate.from,
-                      to: selectedDate.to
-                    });
-                  }
-                }}
-                numberOfMonths={2}
-              />
-            </PopoverContent>
-          </Popover>
-        </div>
-
         <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
           <Card>
             <CardContent className="pt-6">
@@ -175,8 +210,8 @@ const SEOPage = () => {
             <CardContent className="pt-6">
               <div className="space-y-2">
                 <p className="text-sm font-medium text-muted-foreground">Keywords Ranked</p>
-                <p className="text-3xl font-bold">143</p>
-                <p className="text-sm text-green-500">+5 new this month</p>
+                <p className="text-3xl font-bold">{serpStats.totalKeywords}</p>
+                <p className="text-sm text-green-500">+{serpStats.top10Keywords} in top 10</p>
               </div>
             </CardContent>
           </Card>
@@ -185,7 +220,7 @@ const SEOPage = () => {
             <CardContent className="pt-6">
               <div className="space-y-2">
                 <p className="text-sm font-medium text-muted-foreground">Average Position</p>
-                <p className="text-3xl font-bold">12.4</p>
+                <p className="text-3xl font-bold">{serpStats.avgPosition}</p>
                 <p className="text-sm text-green-500">Improved by 1.2</p>
               </div>
             </CardContent>
@@ -194,9 +229,9 @@ const SEOPage = () => {
           <Card>
             <CardContent className="pt-6">
               <div className="space-y-2">
-                <p className="text-sm font-medium text-muted-foreground">Revenue Generated</p>
-                <p className="text-3xl font-bold">$24,680</p>
-                <p className="text-sm text-green-500">+18% from last month</p>
+                <p className="text-sm font-medium text-muted-foreground">Est. Traffic</p>
+                <p className="text-3xl font-bold">{serpStats.estTraffic.toLocaleString()}</p>
+                <p className="text-sm text-green-500">+18% from SERP data</p>
               </div>
             </CardContent>
           </Card>
@@ -215,6 +250,7 @@ const SEOPage = () => {
           <div className="bg-white rounded-lg shadow">
             <div className="p-4 border-b">
               <h3 className="text-lg font-semibold">Top Ranking Keywords</h3>
+              <p className="text-sm text-muted-foreground">Data from SERP API analysis</p>
             </div>
             <div className="overflow-x-auto">
               <table className="w-full">
@@ -228,7 +264,7 @@ const SEOPage = () => {
                   </tr>
                 </thead>
                 <tbody>
-                  {topKeywords.map((keyword, index) => (
+                  {serpKeywords.map((keyword, index) => (
                     <tr key={index} className="border-b hover:bg-muted/20">
                       <td className="py-3 px-4">{keyword.keyword}</td>
                       <td className="py-3 px-4 text-center">{keyword.position}</td>
@@ -240,7 +276,7 @@ const SEOPage = () => {
                           {keyword.change}
                         </span>
                       </td>
-                      <td className="py-3 px-4 text-center">{keyword.impressions.toLocaleString()}</td>
+                      <td className="py-3 px-4 text-center">{keyword.impressions?.toLocaleString() || keyword.searchVolume?.toLocaleString()}</td>
                       <td className="py-3 px-4 text-right">
                         <span className={cn(
                           "px-2 py-1 rounded text-xs font-medium",
@@ -349,9 +385,9 @@ const SEOPage = () => {
           <Card>
             <CardContent className="pt-6">
               <h3 className="text-lg font-semibold">URL Meta Data Analysis</h3>
-              <p className="text-muted-foreground mb-6">Meta title and description optimization status</p>
+              <p className="text-muted-foreground mb-6">Meta title and description optimization status for {selectedWebsite}</p>
               <div className="p-6 border rounded-lg bg-muted/20">
-                <p>Connect your site to analyze URL meta data</p>
+                <p>URL meta data analysis will be populated from Google Search Console data when connected</p>
               </div>
             </CardContent>
           </Card>
@@ -361,9 +397,9 @@ const SEOPage = () => {
           <Card>
             <CardContent className="pt-6">
               <h3 className="text-lg font-semibold">Site Performance Metrics</h3>
-              <p className="text-muted-foreground mb-6">Page speed and core web vitals</p>
+              <p className="text-muted-foreground mb-6">Page speed and core web vitals for {selectedWebsite}</p>
               <div className="p-6 border rounded-lg bg-muted/20">
-                <p>Connect your site to analyze performance metrics</p>
+                <p>Performance metrics will be integrated with Google Search Console and Meta Ads data</p>
               </div>
             </CardContent>
           </Card>
