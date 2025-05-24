@@ -487,7 +487,7 @@ export const keywordPerformanceData: KeywordData[] = [
     qualityScore: 8,
     expectedCtr: 'Above average',
     adRelevance: 'Average',
-    landingPageExp: 'Above average'
+    landingPageExp: 'Average'
   },
   {
     id: '9',
@@ -890,4 +890,12 @@ export const getOverviewMetrics = () => {
     avgConvRate,
     avgCPA
   };
+};
+
+export const getDailyPerformance = () => {
+  return dailyPerformance;
+};
+
+export const getCampaigns = () => {
+  return campaignsData;
 };
