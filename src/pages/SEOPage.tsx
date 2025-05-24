@@ -5,7 +5,6 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts';
 import { Globe, ExternalLink, RefreshCw, Loader2, LinkIcon } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import GoogleSearchConsoleIntegration from '@/components/GoogleSearchConsoleIntegration';
@@ -13,47 +12,6 @@ import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/context/AuthContext';
 import { toast } from '@/components/ui/sonner';
 import { useSearchConsoleIntegration } from '@/components/google-search-console/useSearchConsoleIntegration';
-
-// Sample SEO data for visualization
-const seoData = [
-  { date: '2025-04-20', organicTraffic: 1200, impressions: 8500, clicks: 420, position: 18 },
-  { date: '2025-04-21', organicTraffic: 1250, impressions: 9000, clicks: 450, position: 17 },
-  { date: '2025-04-22', organicTraffic: 1300, impressions: 9200, clicks: 470, position: 16 },
-  { date: '2025-04-23', organicTraffic: 1320, impressions: 9400, clicks: 490, position: 15 },
-  { date: '2025-04-24', organicTraffic: 1400, impressions: 9600, clicks: 510, position: 15 },
-  { date: '2025-04-25', organicTraffic: 1450, impressions: 9800, clicks: 530, position: 14 },
-  { date: '2025-04-26', organicTraffic: 1500, impressions: 10000, clicks: 550, position: 14 },
-  { date: '2025-04-27', organicTraffic: 1550, impressions: 10200, clicks: 570, position: 13 },
-  { date: '2025-04-28', organicTraffic: 1600, impressions: 10400, clicks: 590, position: 13 },
-  { date: '2025-04-29', organicTraffic: 1650, impressions: 10600, clicks: 610, position: 12 },
-  { date: '2025-04-30', organicTraffic: 1700, impressions: 10800, clicks: 630, position: 12 },
-  { date: '2025-05-01', organicTraffic: 1750, impressions: 11000, clicks: 650, position: 11 },
-  { date: '2025-05-02', organicTraffic: 1800, impressions: 11200, clicks: 670, position: 11 },
-  { date: '2025-05-03', organicTraffic: 1850, impressions: 11400, clicks: 690, position: 10 },
-  { date: '2025-05-04', organicTraffic: 1900, impressions: 11600, clicks: 710, position: 10 },
-  { date: '2025-05-05', organicTraffic: 1950, impressions: 11800, clicks: 730, position: 9 },
-  { date: '2025-05-06', organicTraffic: 2000, impressions: 12000, clicks: 750, position: 9 },
-  { date: '2025-05-07', organicTraffic: 2050, impressions: 12200, clicks: 770, position: 8 },
-  { date: '2025-05-08', organicTraffic: 2100, impressions: 12400, clicks: 790, position: 8 },
-  { date: '2025-05-09', organicTraffic: 2150, impressions: 12600, clicks: 810, position: 7 },
-  { date: '2025-05-10', organicTraffic: 2200, impressions: 12800, clicks: 830, position: 7 },
-  { date: '2025-05-11', organicTraffic: 2250, impressions: 13000, clicks: 850, position: 6 },
-  { date: '2025-05-12', organicTraffic: 2300, impressions: 13200, clicks: 870, position: 6 },
-  { date: '2025-05-13', organicTraffic: 2350, impressions: 13400, clicks: 890, position: 5 },
-  { date: '2025-05-14', organicTraffic: 2400, impressions: 13600, clicks: 910, position: 5 },
-  { date: '2025-05-15', organicTraffic: 2450, impressions: 13800, clicks: 930, position: 4 },
-  { date: '2025-05-16', organicTraffic: 2500, impressions: 14000, clicks: 950, position: 4 },
-  { date: '2025-05-17', organicTraffic: 2550, impressions: 14200, clicks: 970, position: 3 },
-  { date: '2025-05-18', organicTraffic: 2600, impressions: 14400, clicks: 990, position: 3 },
-  { date: '2025-05-19', organicTraffic: 2650, impressions: 14600, clicks: 1010, position: 2 },
-  { date: '2025-05-20', organicTraffic: 2700, impressions: 14800, clicks: 1030, position: 2 },
-];
-
-// Format date for display
-const formatDate = (dateStr: string) => {
-  const date = new Date(dateStr);
-  return `${(date.getMonth() + 1).toString().padStart(2, '0')}/${date.getDate().toString().padStart(2, '0')}`;
-};
 
 // Top pages sample data
 const topPages = [
@@ -83,7 +41,6 @@ const availableWebsites = [
 
 const SEOPage = () => {
   const { user } = useAuth();
-  const [activeMetric, setActiveMetric] = useState('organicTraffic');
   const [activeTab, setActiveTab] = useState('keywords');
   const [isRefreshing, setIsRefreshing] = useState(false);
   const [selectedWebsite, setSelectedWebsite] = useState<string>('mergeinsights.ai');
@@ -100,9 +57,6 @@ const SEOPage = () => {
     handleConnect,
     isLoading: gscLoading
   } = useSearchConsoleIntegration();
-
-  // Get last 30 days data
-  const last30Days = seoData.slice(-30);
 
   const handleRefreshSerpData = async () => {
     if (!selectedWebsite) {
@@ -341,62 +295,6 @@ const SEOPage = () => {
               </table>
             </div>
           </div>
-
-          <Card className="mt-6">
-            <CardContent className="pt-6">
-              <h3 className="text-lg font-semibold mb-4">Keyword Performance over Time</h3>
-              <div className="h-[350px]">
-                <ResponsiveContainer width="100%" height="100%">
-                  <LineChart
-                    data={last30Days}
-                    margin={{ top: 5, right: 30, left: 20, bottom: 5 }}
-                  >
-                    <CartesianGrid strokeDasharray="3 3" />
-                    <XAxis 
-                      dataKey="date" 
-                      tickFormatter={formatDate}
-                      tick={{ fontSize: 12 }}
-                      tickCount={7}
-                    />
-                    <YAxis 
-                      tickFormatter={(value) => 
-                        activeMetric === 'position' 
-                          ? value.toFixed(1) 
-                          : value >= 1000 
-                            ? `${(value/1000).toFixed(1)}k` 
-                            : value
-                      }
-                    />
-                    <Tooltip 
-                      formatter={(value: any) => [
-                        activeMetric === 'position' 
-                          ? value.toFixed(1) 
-                          : value.toLocaleString(),
-                        activeMetric === 'organicTraffic' 
-                          ? 'Organic Traffic' 
-                          : activeMetric.charAt(0).toUpperCase() + activeMetric.slice(1)
-                      ]}
-                      labelFormatter={(label) => new Date(label).toLocaleDateString()}
-                    />
-                    <Legend />
-                    <Line 
-                      type="monotone" 
-                      dataKey={activeMetric} 
-                      stroke="#3b82f6" 
-                      strokeWidth={2}
-                      dot={false}
-                      activeDot={{ r: 6 }}
-                      name={
-                        activeMetric === 'organicTraffic' 
-                          ? 'Organic Traffic' 
-                          : activeMetric.charAt(0).toUpperCase() + activeMetric.slice(1)
-                      }
-                    />
-                  </LineChart>
-                </ResponsiveContainer>
-              </div>
-            </CardContent>
-          </Card>
         </TabsContent>
 
         <TabsContent value="pages">
