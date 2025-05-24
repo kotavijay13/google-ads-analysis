@@ -10,6 +10,7 @@ import GeoPerformance from '@/components/GeoPerformance';
 import KeywordPerformance from '@/components/KeywordPerformance';
 import AdCopyPerformance from '@/components/AdCopyPerformance';
 import AssetPerformance from '@/components/AssetPerformance';
+import SearchTermsPerformance from '@/components/SearchTermsPerformance';
 import { useGoogleAdsAPI } from '@/hooks/use-google-ads-api';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { 
@@ -21,7 +22,8 @@ import {
   keywordPerformanceData,
   adCopyPerformanceData,
   adGroupsData,
-  assetPerformanceData
+  assetPerformanceData,
+  searchTermsData
 } from '@/data/mockData';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { useGoogleAccounts } from '@/hooks/use-google-accounts';
@@ -105,6 +107,7 @@ const GoogleAdsPage = () => {
           <TabsTrigger value="keywords">Keywords</TabsTrigger>
           <TabsTrigger value="adcopy">Ad Copy</TabsTrigger>
           <TabsTrigger value="assets">Assets</TabsTrigger>
+          <TabsTrigger value="searchterms">Search Terms</TabsTrigger>
         </TabsList>
         
         <TabsContent value="campaigns" className="mt-0">
@@ -130,6 +133,14 @@ const GoogleAdsPage = () => {
         <TabsContent value="assets" className="mt-0">
           <AssetPerformance 
             assets={assetPerformanceData} 
+            campaigns={campaignsData}
+            adGroups={adGroupsData}
+          />
+        </TabsContent>
+        
+        <TabsContent value="searchterms" className="mt-0">
+          <SearchTermsPerformance 
+            searchTerms={searchTermsData} 
             campaigns={campaignsData}
             adGroups={adGroupsData}
           />
