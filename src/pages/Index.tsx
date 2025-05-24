@@ -4,7 +4,7 @@ import Header from '@/components/Header';
 import MetricsOverview from '@/components/MetricsOverview';
 import PerformanceChart from '@/components/PerformanceChart';
 import CampaignTable from '@/components/CampaignTable';
-import AIInsights from '@/components/AIInsights';
+import Top5AIInsights from '@/components/Top5AIInsights';
 import { getOverviewMetrics, getDailyPerformance, getCampaigns } from '@/data/mockData';
 
 const Index = () => {
@@ -15,6 +15,11 @@ const Index = () => {
   const handleRefresh = () => {
     // Refresh functionality - could trigger data refetch
     window.location.reload();
+  };
+
+  const handleInsightCompleted = (insightId: string) => {
+    console.log(`AI Insight ${insightId} has been completed and will trigger fresh data analysis`);
+    // Here you could trigger a refresh of related data based on the completed insight
   };
 
   return (
@@ -29,7 +34,7 @@ const Index = () => {
               <PerformanceChart data={dailyPerformance} />
             </div>
             <div className="lg:col-span-1">
-              <AIInsights data={metrics} type="campaign" />
+              <Top5AIInsights onInsightCompleted={handleInsightCompleted} />
             </div>
           </div>
           
