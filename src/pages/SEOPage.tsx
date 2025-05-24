@@ -276,7 +276,7 @@ const SEOPage = () => {
                           {keyword.change}
                         </span>
                       </td>
-                      <td className="py-3 px-4 text-center">{keyword.impressions?.toLocaleString() || keyword.searchVolume?.toLocaleString()}</td>
+                      <td className="py-3 px-4 text-center">{keyword.impressions?.toLocaleString()}</td>
                       <td className="py-3 px-4 text-right">
                         <span className={cn(
                           "px-2 py-1 rounded text-xs font-medium",
@@ -399,7 +399,7 @@ const SEOPage = () => {
               <h3 className="text-lg font-semibold">Site Performance Metrics</h3>
               <p className="text-muted-foreground mb-6">Page speed and core web vitals for {selectedWebsite}</p>
               <div className="p-6 border rounded-lg bg-muted/20">
-                <p>Performance metrics will be integrated with Google Search Console and Meta Ads data</p>
+                <p>Performance metrics will be integrated with Google Search Console data</p>
               </div>
             </CardContent>
           </Card>
