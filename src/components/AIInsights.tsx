@@ -7,7 +7,7 @@ import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover
 
 interface AIInsightsProps {
   data: any;
-  type: 'campaign' | 'adset' | 'ad';
+  type: 'campaign' | 'adset' | 'ad' | 'searchterm';
 }
 
 const AIInsights = ({ data, type }: AIInsightsProps) => {
