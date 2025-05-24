@@ -1,4 +1,5 @@
 
+
 // Type exports
 export type {
   Campaign,
@@ -23,6 +24,10 @@ export { searchTermsData } from './searchTerms';
 // Utility function exports
 export { getOverviewMetrics } from './utils';
 
+// Import the data needed for legacy functions
+import { dailyPerformance } from './performance';
+import { campaignsData } from './campaigns';
+
 // Legacy function exports for backward compatibility
 export const getDailyPerformance = () => {
   return dailyPerformance;
@@ -31,3 +36,4 @@ export const getDailyPerformance = () => {
 export const getCampaigns = () => {
   return campaignsData;
 };
+
