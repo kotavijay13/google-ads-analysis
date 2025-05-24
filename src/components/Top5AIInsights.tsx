@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { Brain, RefreshCw, Loader2, TrendingUp, AlertTriangle, Target, Users, Search } from 'lucide-react';
+import { Brain, RefreshCw, Loader2, TrendingUp, AlertTriangle, Target, Users, Search, LucideIcon } from 'lucide-react';
 
 interface AIInsight {
   id: string;
@@ -10,7 +10,7 @@ interface AIInsight {
   description: string;
   impact: 'High Impact' | 'Medium Impact' | 'Low Impact';
   source: 'Google Ads' | 'Meta Ads' | 'SEO' | 'Leads' | 'Competition';
-  icon: React.ComponentType;
+  icon: LucideIcon;
   actionable: boolean;
 }
 
