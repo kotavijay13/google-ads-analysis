@@ -12,7 +12,7 @@ interface CampaignLevelTableProps {
 
 const CampaignLevelTable = ({ accounts, selectedAccount, onSelectAccount }: CampaignLevelTableProps) => {
   const [visibleColumns, setVisibleColumns] = useState([
-    'selected', 'campaignId', 'campaignName', 'status', 'budget', 'amountSpent', 'impressions', 'ctr', 'cpc', 'roas'
+    'selected', 'campaignId', 'campaignName', 'status', 'budget', 'amountSpent', 'impressions', 'ctr', 'cpc', 'roas', 'aiInsights'
   ]);
 
   const toggleColumn = (columnKey: string) => {
