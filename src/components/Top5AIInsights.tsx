@@ -185,7 +185,7 @@ const Top5AIInsights = ({ onInsightCompleted }: Top5AIInsightsProps) => {
               >
                 <div className="flex items-start justify-between mb-2">
                   <div className="flex items-center space-x-2">
-                    <IconComponent className="h-4 w-4 text-muted-foreground" />
+                    <IconComponent size={16} color="currentColor" />
                     <h4 className={`font-medium text-sm ${isCompleted ? 'line-through text-muted-foreground' : ''}`}>
                       {insight.title}
                     </h4>
