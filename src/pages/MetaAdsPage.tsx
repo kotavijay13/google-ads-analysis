@@ -7,6 +7,9 @@ import PerformanceChart from '@/components/PerformanceChart';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import MetaAccountsTable from '@/components/meta-ads/MetaAccountsTable';
+import CampaignLevelTable from '@/components/meta-ads/CampaignLevelTable';
+import AdSetLevelTable from '@/components/meta-ads/AdSetLevelTable';
+import AdLevelTable from '@/components/meta-ads/AdLevelTable';
 import { MetaAdsAccount } from '@/components/meta-ads/types';
 import { 
   dailyPerformance, 

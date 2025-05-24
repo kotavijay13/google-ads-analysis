@@ -9,9 +9,34 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { useState, useCallback } from "react";
 import { 
   dailyPerformance, 
-  getOverviewMetrics, 
-  getCampaigns 
+  getOverviewMetrics
 } from "@/data/mockData";
+
+// Mock campaigns data since getCampaigns is not available
+const mockCampaigns = [
+  {
+    id: "1",
+    name: "Spring Collection Campaign",
+    status: "Active",
+    impressions: 45000,
+    clicks: 1200,
+    ctr: 2.67,
+    cpc: 0.85,
+    conversions: 89,
+    spend: 1020
+  },
+  {
+    id: "2", 
+    name: "Summer Promotion",
+    status: "Active",
+    impressions: 32000,
+    clicks: 890,
+    ctr: 2.78,
+    cpc: 0.92,
+    conversions: 67,
+    spend: 819
+  }
+];
 
 const Index = () => {
   const [metrics, setMetrics] = useState(getOverviewMetrics());
@@ -38,7 +63,7 @@ const Index = () => {
 
   return (
     <div className="container mx-auto py-6 px-4 max-w-7xl">
-      <Header onRefresh={handleRefresh} />
+      <Header onRefresh={handleRefresh} title="Dashboard" />
       
       <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-6 gap-4">
         <h2 className="text-lg font-medium">Marketing Performance Overview</h2>
@@ -60,7 +85,7 @@ const Index = () => {
         <ChangeTracker />
       </div>
       
-      <CampaignTable campaigns={getCampaigns()} loading={isLoading} />
+      <CampaignTable campaigns={mockCampaigns} />
     </div>
   );
 };
