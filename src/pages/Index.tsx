@@ -2,11 +2,15 @@
 import { useState } from 'react';
 import Header from '@/components/Header';
 import MetricsOverview from '@/components/MetricsOverview';
+import PerformanceChart from '@/components/PerformanceChart';
+import CampaignTable from '@/components/CampaignTable';
 import AIInsights from '@/components/AIInsights';
-import { getOverviewMetrics } from '@/data/mockData';
+import { getOverviewMetrics, getDailyPerformance, getCampaigns } from '@/data/mockData';
 
 const Index = () => {
   const metrics = getOverviewMetrics();
+  const dailyPerformance = getDailyPerformance();
+  const campaigns = getCampaigns();
 
   const handleRefresh = () => {
     // Refresh functionality - could trigger data refetch
@@ -19,9 +23,17 @@ const Index = () => {
       <main className="container mx-auto px-4 py-8">
         <div className="space-y-8">
           <MetricsOverview metrics={metrics} />
-          <div className="grid grid-cols-1 gap-6">
-            <AIInsights data={metrics} type="campaign" />
+          
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+            <div className="lg:col-span-2">
+              <PerformanceChart data={dailyPerformance} />
+            </div>
+            <div className="lg:col-span-1">
+              <AIInsights data={metrics} type="campaign" />
+            </div>
           </div>
+          
+          <CampaignTable campaigns={campaigns} />
         </div>
       </main>
     </div>
