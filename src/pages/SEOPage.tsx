@@ -4,14 +4,15 @@ import Header from '@/components/Header';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts';
-import { Globe, ExternalLink, RefreshCw, Loader2 } from 'lucide-react';
-import { format } from 'date-fns';
+import { Globe, ExternalLink, RefreshCw, Loader2, LinkIcon } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import GoogleSearchConsoleIntegration from '@/components/GoogleSearchConsoleIntegration';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/context/AuthContext';
 import { toast } from '@/components/ui/sonner';
+import { useSearchConsoleIntegration } from '@/components/google-search-console/useSearchConsoleIntegration';
 
 // Sample SEO data for visualization
 const seoData = [
@@ -72,6 +73,14 @@ const initialKeywords = [
   { keyword: 'seo services', impressions: 1500, clicks: 130, ctr: 8.7, position: 4, change: '+3' },
 ];
 
+// Available websites for selection
+const availableWebsites = [
+  'mergeinsights.ai',
+  'example.com',
+  'testsite.org',
+  'mydomain.net'
+];
+
 const SEOPage = () => {
   const { user } = useAuth();
   const [activeMetric, setActiveMetric] = useState('organicTraffic');
@@ -85,6 +94,12 @@ const SEOPage = () => {
     avgPosition: '3.6',
     estTraffic: 970
   });
+
+  const {
+    connected,
+    handleConnect,
+    isLoading: gscLoading
+  } = useSearchConsoleIntegration();
 
   // Get last 30 days data
   const last30Days = seoData.slice(-30);
@@ -130,112 +145,147 @@ const SEOPage = () => {
 
   return (
     <div className="container mx-auto py-6 px-4 max-w-7xl">
-      {/* Website Details Section */}
-      <div className="mb-6">
-        <Card>
-          <CardHeader>
-            <div className="flex items-center justify-between">
-              <div className="flex items-center space-x-4">
-                <div className="text-primary p-2 bg-primary/10 rounded-lg">
-                  <Globe className="w-6 h-6" />
-                </div>
-                <div>
-                  <CardTitle className="text-xl">Website Analysis</CardTitle>
-                  <div className="flex items-center gap-2 mt-1">
-                    <span className="text-lg font-semibold text-blue-600">{selectedWebsite}</span>
-                    <Button
-                      variant="ghost"
-                      size="sm"
-                      onClick={() => window.open(`https://${selectedWebsite}`, '_blank')}
-                      className="p-1 h-6 w-6"
-                    >
-                      <ExternalLink className="h-4 w-4" />
-                    </Button>
-                  </div>
-                </div>
+      <div className="flex items-center justify-between mb-6">
+        <div className="flex items-center space-x-4">
+          <div className="text-primary p-2 bg-primary/10 rounded-lg">
+            <Globe className="w-6 h-6" />
+          </div>
+          <div>
+            <h1 className="text-2xl font-bold">SEO Dashboard</h1>
+            <p className="text-muted-foreground text-sm">
+              Comprehensive SEO analytics and insights
+            </p>
+          </div>
+        </div>
+      </div>
+
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-6">
+        {/* Website Selection */}
+        <div className="lg:col-span-1">
+          <Card>
+            <CardHeader>
+              <CardTitle className="text-lg">Website Details</CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              <div>
+                <label className="text-sm font-medium text-muted-foreground mb-2 block">
+                  Select Website
+                </label>
+                <Select value={selectedWebsite} onValueChange={handleWebsiteChange}>
+                  <SelectTrigger className="w-full">
+                    <SelectValue placeholder="Choose a website" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {availableWebsites.map((website) => (
+                      <SelectItem key={website} value={website}>
+                        <div className="flex items-center gap-2">
+                          <Globe className="h-4 w-4" />
+                          {website}
+                        </div>
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
               </div>
-              <div className="flex items-center gap-2">
+              
+              <div className="flex items-center gap-2 pt-2">
+                <span className="text-lg font-semibold text-blue-600">{selectedWebsite}</span>
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={() => window.open(`https://${selectedWebsite}`, '_blank')}
+                  className="p-1 h-6 w-6"
+                >
+                  <ExternalLink className="h-4 w-4" />
+                </Button>
+              </div>
+
+              <div className="flex flex-col gap-2">
+                <Button 
+                  onClick={connected ? () => {} : handleConnect}
+                  disabled={gscLoading}
+                  variant={connected ? "secondary" : "default"}
+                  className="flex items-center gap-2 w-full"
+                >
+                  {gscLoading ? (
+                    <Loader2 className="h-4 w-4 animate-spin" />
+                  ) : (
+                    <LinkIcon className="h-4 w-4" />
+                  )}
+                  {connected ? 'Connected to GSC' : 'Connect Google Search Console'}
+                </Button>
+                
                 <Button 
                   onClick={handleRefreshSerpData}
                   disabled={isRefreshing}
-                  className="flex items-center gap-2"
+                  variant="outline"
+                  className="flex items-center gap-2 w-full"
                 >
                   {isRefreshing ? (
                     <Loader2 className="h-4 w-4 animate-spin" />
                   ) : (
                     <RefreshCw className="h-4 w-4" />
                   )}
-                  {isRefreshing ? 'Analyzing...' : 'Refresh SERP Data'}
+                  {isRefreshing ? 'Refreshing...' : 'Refresh'}
                 </Button>
               </div>
-            </div>
-          </CardHeader>
-        </Card>
+            </CardContent>
+          </Card>
+        </div>
+
+        {/* SEO Overview Stats */}
+        <div className="lg:col-span-2">
+          <div className="mb-4">
+            <h2 className="text-xl font-semibold">SEO Overview</h2>
+          </div>
+          
+          <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+            <Card>
+              <CardContent className="pt-6">
+                <div className="space-y-2">
+                  <p className="text-sm font-medium text-muted-foreground">Organic Traffic</p>
+                  <p className="text-3xl font-bold">5,238</p>
+                  <p className="text-sm text-green-500">+12% from last month</p>
+                </div>
+              </CardContent>
+            </Card>
+            
+            <Card>
+              <CardContent className="pt-6">
+                <div className="space-y-2">
+                  <p className="text-sm font-medium text-muted-foreground">Keywords Ranked</p>
+                  <p className="text-3xl font-bold">{serpStats.totalKeywords}</p>
+                  <p className="text-sm text-green-500">+{serpStats.top10Keywords} in top 10</p>
+                </div>
+              </CardContent>
+            </Card>
+            
+            <Card>
+              <CardContent className="pt-6">
+                <div className="space-y-2">
+                  <p className="text-sm font-medium text-muted-foreground">Average Position</p>
+                  <p className="text-3xl font-bold">{serpStats.avgPosition}</p>
+                  <p className="text-sm text-green-500">Improved by 1.2</p>
+                </div>
+              </CardContent>
+            </Card>
+            
+            <Card>
+              <CardContent className="pt-6">
+                <div className="space-y-2">
+                  <p className="text-sm font-medium text-muted-foreground">Est. Traffic</p>
+                  <p className="text-3xl font-bold">{serpStats.estTraffic.toLocaleString()}</p>
+                  <p className="text-sm text-green-500">+18% from SERP data</p>
+                </div>
+              </CardContent>
+            </Card>
+          </div>
+        </div>
       </div>
 
       {/* Google Search Console Integration */}
       <div className="mb-6">
         <GoogleSearchConsoleIntegration />
-      </div>
-
-      <div className="flex items-center justify-between mb-6">
-        <div className="flex items-center space-x-4">
-          <div className="text-primary p-2 bg-primary/10 rounded-lg">
-            <LineChart className="w-6 h-6" />
-          </div>
-          <div>
-            <h1 className="text-2xl font-bold">SEO Dashboard</h1>
-            <p className="text-muted-foreground text-sm">
-              Last updated: {format(new Date(), "dd/MM/yyyy, HH:mm:ss")}
-            </p>
-          </div>
-        </div>
-      </div>
-
-      <div className="mb-6">
-        <h2 className="text-xl font-semibold mb-4">SEO Overview</h2>
-        
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-          <Card>
-            <CardContent className="pt-6">
-              <div className="space-y-2">
-                <p className="text-sm font-medium text-muted-foreground">Organic Traffic</p>
-                <p className="text-3xl font-bold">5,238</p>
-                <p className="text-sm text-green-500">+12% from last month</p>
-              </div>
-            </CardContent>
-          </Card>
-          
-          <Card>
-            <CardContent className="pt-6">
-              <div className="space-y-2">
-                <p className="text-sm font-medium text-muted-foreground">Keywords Ranked</p>
-                <p className="text-3xl font-bold">{serpStats.totalKeywords}</p>
-                <p className="text-sm text-green-500">+{serpStats.top10Keywords} in top 10</p>
-              </div>
-            </CardContent>
-          </Card>
-          
-          <Card>
-            <CardContent className="pt-6">
-              <div className="space-y-2">
-                <p className="text-sm font-medium text-muted-foreground">Average Position</p>
-                <p className="text-3xl font-bold">{serpStats.avgPosition}</p>
-                <p className="text-sm text-green-500">Improved by 1.2</p>
-              </div>
-            </CardContent>
-          </Card>
-          
-          <Card>
-            <CardContent className="pt-6">
-              <div className="space-y-2">
-                <p className="text-sm font-medium text-muted-foreground">Est. Traffic</p>
-                <p className="text-3xl font-bold">{serpStats.estTraffic.toLocaleString()}</p>
-                <p className="text-sm text-green-500">+18% from SERP data</p>
-              </div>
-            </CardContent>
-          </Card>
-        </div>
       </div>
 
       <Tabs defaultValue="keywords" className="mt-6" onValueChange={setActiveTab} value={activeTab}>
