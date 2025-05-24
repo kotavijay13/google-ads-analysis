@@ -87,11 +87,116 @@ export const renderTableCell = (columnKey: string, account: any) => {
   if (columnKey === 'selected') {
     return null; // Will be handled by the table component
   }
+  
+  // Handle ID fields
   if (columnKey === 'campaignId' || columnKey === 'adSetId' || columnKey === 'adId') {
     return account.id;
   }
+  
+  // Handle name fields
   if (columnKey === 'campaignName' || columnKey === 'adSetName' || columnKey === 'adName') {
     return account.name;
   }
-  return '-';
+  
+  // Handle specific field mappings
+  switch (columnKey) {
+    // Campaign level fields
+    case 'objective':
+      return account.objective || '-';
+    case 'buyingType':
+      return account.buyingType || '-';
+    case 'status':
+      return account.status || '-';
+    case 'budget':
+      return account.budget || '-';
+    case 'amountSpent':
+      return account.amountSpent ? `$${account.amountSpent.toLocaleString(undefined, {maximumFractionDigits: 2})}` : '-';
+    case 'impressions':
+      return account.impressions ? account.impressions.toLocaleString() : '-';
+    case 'reach':
+      return account.reach ? account.reach.toLocaleString() : '-';
+    case 'frequency':
+      return account.frequency ? account.frequency.toFixed(2) : '-';
+    case 'cpm':
+      return account.cpm ? `$${account.cpm.toFixed(2)}` : '-';
+    case 'ctr':
+      return account.ctr ? `${account.ctr.toFixed(2)}%` : '-';
+    case 'cpc':
+      return account.cpc ? `$${account.cpc.toFixed(2)}` : '-';
+    case 'results':
+      return account.results ? account.results.toLocaleString() : '-';
+    case 'costPerResult':
+      return account.costPerResult ? `$${account.costPerResult.toFixed(2)}` : '-';
+    case 'resultRate':
+      return account.resultRate ? `${(account.resultRate * 100).toFixed(2)}%` : '-';
+    case 'roas':
+      return account.roas ? `${account.roas.toFixed(1)}x` : '-';
+    case 'purchases':
+      return account.purchases ? account.purchases.toLocaleString() : '-';
+    case 'purchaseValue':
+      return account.purchaseValue ? `$${account.purchaseValue.toLocaleString(undefined, {maximumFractionDigits: 2})}` : '-';
+    case 'websiteLeads':
+      return account.websiteLeads ? account.websiteLeads.toLocaleString() : '-';
+    case 'addToCart':
+      return account.addToCart ? account.addToCart.toLocaleString() : '-';
+    case 'landingPageViews':
+      return account.landingPageViews ? account.landingPageViews.toLocaleString() : '-';
+    case 'linkClicks':
+      return account.linkClicks ? account.linkClicks.toLocaleString() : '-';
+    case 'saves':
+      return account.saves ? account.saves.toLocaleString() : '-';
+    
+    // Ad Set level fields
+    case 'delivery':
+      return account.delivery || '-';
+    case 'optimizationGoal':
+      return account.optimizationGoal || '-';
+    case 'bidStrategy':
+      return account.bidStrategy || '-';
+    case 'schedule':
+      return account.schedule || '-';
+    case 'audience':
+      return account.audience || '-';
+    case 'placement':
+      return account.placement || '-';
+    case 'devices':
+      return account.devices || '-';
+    case 'clicks':
+      return account.clicks ? account.clicks.toLocaleString() : '-';
+    case 'cpcLinkClick':
+      return account.cpcLinkClick ? `$${account.cpcLinkClick.toFixed(2)}` : '-';
+    case 'conversions':
+      return account.conversions ? account.conversions.toLocaleString() : '-';
+    case 'costPerConversion':
+      return account.costPerConversion ? `$${account.costPerConversion.toFixed(2)}` : '-';
+    case 'leads':
+      return account.leads ? account.leads.toLocaleString() : '-';
+    case 'initiatedCheckout':
+      return account.initiatedCheckout ? account.initiatedCheckout.toLocaleString() : '-';
+    
+    // Ad level fields
+    case 'adCreative':
+      return account.adCreative || '-';
+    case 'format':
+      return account.format || '-';
+    case 'callToAction':
+      return account.callToAction || '-';
+    case 'allClicks':
+      return account.allClicks ? account.allClicks.toLocaleString() : '-';
+    case 'engagements':
+      return account.engagements ? account.engagements.toLocaleString() : '-';
+    case 'videoPlays':
+      return account.videoPlays ? account.videoPlays.toLocaleString() : '-';
+    case 'purchase':
+      return account.purchase ? account.purchase.toLocaleString() : '-';
+    case 'qualityRanking':
+      return account.qualityRanking || '-';
+    case 'engagementRateRanking':
+      return account.engagementRateRanking || '-';
+    case 'conversionRateRanking':
+      return account.conversionRateRanking || '-';
+    
+    default:
+      return '-';
+  }
 };
