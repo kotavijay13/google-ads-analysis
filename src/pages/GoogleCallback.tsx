@@ -14,6 +14,7 @@ const GoogleCallback = () => {
   const [processing, setProcessing] = useState(true);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const [errorDetails, setErrorDetails] = useState<string | null>(null);
+  const [authType, setAuthType] = useState<'search-console' | 'ads'>('search-console');
 
   useEffect(() => {
     const processCallback = async () => {
@@ -28,10 +29,25 @@ const GoogleCallback = () => {
         const state = urlParams.get('state');
         const error = urlParams.get('error');
         const errorDescription = urlParams.get('error_description');
-        const storedState = localStorage.getItem('googleSearchConsoleOAuthState');
         
-        // Clear the state from localStorage
-        localStorage.removeItem('googleSearchConsoleOAuthState');
+        // Determine which type of auth this is based on stored state
+        const googleAdsState = localStorage.getItem('googleOAuthState');
+        const searchConsoleState = localStorage.getItem('googleSearchConsoleOAuthState');
+        
+        let currentAuthType: 'search-console' | 'ads' = 'search-console';
+        let storedState: string | null = null;
+        
+        if (state === googleAdsState) {
+          currentAuthType = 'ads';
+          storedState = googleAdsState;
+          localStorage.removeItem('googleOAuthState');
+        } else if (state === searchConsoleState) {
+          currentAuthType = 'search-console';
+          storedState = searchConsoleState;
+          localStorage.removeItem('googleSearchConsoleOAuthState');
+        }
+        
+        setAuthType(currentAuthType);
 
         if (error) {
           console.error('Google OAuth error:', error, errorDescription);
@@ -46,29 +62,35 @@ const GoogleCallback = () => {
           throw new Error('OAuth state mismatch. This could be a security issue or you may have initiated the login flow multiple times.');
         }
 
-        // Call our secure edge function to exchange the code for tokens
-        console.log("Calling google-search-console-auth edge function with code");
-        const { data, error: functionError } = await supabase.functions.invoke('google-search-console-auth', {
+        // Call the appropriate edge function based on auth type
+        const functionName = currentAuthType === 'ads' ? 'google-ads-auth' : 'google-search-console-auth';
+        const redirectUri = window.location.origin + '/google-callback';
+        
+        console.log(`Calling ${functionName} edge function with code`);
+        const { data, error: functionError } = await supabase.functions.invoke(functionName, {
           body: { 
             action: 'exchange_code',
             code, 
-            redirectUri: window.location.origin + '/google-callback' 
+            redirectUri 
           }
         });
 
         if (functionError || !data?.success) {
           console.error("Edge function error:", functionError, data);
-          const errorMsg = functionError?.message || data?.error || 'Failed to get Google access token';
+          const errorMsg = functionError?.message || data?.error || `Failed to get Google access token for ${currentAuthType}`;
           const details = data?.details ? JSON.stringify(data.details, null, 2) : null;
           setErrorDetails(details);
           throw new Error(errorMsg);
         }
 
-        toast.success('Successfully connected to Google Search Console');
-        navigate('/search-console');
+        const serviceName = currentAuthType === 'ads' ? 'Google Ads' : 'Google Search Console';
+        const targetPage = currentAuthType === 'ads' ? '/integrations' : '/search-console';
+        
+        toast.success(`Successfully connected to ${serviceName}`);
+        navigate(targetPage);
       } catch (error) {
         console.error('Google OAuth callback error:', error);
-        const errorMsg = (error as Error).message || 'Failed to connect to Google Search Console';
+        const errorMsg = (error as Error).message || `Failed to connect to Google ${authType === 'ads' ? 'Ads' : 'Search Console'}`;
         setErrorMessage(errorMsg);
         toast.error(errorMsg);
       } finally {
@@ -77,7 +99,7 @@ const GoogleCallback = () => {
     };
 
     processCallback();
-  }, [user, navigate]);
+  }, [user, navigate, authType]);
 
   const goToIntegrations = () => {
     navigate('/integrations');
@@ -85,6 +107,14 @@ const GoogleCallback = () => {
 
   const goToGoogleCloudConsole = () => {
     window.open('https://console.cloud.google.com/apis/credentials', '_blank');
+  };
+
+  const getServiceName = () => {
+    return authType === 'ads' ? 'Google Ads' : 'Google Search Console';
+  };
+
+  const getTargetPage = () => {
+    return authType === 'ads' ? '/integrations' : '/search-console';
   };
 
   return (
@@ -95,7 +125,7 @@ const GoogleCallback = () => {
             <>
               <Loader2 className="h-8 w-8 animate-spin mb-2" />
               <h2 className="text-xl font-semibold mt-4">Processing Google Authentication</h2>
-              <p className="text-muted-foreground mt-2">Please wait while we connect your Google Search Console account...</p>
+              <p className="text-muted-foreground mt-2">Please wait while we connect your {getServiceName()} account...</p>
             </>
           ) : errorMessage ? (
             <>
@@ -126,9 +156,9 @@ const GoogleCallback = () => {
               <div className="mt-6 text-xs text-muted-foreground">
                 <p className="font-medium">Troubleshooting Tips:</p>
                 <ul className="list-disc pl-4 mt-1 space-y-1">
-                  <li>Verify Google Search Console API is enabled</li>
+                  <li>Verify {getServiceName()} API is enabled</li>
                   <li>Check OAuth consent screen configuration</li>
-                  <li>Ensure redirect URIs are properly set</li>
+                  <li>Ensure redirect URIs are properly set to: <code className="bg-gray-100 px-1 py-0.5">{window.location.origin}/google-callback</code></li>
                   <li>Confirm client ID and secret are correctly configured</li>
                 </ul>
               </div>
@@ -141,9 +171,9 @@ const GoogleCallback = () => {
                 </svg>
               </div>
               <h2 className="text-xl font-semibold mt-4">Authentication Successful</h2>
-              <p className="text-muted-foreground mt-2">Successfully connected to Google Search Console!</p>
-              <Button className="mt-6" onClick={() => navigate('/search-console')}>
-                Go to Search Console Dashboard
+              <p className="text-muted-foreground mt-2">Successfully connected to {getServiceName()}!</p>
+              <Button className="mt-6" onClick={() => navigate(getTargetPage())}>
+                Go to {authType === 'ads' ? 'Integrations' : 'Search Console Dashboard'}
               </Button>
             </>
           )}

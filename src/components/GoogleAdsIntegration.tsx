@@ -6,7 +6,7 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { toast } from '@/components/ui/sonner';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
-import { Loader2, Check } from 'lucide-react';
+import { Loader2, Check, AlertCircle } from 'lucide-react';
 import { 
   Select,
   SelectContent,
@@ -106,35 +106,50 @@ const GoogleAdsIntegration = () => {
 
   const handleConnect = async () => {
     try {
+      setConfigError(null);
+      setLoading(true);
+      
       // Generate a random state for OAuth security
       const state = Math.random().toString(36).substring(2);
       // Save the state in localStorage to verify later
       localStorage.setItem('googleOAuthState', state);
       
-      // Using the correct OAuth configuration
-      const oauthEndpoint = 'https://accounts.google.com/o/oauth2/v2/auth';
-      // Use web application client ID shown in the screenshot
-      const clientId = '463775925601-8i7gv5qhham5b5f60mjvhusp6jg6qfd8.apps.googleusercontent.com';
-      
       // Use the exact redirect URI as configured in Google Cloud Console
       const redirectUri = window.location.origin + '/google-callback';
+      
+      // Call our secure edge function to get the proper client ID
+      console.log("Getting Google client ID from edge function");
+      const { data: clientData, error: clientError } = await supabase.functions.invoke('google-ads-auth', {
+        body: { 
+          action: 'get_client_id'
+        }
+      });
+      
+      if (clientError || !clientData?.clientId) {
+        console.error("Failed to get client ID:", clientError, clientData);
+        throw new Error('Could not retrieve Google Client ID. Please check your configuration.');
+      }
+      
+      const clientId = clientData.clientId;
       const scope = encodeURIComponent('https://www.googleapis.com/auth/adwords');
       
       console.log("Starting Google OAuth with:", {
-        clientId,
+        clientId: clientId.substring(0, 8) + '...',
         redirectUri,
         state
       });
       
       // Construct the OAuth URL with all required parameters
-      const oauthUrl = `${oauthEndpoint}?client_id=${clientId}&redirect_uri=${encodeURIComponent(redirectUri)}&response_type=code&scope=${scope}&state=${state}&access_type=offline&prompt=consent&include_granted_scopes=true`;
+      const oauthUrl = `https://accounts.google.com/o/oauth2/v2/auth?client_id=${clientId}&redirect_uri=${encodeURIComponent(redirectUri)}&response_type=code&scope=${scope}&state=${state}&access_type=offline&prompt=consent&include_granted_scopes=true`;
       
       // Redirect to Google's OAuth page
       window.location.href = oauthUrl;
     } catch (error) {
       console.error("Error initiating Google OAuth:", error);
-      setConfigError("OAuth initialization failed. Check console for details.");
-      toast.error("Failed to connect to Google");
+      setConfigError((error as Error).message || "OAuth initialization failed. Check console for details.");
+      toast.error("Failed to connect to Google Ads");
+    } finally {
+      setLoading(false);
     }
   };
   
@@ -162,11 +177,50 @@ const GoogleAdsIntegration = () => {
               Connect your Google Ads account to view and analyze your campaigns, keywords, and performance data.
             </p>
             {configError && (
-              <div className="mb-4 p-2 bg-red-50 text-red-700 rounded border border-red-200 text-sm">
-                {configError}
+              <div className="mb-4 p-3 bg-red-50 border border-red-200 rounded-md">
+                <div className="flex items-start gap-2 text-red-700">
+                  <AlertCircle className="h-4 w-4 mt-0.5 flex-shrink-0" />
+                  <div className="text-sm">
+                    <p className="font-medium">Configuration Error</p>
+                    <p>{configError}</p>
+                    {configError.includes('redirect') && (
+                      <div className="mt-2 text-xs">
+                        <p className="font-medium">To fix this:</p>
+                        <ol className="list-decimal pl-4 mt-1 space-y-1">
+                          <li>Go to your Google Cloud Console</li>
+                          <li>Navigate to APIs & Services → Credentials</li>
+                          <li>Edit your OAuth 2.0 Client ID</li>
+                          <li>Add this redirect URI: <code className="bg-gray-100 px-1 py-0.5 rounded">{window.location.origin}/google-callback</code></li>
+                          <li>Save and try connecting again</li>
+                        </ol>
+                      </div>
+                    )}
+                  </div>
+                </div>
               </div>
             )}
-            <Button onClick={handleConnect}>Connect Google Ads</Button>
+            <Button 
+              onClick={handleConnect} 
+              disabled={loading}
+              className="gap-2"
+            >
+              {loading ? (
+                <>
+                  <Loader2 className="h-4 w-4 animate-spin" />
+                  Connecting...
+                </>
+              ) : (
+                'Connect Google Ads'
+              )}
+            </Button>
+            <div className="mt-4 text-xs text-muted-foreground">
+              <p className="font-medium mb-1">Setup Requirements:</p>
+              <ul className="list-disc pl-4 space-y-1">
+                <li>Google Ads API must be enabled in Google Cloud Console</li>
+                <li>OAuth consent screen must be configured</li>
+                <li>Redirect URI must be set to: <code className="bg-gray-100 px-1 py-0.5">{window.location.origin}/google-callback</code></li>
+              </ul>
+            </div>
           </div>
         ) : (
           <>
