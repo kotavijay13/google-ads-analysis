@@ -4,7 +4,7 @@ import { toast } from '@/components/ui/sonner';
 import { GoogleAdsAccount } from './types';
 
 export const checkGoogleAdsConnection = async (userId: string) => {
-  console.log('Checking Google Ads connection status...');
+  console.log('Checking Google Ads connection status for user:', userId);
   
   try {
     const { data, error } = await supabase
@@ -17,11 +17,22 @@ export const checkGoogleAdsConnection = async (userId: string) => {
     console.log('Connection check result:', { data, error });
     
     if (data && !error) {
-      console.log('Google Ads connection found');
-      window.dispatchEvent(new CustomEvent('google-ads-connected', { detail: data }));
-      return true;
+      console.log('Google Ads connection found for user:', userId);
+      
+      // Check if token is still valid (not expired)
+      const now = new Date();
+      const expiresAt = new Date(data.expires_at);
+      
+      if (expiresAt > now) {
+        console.log('Token is still valid');
+        window.dispatchEvent(new CustomEvent('google-ads-connected', { detail: data }));
+        return true;
+      } else {
+        console.log('Token has expired, need to refresh');
+        return false;
+      }
     } else {
-      console.log('No Google Ads connection found');
+      console.log('No Google Ads connection found for user:', userId);
       return false;
     }
   } catch (error) {
@@ -31,7 +42,7 @@ export const checkGoogleAdsConnection = async (userId: string) => {
 };
 
 export const fetchGoogleAdsAccounts = async (userId: string): Promise<GoogleAdsAccount[]> => {
-  console.log('Fetching Google Ads accounts...');
+  console.log('Fetching Google Ads accounts for user:', userId);
   
   try {
     const { data, error } = await supabase
@@ -40,9 +51,10 @@ export const fetchGoogleAdsAccounts = async (userId: string): Promise<GoogleAdsA
       .eq('user_id', userId)
       .eq('platform', 'google');
     
-    console.log('Accounts fetch result:', { data, error });
+    console.log('Accounts fetch result:', { data, error, userId });
     
     if (error) {
+      console.error('Error fetching accounts:', error);
       throw error;
     }
     
@@ -60,7 +72,28 @@ export const fetchGoogleAdsAccounts = async (userId: string): Promise<GoogleAdsA
       
       return accountsData;
     } else {
-      console.log('No Google Ads accounts found in database');
+      console.log('No Google Ads accounts found in database for user:', userId);
+      
+      // Try to fetch accounts from Google Ads API
+      console.log('Attempting to fetch accounts from Google Ads API...');
+      
+      const { data: tokenData } = await supabase
+        .from('api_tokens')
+        .select('*')
+        .eq('user_id', userId)
+        .eq('provider', 'google')
+        .single();
+      
+      if (tokenData) {
+        console.log('Triggering account refresh from API...');
+        toast.info('Fetching your Google Ads accounts...');
+        
+        // This should trigger the edge function to fetch accounts
+        setTimeout(() => {
+          window.location.reload();
+        }, 2000);
+      }
+      
       return [];
     }
   } catch (error) {
@@ -71,6 +104,7 @@ export const fetchGoogleAdsAccounts = async (userId: string): Promise<GoogleAdsA
 };
 
 export const selectGoogleAdsAccount = (accountId: string, accounts: GoogleAdsAccount[]) => {
+  console.log('Selecting Google Ads account:', accountId);
   localStorage.setItem('selectedGoogleAdsAccount', accountId);
   
   const account = accounts.find(acc => acc.id === accountId);
@@ -87,10 +121,14 @@ export const initializeSelectedAccount = (accounts: GoogleAdsAccount[]): string 
   if (accounts.length === 0) return null;
   
   const savedAccountId = localStorage.getItem('selectedGoogleAdsAccount');
+  console.log('Initializing selected account. Saved:', savedAccountId, 'Available accounts:', accounts);
+  
   if (savedAccountId && accounts.find(acc => acc.id === savedAccountId)) {
+    console.log('Using saved account:', savedAccountId);
     return savedAccountId;
   } else {
     const firstAccountId = accounts[0].id;
+    console.log('Using first available account:', firstAccountId);
     localStorage.setItem('selectedGoogleAdsAccount', firstAccountId);
     return firstAccountId;
   }
