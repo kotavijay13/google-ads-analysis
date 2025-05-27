@@ -4,7 +4,7 @@ import { toast } from '@/components/ui/sonner';
 import { GoogleAdsAccount } from './types';
 
 export const checkGoogleAdsConnection = async (userId: string) => {
-  console.log('Checking Google Ads connection status...');
+  console.log('Checking Google Ads connection status for user:', userId);
   
   try {
     const { data, error } = await supabase
@@ -17,7 +17,18 @@ export const checkGoogleAdsConnection = async (userId: string) => {
     console.log('Connection check result:', { data, error });
     
     if (data && !error) {
-      console.log('Google Ads connection found');
+      console.log('Google Ads connection found, token expires at:', data.expires_at);
+      
+      // Check if token is expired
+      const now = new Date();
+      const expiresAt = new Date(data.expires_at);
+      
+      if (expiresAt <= now) {
+        console.log('Token is expired, user needs to reconnect');
+        toast.error('Your Google Ads connection has expired. Please reconnect.');
+        return false;
+      }
+      
       window.dispatchEvent(new CustomEvent('google-ads-connected', { detail: data }));
       return true;
     } else {
@@ -31,7 +42,7 @@ export const checkGoogleAdsConnection = async (userId: string) => {
 };
 
 export const fetchGoogleAdsAccounts = async (userId: string): Promise<GoogleAdsAccount[]> => {
-  console.log('Fetching Google Ads accounts...');
+  console.log('Fetching Google Ads accounts for user:', userId);
   
   try {
     const { data, error } = await supabase
@@ -40,9 +51,10 @@ export const fetchGoogleAdsAccounts = async (userId: string): Promise<GoogleAdsA
       .eq('user_id', userId)
       .eq('platform', 'google');
     
-    console.log('Accounts fetch result:', { data, error });
+    console.log('Accounts fetch result:', { data, error, count: data?.length });
     
     if (error) {
+      console.error('Database error fetching accounts:', error);
       throw error;
     }
     
@@ -60,7 +72,21 @@ export const fetchGoogleAdsAccounts = async (userId: string): Promise<GoogleAdsA
       
       return accountsData;
     } else {
-      console.log('No Google Ads accounts found in database');
+      console.log('No Google Ads accounts found in database - this means the OAuth flow may not have completed properly');
+      
+      // Check if user has a valid token but no accounts
+      const { data: tokenData } = await supabase
+        .from('api_tokens')
+        .select('*')
+        .eq('user_id', userId)
+        .eq('provider', 'google')
+        .maybeSingle();
+      
+      if (tokenData) {
+        console.log('User has token but no accounts - suggesting to try the OAuth flow again');
+        toast.error('No Google Ads accounts found. Please try reconnecting to refresh your account list.');
+      }
+      
       return [];
     }
   } catch (error) {
@@ -71,6 +97,7 @@ export const fetchGoogleAdsAccounts = async (userId: string): Promise<GoogleAdsA
 };
 
 export const selectGoogleAdsAccount = (accountId: string, accounts: GoogleAdsAccount[]) => {
+  console.log('Selecting Google Ads account:', accountId);
   localStorage.setItem('selectedGoogleAdsAccount', accountId);
   
   const account = accounts.find(acc => acc.id === accountId);
@@ -88,9 +115,11 @@ export const initializeSelectedAccount = (accounts: GoogleAdsAccount[]): string 
   
   const savedAccountId = localStorage.getItem('selectedGoogleAdsAccount');
   if (savedAccountId && accounts.find(acc => acc.id === savedAccountId)) {
+    console.log('Using saved account:', savedAccountId);
     return savedAccountId;
   } else {
     const firstAccountId = accounts[0].id;
+    console.log('Using first account:', firstAccountId);
     localStorage.setItem('selectedGoogleAdsAccount', firstAccountId);
     return firstAccountId;
   }

@@ -8,12 +8,12 @@ export async function fetchGoogleAdsAccounts(
   userId: string
 ): Promise<void> {
   try {
-    console.log('Attempting to fetch Google Ads accounts');
+    console.log('Attempting to fetch Google Ads accounts for user:', userId);
     
     const googleAdsUrl = 'https://googleads.googleapis.com/v15/customers:listAccessibleCustomers';
     
     if (!config.developToken) {
-      console.warn('Google Ads Developer Token not configured');
+      console.warn('Google Ads Developer Token not configured - this may limit account access');
     }
     
     const accountsResponse = await fetch(googleAdsUrl, {
@@ -23,34 +23,84 @@ export async function fetchGoogleAdsAccounts(
       },
     });
     
-    const accountsData = await accountsResponse.json();
+    console.log('Google Ads API response status:', accountsResponse.status);
     
-    if (accountsResponse.ok && accountsData.resourceNames) {
+    if (!accountsResponse.ok) {
+      const errorText = await accountsResponse.text();
+      console.error('Google Ads API error:', errorText);
+      throw new Error(`Google Ads API error: ${accountsResponse.status} - ${errorText}`);
+    }
+    
+    const accountsData = await accountsResponse.json();
+    console.log('Google Ads API response:', accountsData);
+    
+    if (accountsData.resourceNames && accountsData.resourceNames.length > 0) {
       const supabase = createClient(config.supabaseUrl, config.supabaseKey);
       
-      // Format: customers/{customer_id}
+      // Extract customer IDs from resource names (format: customers/{customer_id})
       const customerIds = accountsData.resourceNames.map((name: string) => name.split('/')[1]);
-      console.log(`Found ${customerIds.length} Google Ads accounts`);
+      console.log(`Found ${customerIds.length} Google Ads customer IDs:`, customerIds);
       
-      // Get account names - in a real app you would make additional API calls to get names
-      // For simplicity, we'll just use IDs as names in this example
+      // For each customer ID, fetch detailed account information
       for (const customerId of customerIds) {
-        await supabase
-          .from('ad_accounts')
-          .upsert({
-            user_id: userId,
-            platform: 'google',
-            account_id: customerId,
-            account_name: `Google Ads Account ${customerId}`, // In reality, you'd get the actual name
-          }, {
-            onConflict: 'user_id,platform,account_id'
+        try {
+          // Fetch account details
+          const accountDetailUrl = `https://googleads.googleapis.com/v15/customers/${customerId}`;
+          
+          const detailResponse = await fetch(accountDetailUrl, {
+            headers: {
+              'Authorization': `Bearer ${accessToken}`,
+              'developer-token': config.developToken || '',
+            },
           });
+          
+          let accountName = `Google Ads Account ${customerId}`;
+          
+          if (detailResponse.ok) {
+            const detailData = await detailResponse.json();
+            accountName = detailData.descriptiveName || accountName;
+            console.log(`Account ${customerId} name: ${accountName}`);
+          } else {
+            console.warn(`Could not fetch details for account ${customerId}, using default name`);
+          }
+          
+          // Store account in database
+          const { error: upsertError } = await supabase
+            .from('ad_accounts')
+            .upsert({
+              user_id: userId,
+              platform: 'google',
+              account_id: customerId,
+              account_name: accountName,
+            }, {
+              onConflict: 'user_id,platform,account_id'
+            });
+          
+          if (upsertError) {
+            console.error(`Error storing account ${customerId}:`, upsertError);
+          } else {
+            console.log(`Successfully stored account ${customerId}`);
+          }
+          
+        } catch (error) {
+          console.error(`Error processing account ${customerId}:`, error);
+          // Continue with other accounts even if one fails
+        }
       }
+      
+      console.log(`Successfully processed ${customerIds.length} Google Ads accounts`);
+      
     } else {
-      console.error('Error fetching Google Ads accounts:', accountsData);
+      console.log('No Google Ads accounts found in API response');
+      
+      // Check if the user has the necessary permissions
+      if (!accountsData.resourceNames) {
+        console.warn('User may not have access to any Google Ads accounts or missing permissions');
+      }
     }
   } catch (error) {
     console.error('Error fetching Google Ads accounts:', error);
     // We don't fail the whole operation if just the accounts fetch fails
+    // The user can still be considered "connected" and try again later
   }
 }

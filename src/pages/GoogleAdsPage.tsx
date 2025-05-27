@@ -1,4 +1,3 @@
-
 import { useState, useCallback, useEffect } from 'react';
 import Header from '@/components/Header';
 import DateRangePicker from '@/components/DateRangePicker';
@@ -44,6 +43,12 @@ const GoogleAdsPage = () => {
   
   const { accounts, currentAccount, switchAccount, setCurrentAccount } = useGoogleAccounts();
   
+  // Add debugging logs
+  useEffect(() => {
+    console.log('GoogleAdsPage - Current accounts:', accounts);
+    console.log('GoogleAdsPage - Current account:', currentAccount);
+  }, [accounts, currentAccount]);
+
   const handleRefresh = () => {
     // Fetch fresh data from Google Ads API
     fetchData(dateRange.from, dateRange.to);
@@ -73,20 +78,36 @@ const GoogleAdsPage = () => {
             value={currentAccount?.id || ''} 
             onValueChange={(value) => {
               const account = accounts.find(acc => acc.id === value);
-              if (account) setCurrentAccount(account);
+              if (account) {
+                console.log('Switching to account:', account);
+                setCurrentAccount(account);
+              }
             }}
           >
             <SelectTrigger className="w-[250px]">
-              <SelectValue placeholder="Select ad account" />
+              <SelectValue placeholder={accounts.length === 0 ? "No accounts available" : "Select ad account"} />
             </SelectTrigger>
             <SelectContent>
-              {accounts.map(account => (
-                <SelectItem key={account.id} value={account.id}>
-                  {account.name} ({account.id})
+              {accounts.length === 0 ? (
+                <SelectItem value="no-accounts" disabled>
+                  No Google Ads accounts found
                 </SelectItem>
-              ))}
+              ) : (
+                accounts.map(account => (
+                  <SelectItem key={account.id} value={account.id}>
+                    {account.name} ({account.id})
+                  </SelectItem>
+                ))
+              )}
             </SelectContent>
           </Select>
+          
+          {accounts.length === 0 && (
+            <div className="text-sm text-muted-foreground bg-yellow-50 border border-yellow-200 rounded-md p-3">
+              <p className="font-medium">No Google Ads accounts found</p>
+              <p>Please go to the Integrations page to connect your Google Ads account.</p>
+            </div>
+          )}
         </div>
         <DateRangePicker onDateChange={handleDateChange} />
       </div>

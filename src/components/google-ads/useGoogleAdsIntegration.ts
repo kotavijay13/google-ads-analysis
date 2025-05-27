@@ -24,11 +24,23 @@ export const useGoogleAdsIntegration = () => {
   });
 
   const checkConnection = useCallback(async () => {
-    if (!user) return;
+    if (!user) {
+      console.log('No user found for connection check');
+      return;
+    }
+    
+    console.log('Checking Google Ads connection for user:', user.id);
     
     try {
       const isConnected = await checkGoogleAdsConnection(user.id);
+      console.log('Connection check result:', isConnected);
       setState(prev => ({ ...prev, connected: isConnected, configError: null }));
+      
+      // If connected, immediately try to fetch accounts
+      if (isConnected) {
+        console.log('User is connected, fetching accounts...');
+        await fetchAccounts();
+      }
     } catch (error) {
       console.error("Error checking connection:", error);
       setState(prev => ({ ...prev, connected: false }));
@@ -36,27 +48,40 @@ export const useGoogleAdsIntegration = () => {
   }, [user]);
 
   const fetchAccounts = useCallback(async () => {
-    if (!user) return;
+    if (!user) {
+      console.log('No user found for account fetch');
+      return;
+    }
+    
+    console.log('Fetching Google Ads accounts for user:', user.id);
     
     try {
+      setState(prev => ({ ...prev, refreshing: true }));
       const accounts = await fetchGoogleAdsAccounts(user.id);
-      setState(prev => ({ ...prev, accounts }));
+      console.log('Fetched accounts:', accounts);
+      
+      setState(prev => ({ ...prev, accounts, refreshing: false }));
       
       if (accounts.length > 0) {
         const selectedAccountId = initializeSelectedAccount(accounts);
         setState(prev => ({ ...prev, selectedAccount: selectedAccountId }));
+        console.log('Set selected account:', selectedAccountId);
+      } else {
+        console.log('No accounts found, user may need to reconnect');
+        setState(prev => ({ ...prev, selectedAccount: null }));
       }
     } catch (error) {
       console.error('Error in fetchAccounts:', error);
+      setState(prev => ({ ...prev, refreshing: false }));
     }
   }, [user]);
 
   useEffect(() => {
+    console.log('useGoogleAdsIntegration effect triggered, user:', user?.id);
     if (user) {
       checkConnection();
-      fetchAccounts();
     }
-  }, [user, checkConnection, fetchAccounts]);
+  }, [user, checkConnection]);
 
   // Set up event listeners
   useGoogleAdsEventListeners(state, checkConnection, fetchAccounts);
@@ -79,14 +104,15 @@ export const useGoogleAdsIntegration = () => {
   };
   
   const handleRefreshAccounts = async () => {
+    console.log('Refreshing accounts manually...');
     setState(prev => ({ ...prev, refreshing: true }));
     await checkConnection();
-    await fetchAccounts();
     setState(prev => ({ ...prev, refreshing: false }));
     toast.success('Account data refreshed');
   };
   
   const handleSelectAccount = (accountId: string) => {
+    console.log('Selecting account:', accountId);
     setState(prev => ({ ...prev, selectedAccount: accountId }));
     selectGoogleAdsAccount(accountId, state.accounts);
   };
