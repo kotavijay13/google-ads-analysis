@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from 'react';
 import { useAuth } from '@/context/AuthContext';
 import { supabase } from '@/integrations/supabase/client';
@@ -126,10 +127,11 @@ const GoogleAdsIntegration = () => {
       // Save the state in localStorage to verify later
       localStorage.setItem('googleOAuthState', state);
       
-      // Use the exact redirect URI as configured in Google Cloud Console
+      // Use the current domain for redirect URI
       const redirectUri = window.location.origin + '/google-callback';
       
       console.log('OAuth parameters:', { redirectUri, state });
+      console.log('Current domain:', window.location.origin);
       
       // Call our secure edge function to get the proper client ID
       console.log("Getting Google client ID from edge function");
@@ -152,7 +154,7 @@ const GoogleAdsIntegration = () => {
       // Construct the OAuth URL with all required parameters
       const oauthUrl = `https://accounts.google.com/o/oauth2/v2/auth?client_id=${clientId}&redirect_uri=${encodeURIComponent(redirectUri)}&response_type=code&scope=${scope}&state=${state}&access_type=offline&prompt=consent&include_granted_scopes=true`;
       
-      console.log('Redirecting to OAuth URL');
+      console.log('Redirecting to OAuth URL with redirect URI:', redirectUri);
       
       // Redirect to Google's OAuth page
       window.location.href = oauthUrl;
@@ -203,18 +205,18 @@ const GoogleAdsIntegration = () => {
                   <div className="text-sm">
                     <p className="font-medium">Configuration Error</p>
                     <p>{configError}</p>
-                    {configError.includes('redirect') && (
-                      <div className="mt-2 text-xs">
-                        <p className="font-medium">To fix this:</p>
-                        <ol className="list-decimal pl-4 mt-1 space-y-1">
-                          <li>Go to your Google Cloud Console</li>
-                          <li>Navigate to APIs & Services → Credentials</li>
-                          <li>Edit your OAuth 2.0 Client ID</li>
-                          <li>Add this redirect URI: <code className="bg-gray-100 px-1 py-0.5 rounded">{window.location.origin}/google-callback</code></li>
-                          <li>Save and try connecting again</li>
-                        </ol>
-                      </div>
-                    )}
+                    <div className="mt-2 text-xs">
+                      <p className="font-medium">Current redirect URI should be:</p>
+                      <code className="bg-red-100 px-1 py-0.5 rounded text-red-800">{window.location.origin}/google-callback</code>
+                      <p className="mt-2 font-medium">To fix this:</p>
+                      <ol className="list-decimal pl-4 mt-1 space-y-1">
+                        <li>Go to your Google Cloud Console</li>
+                        <li>Navigate to APIs & Services → Credentials</li>
+                        <li>Edit your OAuth 2.0 Client ID</li>
+                        <li>Update the redirect URI to: <code className="bg-gray-100 px-1 py-0.5 rounded">{window.location.origin}/google-callback</code></li>
+                        <li>Save and try connecting again</li>
+                      </ol>
+                    </div>
                   </div>
                 </div>
               </div>
@@ -238,7 +240,7 @@ const GoogleAdsIntegration = () => {
               <ul className="list-disc pl-4 space-y-1">
                 <li>Google Ads API must be enabled in Google Cloud Console</li>
                 <li>OAuth consent screen must be configured</li>
-                <li>Redirect URI must be set to: <code className="bg-gray-100 px-1 py-0.5">{window.location.origin}/google-callback</code></li>
+                <li>Current redirect URI: <code className="bg-blue-100 px-1 py-0.5 text-blue-800">{window.location.origin}/google-callback</code></li>
               </ul>
             </div>
           </div>
