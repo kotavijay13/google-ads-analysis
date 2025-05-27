@@ -127,6 +127,13 @@ export const useOAuthCallback = () => {
         console.log(`Successfully connected to ${serviceName}`);
         toast.success(`Successfully connected to ${serviceName}`);
         
+        // Dispatch success event for Google Ads
+        if (currentAuthType === 'ads') {
+          window.dispatchEvent(new CustomEvent('google-oauth-success', { 
+            detail: { service: 'google-ads' } 
+          }));
+        }
+        
         // Small delay to ensure toast is visible before navigation
         setTimeout(() => {
           navigate(targetPage);

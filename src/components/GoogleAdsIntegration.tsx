@@ -36,6 +36,38 @@ const GoogleAdsIntegration = () => {
     }
   }, [user]);
 
+  // Listen for successful OAuth completion
+  useEffect(() => {
+    const handleOAuthSuccess = () => {
+      console.log('OAuth success detected, refreshing connection status...');
+      setTimeout(() => {
+        checkConnection();
+        fetchAccounts();
+      }, 1000);
+    };
+
+    // Listen for the OAuth success event from the callback page
+    window.addEventListener('google-oauth-success', handleOAuthSuccess);
+    
+    // Also check when the page becomes visible again (user returns from OAuth)
+    const handleVisibilityChange = () => {
+      if (!document.hidden && !connected) {
+        console.log('Page became visible, checking for new connection...');
+        setTimeout(() => {
+          checkConnection();
+          fetchAccounts();
+        }, 1000);
+      }
+    };
+
+    document.addEventListener('visibilitychange', handleVisibilityChange);
+
+    return () => {
+      window.removeEventListener('google-oauth-success', handleOAuthSuccess);
+      document.removeEventListener('visibilitychange', handleVisibilityChange);
+    };
+  }, [connected]);
+
   async function checkConnection() {
     if (!user) return;
     
@@ -47,7 +79,7 @@ const GoogleAdsIntegration = () => {
         .select('*')
         .eq('user_id', user.id)
         .eq('provider', 'google')
-        .single();
+        .maybeSingle();
       
       console.log('Connection check result:', { data, error });
       
@@ -55,6 +87,9 @@ const GoogleAdsIntegration = () => {
         setConnected(true);
         setConfigError(null);
         console.log('Google Ads connection found');
+        
+        // Dispatch event to notify other components
+        window.dispatchEvent(new CustomEvent('google-ads-connected', { detail: data }));
       } else {
         setConnected(false);
         console.log('No Google Ads connection found');
@@ -83,10 +118,10 @@ const GoogleAdsIntegration = () => {
         throw error;
       }
       
-      if (data) {
+      if (data && data.length > 0) {
         const accountsData = data.map(account => ({
           id: account.account_id,
-          name: account.account_name || account.account_id
+          name: account.account_name || `Account ${account.account_id}`
         }));
         
         console.log('Found Google Ads accounts:', accountsData);
@@ -108,6 +143,14 @@ const GoogleAdsIntegration = () => {
           setSelectedAccount(accountsData[0].id);
           localStorage.setItem('selectedGoogleAdsAccount', accountsData[0].id);
         }
+
+        // Dispatch event with account data for other components to use
+        window.dispatchEvent(new CustomEvent('google-ads-accounts-loaded', { 
+          detail: { accounts: accountsData, selectedAccount: accountsData[0]?.id } 
+        }));
+      } else {
+        console.log('No Google Ads accounts found in database');
+        setAccounts([]);
       }
     } catch (error) {
       console.error('Error fetching Google Ads accounts:', error);
@@ -183,6 +226,11 @@ const GoogleAdsIntegration = () => {
     const account = accounts.find(acc => acc.id === accountId);
     if (account) {
       toast.success(`Selected account: ${account.name}`);
+      
+      // Dispatch event to notify other components of account selection
+      window.dispatchEvent(new CustomEvent('google-ads-account-selected', { 
+        detail: { accountId, accountName: account.name } 
+      }));
     }
   };
 
@@ -285,7 +333,7 @@ const GoogleAdsIntegration = () => {
                   <SelectContent>
                     {accounts.map((account) => (
                       <SelectItem key={account.id} value={account.id}>
-                        {account.name}
+                        {account.name} ({account.id})
                       </SelectItem>
                     ))}
                   </SelectContent>
@@ -337,6 +385,14 @@ const GoogleAdsIntegration = () => {
                 <p className="text-sm text-muted-foreground">
                   Make sure you have access to Google Ads accounts with the email you used to sign in.
                 </p>
+                <Button 
+                  onClick={handleRefreshAccounts} 
+                  className="mt-4"
+                  variant="outline"
+                >
+                  <RefreshCw className="h-4 w-4 mr-2" />
+                  Refresh Accounts
+                </Button>
               </div>
             )}
           </>
