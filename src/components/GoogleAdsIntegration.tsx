@@ -6,7 +6,7 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { toast } from '@/components/ui/sonner';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
-import { Loader2, Check, AlertCircle } from 'lucide-react';
+import { Loader2, Check, AlertCircle, RefreshCw } from 'lucide-react';
 import { 
   Select,
   SelectContent,
@@ -23,6 +23,7 @@ interface GoogleAdsAccount {
 const GoogleAdsIntegration = () => {
   const { user } = useAuth();
   const [loading, setLoading] = useState(false);
+  const [refreshing, setRefreshing] = useState(false);
   const [accounts, setAccounts] = useState<GoogleAdsAccount[]>([]);
   const [connected, setConnected] = useState(false);
   const [configError, setConfigError] = useState<string | null>(null);
@@ -38,6 +39,8 @@ const GoogleAdsIntegration = () => {
   const checkConnection = async () => {
     if (!user) return;
     
+    console.log('Checking Google Ads connection status...');
+    
     try {
       const { data, error } = await supabase
         .from('api_tokens')
@@ -46,19 +49,26 @@ const GoogleAdsIntegration = () => {
         .eq('provider', 'google')
         .single();
       
-      if (data) {
+      console.log('Connection check result:', { data, error });
+      
+      if (data && !error) {
         setConnected(true);
         setConfigError(null);
+        console.log('Google Ads connection found');
+      } else {
+        setConnected(false);
+        console.log('No Google Ads connection found');
       }
     } catch (error) {
       console.error("Error checking connection:", error);
+      setConnected(false);
     }
   };
 
   const fetchAccounts = async () => {
     if (!user) return;
     
-    setLoading(true);
+    console.log('Fetching Google Ads accounts...');
     
     try {
       const { data, error } = await supabase
@@ -66,6 +76,8 @@ const GoogleAdsIntegration = () => {
         .select('*')
         .eq('user_id', user.id)
         .eq('platform', 'google');
+      
+      console.log('Accounts fetch result:', { data, error });
       
       if (error) {
         throw error;
@@ -77,6 +89,7 @@ const GoogleAdsIntegration = () => {
           name: account.account_name || account.account_id
         }));
         
+        console.log('Found Google Ads accounts:', accountsData);
         setAccounts(accountsData);
         
         // If there's a previously selected account in localStorage, use that
@@ -99,8 +112,6 @@ const GoogleAdsIntegration = () => {
     } catch (error) {
       console.error('Error fetching Google Ads accounts:', error);
       toast.error('Failed to fetch Google Ads accounts');
-    } finally {
-      setLoading(false);
     }
   };
 
@@ -109,6 +120,8 @@ const GoogleAdsIntegration = () => {
       setConfigError(null);
       setLoading(true);
       
+      console.log('Starting Google Ads OAuth flow...');
+      
       // Generate a random state for OAuth security
       const state = Math.random().toString(36).substring(2);
       // Save the state in localStorage to verify later
@@ -116,6 +129,8 @@ const GoogleAdsIntegration = () => {
       
       // Use the exact redirect URI as configured in Google Cloud Console
       const redirectUri = window.location.origin + '/google-callback';
+      
+      console.log('OAuth parameters:', { redirectUri, state });
       
       // Call our secure edge function to get the proper client ID
       console.log("Getting Google client ID from edge function");
@@ -133,14 +148,12 @@ const GoogleAdsIntegration = () => {
       const clientId = clientData.clientId;
       const scope = encodeURIComponent('https://www.googleapis.com/auth/adwords');
       
-      console.log("Starting Google OAuth with:", {
-        clientId: clientId.substring(0, 8) + '...',
-        redirectUri,
-        state
-      });
+      console.log("Starting Google OAuth with client ID:", clientId.substring(0, 8) + '...');
       
       // Construct the OAuth URL with all required parameters
       const oauthUrl = `https://accounts.google.com/o/oauth2/v2/auth?client_id=${clientId}&redirect_uri=${encodeURIComponent(redirectUri)}&response_type=code&scope=${scope}&state=${state}&access_type=offline&prompt=consent&include_granted_scopes=true`;
+      
+      console.log('Redirecting to OAuth URL');
       
       // Redirect to Google's OAuth page
       window.location.href = oauthUrl;
@@ -151,6 +164,14 @@ const GoogleAdsIntegration = () => {
     } finally {
       setLoading(false);
     }
+  };
+  
+  const handleRefreshAccounts = async () => {
+    setRefreshing(true);
+    await checkConnection();
+    await fetchAccounts();
+    setRefreshing(false);
+    toast.success('Account data refreshed');
   };
   
   const handleSelectAccount = (accountId: string) => {
@@ -225,8 +246,29 @@ const GoogleAdsIntegration = () => {
         ) : (
           <>
             <div className="flex items-center justify-between mb-4">
-              <span className="text-sm font-medium text-green-500">Connected</span>
-              <Button onClick={fetchAccounts} size="sm">Refresh Accounts</Button>
+              <span className="text-sm font-medium text-green-500 flex items-center gap-2">
+                <Check className="h-4 w-4" />
+                Connected to Google Ads
+              </span>
+              <Button 
+                onClick={handleRefreshAccounts} 
+                size="sm" 
+                variant="outline"
+                disabled={refreshing}
+                className="gap-2"
+              >
+                {refreshing ? (
+                  <>
+                    <Loader2 className="h-3 w-3 animate-spin" />
+                    Refreshing...
+                  </>
+                ) : (
+                  <>
+                    <RefreshCw className="h-3 w-3" />
+                    Refresh Accounts
+                  </>
+                )}
+              </Button>
             </div>
             
             {accounts.length > 0 && (
@@ -260,11 +302,7 @@ const GoogleAdsIntegration = () => {
               </div>
             )}
             
-            {loading ? (
-              <div className="flex justify-center my-4">
-                <Loader2 className="h-6 w-6 animate-spin" />
-              </div>
-            ) : accounts.length > 0 ? (
+            {accounts.length > 0 ? (
               <Table>
                 <TableHeader>
                   <TableRow>
@@ -293,7 +331,12 @@ const GoogleAdsIntegration = () => {
                 </TableBody>
               </Table>
             ) : (
-              <p className="text-center text-muted-foreground my-4">No Google Ads accounts found</p>
+              <div className="text-center py-8">
+                <p className="text-muted-foreground mb-4">No Google Ads accounts found</p>
+                <p className="text-sm text-muted-foreground">
+                  Make sure you have access to Google Ads accounts with the email you used to sign in.
+                </p>
+              </div>
             )}
           </>
         )}
