@@ -228,6 +228,22 @@ const GoogleCallback = () => {
       </Card>
     </div>
   );
+
+  function goToIntegrations() {
+    navigate('/integrations');
+  }
+
+  function goToGoogleCloudConsole() {
+    window.open('https://console.cloud.google.com/apis/credentials', '_blank');
+  }
+
+  function getServiceName() {
+    return authType === 'ads' ? 'Google Ads' : 'Google Search Console';
+  }
+
+  function getTargetPage() {
+    return authType === 'ads' ? '/integrations' : '/search-console';
+  }
 };
 
 export default GoogleCallback;

@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from 'react';
 import { useAuth } from '@/context/AuthContext';
 import { supabase } from '@/integrations/supabase/client';
@@ -36,7 +35,7 @@ const GoogleAdsIntegration = () => {
     }
   }, [user]);
 
-  const checkConnection = async () => {
+  async function checkConnection() {
     if (!user) return;
     
     console.log('Checking Google Ads connection status...');
@@ -63,9 +62,9 @@ const GoogleAdsIntegration = () => {
       console.error("Error checking connection:", error);
       setConnected(false);
     }
-  };
+  }
 
-  const fetchAccounts = async () => {
+  async function fetchAccounts() {
     if (!user) return;
     
     console.log('Fetching Google Ads accounts...');
@@ -113,7 +112,7 @@ const GoogleAdsIntegration = () => {
       console.error('Error fetching Google Ads accounts:', error);
       toast.error('Failed to fetch Google Ads accounts');
     }
-  };
+  }
 
   const handleConnect = async () => {
     try {
