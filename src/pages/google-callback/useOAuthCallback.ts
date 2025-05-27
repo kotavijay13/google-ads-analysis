@@ -57,12 +57,13 @@ export const useOAuthCallback = () => {
           localStorage.removeItem('googleSearchConsoleOAuthState');
           console.log('Google Search Console OAuth flow detected');
         } else {
-          console.warn('No matching state found, defaulting to search-console');
+          console.warn('No matching state found, checking for Google Ads state');
           // If no state match, check if we have a Google Ads state and assume it's Google Ads
           if (googleAdsState) {
             currentAuthType = 'ads';
             storedState = googleAdsState;
             localStorage.removeItem('googleOAuthState');
+            console.log('Defaulting to Google Ads OAuth flow');
           }
         }
         
@@ -77,17 +78,11 @@ export const useOAuthCallback = () => {
           throw new Error('No authorization code received from Google');
         }
 
-        // For production, we'll be more lenient with state checking
-        if (state && storedState && state !== storedState) {
-          console.warn('OAuth state mismatch, but continuing with auth flow');
-        }
-
         // Call the appropriate edge function based on auth type
         const functionName = currentAuthType === 'ads' ? 'google-ads-auth' : 'google-search-console-auth';
         const redirectUri = window.location.origin + '/google-callback';
         
-        console.log(`Calling ${functionName} edge function`);
-        console.log('Using redirect URI:', redirectUri);
+        console.log(`Calling ${functionName} edge function with redirect URI: ${redirectUri}`);
         
         // Get the auth token to pass to the edge function
         const { data: { session } } = await supabase.auth.getSession();
@@ -95,9 +90,11 @@ export const useOAuthCallback = () => {
           throw new Error('No valid session found');
         }
 
+        console.log('Invoking edge function with authorization');
         const { data, error: functionError } = await supabase.functions.invoke(functionName, {
           headers: {
             Authorization: `Bearer ${session.access_token}`,
+            'Content-Type': 'application/json',
           },
           body: { 
             action: 'exchange_code',
