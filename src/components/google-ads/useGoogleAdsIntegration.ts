@@ -24,16 +24,10 @@ export const useGoogleAdsIntegration = () => {
   });
 
   const checkConnection = useCallback(async () => {
-    if (!user) {
-      console.log('No user found, skipping connection check');
-      return;
-    }
-    
-    console.log('Checking connection for user:', user.id);
+    if (!user) return;
     
     try {
       const isConnected = await checkGoogleAdsConnection(user.id);
-      console.log('Connection status:', isConnected);
       setState(prev => ({ ...prev, connected: isConnected, configError: null }));
     } catch (error) {
       console.error("Error checking connection:", error);
@@ -42,24 +36,15 @@ export const useGoogleAdsIntegration = () => {
   }, [user]);
 
   const fetchAccounts = useCallback(async () => {
-    if (!user) {
-      console.log('No user found, skipping account fetch');
-      return;
-    }
-    
-    console.log('Fetching accounts for user:', user.id);
+    if (!user) return;
     
     try {
       const accounts = await fetchGoogleAdsAccounts(user.id);
-      console.log('Fetched accounts:', accounts);
       setState(prev => ({ ...prev, accounts }));
       
       if (accounts.length > 0) {
         const selectedAccountId = initializeSelectedAccount(accounts);
         setState(prev => ({ ...prev, selectedAccount: selectedAccountId }));
-        console.log('Selected account ID:', selectedAccountId);
-      } else {
-        console.log('No accounts found');
       }
     } catch (error) {
       console.error('Error in fetchAccounts:', error);
@@ -67,20 +52,9 @@ export const useGoogleAdsIntegration = () => {
   }, [user]);
 
   useEffect(() => {
-    console.log('useGoogleAdsIntegration - user changed:', user?.id);
     if (user) {
       checkConnection();
       fetchAccounts();
-    } else {
-      // Reset state when no user
-      setState({
-        loading: false,
-        refreshing: false,
-        accounts: [],
-        connected: false,
-        configError: null,
-        selectedAccount: null,
-      });
     }
   }, [user, checkConnection, fetchAccounts]);
 
@@ -88,14 +62,9 @@ export const useGoogleAdsIntegration = () => {
   useGoogleAdsEventListeners(state, checkConnection, fetchAccounts);
 
   const handleConnect = async () => {
-    if (!user) {
-      toast.error('Please log in first');
-      return;
-    }
-    
     try {
       setState(prev => ({ ...prev, configError: null, loading: true }));
-      console.log('Starting Google Ads OAuth flow for user:', user.id);
+      console.log('Starting Google Ads OAuth flow...');
       await initiateGoogleAdsOAuth();
     } catch (error) {
       console.error("Error initiating Google OAuth:", error);
@@ -118,7 +87,6 @@ export const useGoogleAdsIntegration = () => {
   };
   
   const handleSelectAccount = (accountId: string) => {
-    console.log('Handle select account:', accountId);
     setState(prev => ({ ...prev, selectedAccount: accountId }));
     selectGoogleAdsAccount(accountId, state.accounts);
   };

@@ -13,7 +13,6 @@ import AssetPerformance from '@/components/AssetPerformance';
 import SearchTermsPerformance from '@/components/SearchTermsPerformance';
 import { useGoogleAdsAPI } from '@/hooks/use-google-ads-api';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { 
   campaignsData, 
   dailyPerformance, 
@@ -26,9 +25,8 @@ import {
   assetPerformanceData,
   searchTermsData
 } from '@/data/mockData';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { useGoogleAccounts } from '@/hooks/use-google-accounts';
-import { useGoogleAdsIntegration } from '@/components/google-ads/useGoogleAdsIntegration';
-import GoogleAdsIntegration from '@/components/GoogleAdsIntegration';
 
 const GoogleAdsPage = () => {
   const [metrics, setMetrics] = useState(getOverviewMetrics());
@@ -37,6 +35,7 @@ const GoogleAdsPage = () => {
     to: new Date()
   });
   
+  // Use the hooks to fetch Google Ads data and accounts
   const { 
     fetchData, 
     isLoading, 
@@ -44,9 +43,9 @@ const GoogleAdsPage = () => {
   } = useGoogleAdsAPI();
   
   const { accounts, currentAccount, switchAccount, setCurrentAccount } = useGoogleAccounts();
-  const { connected, accounts: googleAdsAccounts } = useGoogleAdsIntegration();
   
   const handleRefresh = () => {
+    // Fetch fresh data from Google Ads API
     fetchData(dateRange.from, dateRange.to);
     console.log('Refreshing Google Ads data...');
   };
@@ -54,35 +53,14 @@ const GoogleAdsPage = () => {
   const handleDateChange = useCallback((range: { from: Date; to: Date }) => {
     setDateRange(range);
     console.log('Date range changed:', range);
+    // Fetch updated data with new date range
     fetchData(range.from, range.to);
   }, [fetchData]);
 
+  // Initial data fetch when component mounts
   useEffect(() => {
-    console.log('Google Ads accounts:', googleAdsAccounts);
-    console.log('Connected status:', connected);
-    console.log('Current account:', currentAccount);
-  }, [googleAdsAccounts, connected, currentAccount]);
-
-  // Show integration component if not connected or no accounts
-  if (!connected || googleAdsAccounts.length === 0) {
-    return (
-      <div className="container mx-auto py-6 px-4 max-w-7xl">
-        <Header onRefresh={handleRefresh} title="Google Ads Dashboard" />
-        
-        <Card className="w-full">
-          <CardHeader>
-            <CardTitle>Connect Your Google Ads Account</CardTitle>
-            <CardDescription>
-              You need to connect your Google Ads account to view your campaign data.
-            </CardDescription>
-          </CardHeader>
-          <CardContent>
-            <GoogleAdsIntegration />
-          </CardContent>
-        </Card>
-      </div>
-    );
-  }
+    console.log('Initial Google Ads data fetch with date range:', dateRange);
+  }, []);
 
   return (
     <div className="container mx-auto py-6 px-4 max-w-7xl">
@@ -91,24 +69,27 @@ const GoogleAdsPage = () => {
       <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-6 gap-4">
         <div className="flex flex-col lg:flex-row items-start lg:items-center gap-4">
           <h2 className="text-lg font-medium">Google Ads Overview</h2>
-          {currentAccount && (
-            <div className="text-sm text-muted-foreground">
-              Current Account: {currentAccount.name} ({currentAccount.id})
-            </div>
-          )}
+          <Select 
+            value={currentAccount?.id || ''} 
+            onValueChange={(value) => {
+              const account = accounts.find(acc => acc.id === value);
+              if (account) setCurrentAccount(account);
+            }}
+          >
+            <SelectTrigger className="w-[250px]">
+              <SelectValue placeholder="Select ad account" />
+            </SelectTrigger>
+            <SelectContent>
+              {accounts.map(account => (
+                <SelectItem key={account.id} value={account.id}>
+                  {account.name} ({account.id})
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
         </div>
         <DateRangePicker onDateChange={handleDateChange} />
       </div>
-
-      {/* Show a notice about data source */}
-      <Card className="mb-6 bg-blue-50 border-blue-200">
-        <CardContent className="pt-6">
-          <p className="text-sm text-blue-800">
-            <strong>Note:</strong> You're currently viewing sample data. Real Google Ads data integration is in development.
-            Your connected account: {currentAccount?.name || 'No account selected'}
-          </p>
-        </CardContent>
-      </Card>
 
       <ChannelMetricsOverview metrics={metrics} />
       
