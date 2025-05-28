@@ -41,6 +41,10 @@ Deno.serve(async (req) => {
     const requestBody: GoogleAdsDataRequest = await req.json();
     const { accountId, startDate, endDate } = requestBody;
 
+    if (!accountId || !startDate || !endDate) {
+      throw new Error('Missing required parameters: accountId, startDate, endDate');
+    }
+
     console.log(`Fetching data for account ${accountId} from ${startDate} to ${endDate}`);
 
     // Get the user's Google access token
@@ -72,7 +76,7 @@ Deno.serve(async (req) => {
 
     console.log('Calling Google Ads API for campaign data...');
 
-    // Fetch campaign performance data
+    // Fetch campaign performance data with error handling
     const campaignQuery = `
       SELECT 
         campaign.id,
@@ -88,28 +92,36 @@ Deno.serve(async (req) => {
       WHERE segments.date BETWEEN '${startDate}' AND '${endDate}'
     `;
 
-    const campaignResponse = await fetch(`https://googleads.googleapis.com/v17/customers/${accountId}/googleAds:searchStream`, {
-      method: 'POST',
-      headers: {
-        'Authorization': `Bearer ${accessToken}`,
-        'developer-token': developToken,
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({
-        query: campaignQuery
-      })
-    });
+    let campaignData = { results: [] };
+    let campaignError = null;
 
-    if (!campaignResponse.ok) {
-      const errorText = await campaignResponse.text();
-      console.error('Campaign API error:', errorText);
-      throw new Error(`Google Ads API error: ${campaignResponse.status} - ${errorText}`);
+    try {
+      const campaignResponse = await fetch(`https://googleads.googleapis.com/v17/customers/${accountId}/googleAds:searchStream`, {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${accessToken}`,
+          'developer-token': developToken,
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          query: campaignQuery
+        })
+      });
+
+      if (!campaignResponse.ok) {
+        const errorText = await campaignResponse.text();
+        console.error('Campaign API error:', errorText);
+        campaignError = `Google Ads API error: ${campaignResponse.status} - ${errorText}`;
+      } else {
+        campaignData = await campaignResponse.json();
+        console.log('Campaign data received:', campaignData);
+      }
+    } catch (error) {
+      console.error('Error fetching campaign data:', error);
+      campaignError = `Failed to fetch campaign data: ${error.message}`;
     }
 
-    const campaignData = await campaignResponse.json();
-    console.log('Campaign data received:', campaignData);
-
-    // Fetch daily performance data
+    // Fetch daily performance data with error handling
     const dailyQuery = `
       SELECT 
         segments.date,
@@ -121,25 +133,40 @@ Deno.serve(async (req) => {
       WHERE segments.date BETWEEN '${startDate}' AND '${endDate}'
     `;
 
-    const dailyResponse = await fetch(`https://googleads.googleapis.com/v17/customers/${accountId}/googleAds:searchStream`, {
-      method: 'POST',
-      headers: {
-        'Authorization': `Bearer ${accessToken}`,
-        'developer-token': developToken,
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({
-        query: dailyQuery
-      })
-    });
+    let dailyData = { results: [] };
+    let dailyError = null;
 
-    const dailyData = dailyResponse.ok ? await dailyResponse.json() : { results: [] };
+    try {
+      const dailyResponse = await fetch(`https://googleads.googleapis.com/v17/customers/${accountId}/googleAds:searchStream`, {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${accessToken}`,
+          'developer-token': developToken,
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          query: dailyQuery
+        })
+      });
 
-    // Process and transform the data
+      if (dailyResponse.ok) {
+        dailyData = await dailyResponse.json();
+        console.log('Daily data received:', dailyData);
+      } else {
+        const errorText = await dailyResponse.text();
+        console.error('Daily API error:', errorText);
+        dailyError = `Daily data fetch error: ${dailyResponse.status}`;
+      }
+    } catch (error) {
+      console.error('Error fetching daily data:', error);
+      dailyError = `Failed to fetch daily data: ${error.message}`;
+    }
+
+    // Process and transform the data with safety checks
     const campaigns = campaignData.results?.map((result: any) => ({
-      id: result.campaign?.id,
+      id: result.campaign?.id || 'unknown',
       name: result.campaign?.name || 'Unnamed Campaign',
-      status: result.campaign?.status,
+      status: result.campaign?.status || 'UNKNOWN',
       impressions: parseInt(result.metrics?.impressions || '0'),
       clicks: parseInt(result.metrics?.clicks || '0'),
       spend: (parseInt(result.metrics?.cost_micros || '0') / 1000000), // Convert micros to currency
@@ -148,20 +175,20 @@ Deno.serve(async (req) => {
       cpc: (parseInt(result.metrics?.average_cpc || '0') / 1000000) // Convert micros to currency
     })) || [];
 
-    // Process daily performance data
+    // Process daily performance data with safety checks
     const dailyPerformance = dailyData.results?.map((result: any) => ({
-      date: result.segments?.date,
+      date: result.segments?.date || startDate,
       clicks: parseInt(result.metrics?.clicks || '0'),
       impressions: parseInt(result.metrics?.impressions || '0'),
       spend: (parseInt(result.metrics?.cost_micros || '0') / 1000000),
       conversions: parseFloat(result.metrics?.conversions || '0')
     })) || [];
 
-    // Calculate overview metrics
-    const totalSpend = campaigns.reduce((sum, camp) => sum + camp.spend, 0);
-    const totalClicks = campaigns.reduce((sum, camp) => sum + camp.clicks, 0);
-    const totalImpressions = campaigns.reduce((sum, camp) => sum + camp.impressions, 0);
-    const totalConversions = campaigns.reduce((sum, camp) => sum + camp.conversions, 0);
+    // Calculate overview metrics with safety checks
+    const totalSpend = campaigns.reduce((sum, camp) => sum + (camp.spend || 0), 0);
+    const totalClicks = campaigns.reduce((sum, camp) => sum + (camp.clicks || 0), 0);
+    const totalImpressions = campaigns.reduce((sum, camp) => sum + (camp.impressions || 0), 0);
+    const totalConversions = campaigns.reduce((sum, camp) => sum + (camp.conversions || 0), 0);
 
     const metrics = {
       totalSpend: totalSpend,
@@ -180,6 +207,11 @@ Deno.serve(async (req) => {
       campaigns,
       dailyPerformance,
       metrics,
+      // Include any errors for debugging
+      errors: {
+        campaignError,
+        dailyError
+      },
       // Placeholder for other data types that will be implemented later
       keywords: [],
       adGroups: [],
@@ -199,7 +231,19 @@ Deno.serve(async (req) => {
     
     return new Response(JSON.stringify({
       error: error instanceof Error ? error.message : 'Unknown error occurred',
-      details: 'Check the edge function logs for more information'
+      details: 'Check the edge function logs for more information',
+      campaigns: [],
+      dailyPerformance: [],
+      metrics: {
+        totalSpend: 0,
+        totalClicks: 0,
+        totalImpressions: 0,
+        totalConversions: 0,
+        avgCtr: 0,
+        avgCpc: 0,
+        conversionRate: 0,
+        costPerConversion: 0
+      }
     }), {
       headers: { ...corsHeaders, 'Content-Type': 'application/json' },
       status: 500,

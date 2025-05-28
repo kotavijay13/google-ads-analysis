@@ -1,4 +1,5 @@
-import { useState, useCallback, useEffect } from 'react';
+
+import { useState, useCallback, useEffect, useRef } from 'react';
 import Header from '@/components/Header';
 import DateRangePicker from '@/components/DateRangePicker';
 import ChannelMetricsOverview from '@/components/ChannelMetricsOverview';
@@ -25,13 +26,18 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { useGoogleAdsIntegration } from '@/components/google-ads/useGoogleAdsIntegration';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { ExternalLink } from 'lucide-react';
+import { ExternalLink, AlertCircle } from 'lucide-react';
+import { Alert, AlertDescription } from '@/components/ui/alert';
 
 const GoogleAdsPage = () => {
   const [dateRange, setDateRange] = useState<{ from: Date; to: Date }>({
     from: new Date(new Date().setDate(new Date().getDate() - 30)),
     to: new Date()
   });
+  
+  // Use ref to track if data has been fetched to prevent infinite loops
+  const hasFetchedData = useRef(false);
+  const lastFetchKey = useRef<string>('');
   
   // Use the Google Ads integration hook
   const { 
@@ -55,27 +61,38 @@ const GoogleAdsPage = () => {
 
   // Fetch data when component mounts or when account/date changes
   useEffect(() => {
-    if (selectedAccount) {
-      fetchData(dateRange.from, dateRange.to);
+    if (selectedAccount && connected) {
+      const fetchKey = `${selectedAccount}-${dateRange.from.toISOString()}-${dateRange.to.toISOString()}`;
+      
+      // Only fetch if we haven't fetched this combination before
+      if (!hasFetchedData.current || lastFetchKey.current !== fetchKey) {
+        console.log('Fetching data for key:', fetchKey);
+        hasFetchedData.current = true;
+        lastFetchKey.current = fetchKey;
+        fetchData(dateRange.from, dateRange.to);
+      }
     }
-  }, [selectedAccount, fetchData]);
+  }, [selectedAccount, connected, dateRange.from, dateRange.to, fetchData]);
 
-  const handleRefresh = () => {
+  const handleRefresh = useCallback(() => {
+    // Reset the fetch tracking to force a new fetch
+    hasFetchedData.current = false;
+    lastFetchKey.current = '';
+    
     // Fetch fresh data from Google Ads API
-    if (selectedAccount) {
+    if (selectedAccount && connected) {
+      console.log('Manual refresh triggered');
       fetchData(dateRange.from, dateRange.to);
     }
-    console.log('Refreshing Google Ads data...');
-  };
+  }, [selectedAccount, connected, fetchData, dateRange.from, dateRange.to]);
 
   const handleDateChange = useCallback((range: { from: Date; to: Date }) => {
-    setDateRange(range);
     console.log('Date range changed:', range);
-    // Fetch updated data with new date range
-    if (selectedAccount) {
-      fetchData(range.from, range.to);
-    }
-  }, [fetchData, selectedAccount]);
+    setDateRange(range);
+    // Reset fetch tracking when date changes
+    hasFetchedData.current = false;
+    lastFetchKey.current = '';
+  }, []);
 
   // If not connected, show connection prompt
   if (!connected) {
@@ -134,7 +151,7 @@ const GoogleAdsPage = () => {
           <Select 
             value={selectedAccount || ''} 
             onValueChange={handleSelectAccount}
-            disabled={refreshing}
+            disabled={refreshing || isLoading}
           >
             <SelectTrigger className="w-[250px]">
               <SelectValue placeholder={accounts.length === 0 ? "No accounts available" : "Select ad account"} />
@@ -184,10 +201,22 @@ const GoogleAdsPage = () => {
       )}
 
       {error && (
-        <div className="mb-4 bg-red-50 border border-red-200 rounded-md p-3">
-          <p className="text-red-800 font-medium">Error loading data</p>
-          <p className="text-red-600 text-sm">{error}</p>
-        </div>
+        <Alert variant="destructive" className="mb-4">
+          <AlertCircle className="h-4 w-4" />
+          <AlertDescription>
+            <strong>Error loading data:</strong> {error}
+            <br />
+            <Button 
+              onClick={handleRefresh} 
+              size="sm" 
+              variant="outline" 
+              className="mt-2"
+              disabled={isLoading}
+            >
+              Retry
+            </Button>
+          </AlertDescription>
+        </Alert>
       )}
 
       <ChannelMetricsOverview metrics={overviewMetrics} />
