@@ -1,6 +1,6 @@
 
 import { serve } from "https://deno.land/std@0.177.0/http/server.ts";
-import { handleGetClientId, handleExchangeCode } from './handlers.ts';
+import { handleGetClientId, handleExchangeCode, handleSyncAccounts } from './handlers.ts';
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
@@ -19,6 +19,15 @@ serve(async (req) => {
     // Handle getting client ID
     if (action === 'get_client_id') {
       const response = await handleGetClientId();
+      return new Response(response.body, { 
+        status: response.status, 
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' } 
+      });
+    }
+    
+    // Handle manual account sync
+    if (action === 'sync_accounts') {
+      const response = await handleSyncAccounts(req);
       return new Response(response.body, { 
         status: response.status, 
         headers: { ...corsHeaders, 'Content-Type': 'application/json' } 

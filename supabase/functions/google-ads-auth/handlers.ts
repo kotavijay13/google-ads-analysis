@@ -14,6 +14,53 @@ export async function handleGetClientId() {
   );
 }
 
+export async function handleSyncAccounts(req: Request) {
+  const config = validateConfig();
+  const { user, supabase } = await getUserFromRequest(req, config);
+  
+  console.log(`Manual account sync requested for user ${user.email}`);
+  
+  try {
+    // Get the user's access token
+    const { data: tokenData, error: tokenError } = await supabase
+      .from('api_tokens')
+      .select('access_token')
+      .eq('user_id', user.id)
+      .eq('provider', 'google')
+      .single();
+    
+    if (tokenError || !tokenData) {
+      console.error('No valid Google token found for user:', user.id);
+      throw new Error('No valid Google authentication found. Please reconnect your Google account.');
+    }
+    
+    console.log('Found valid Google token, attempting to fetch accounts...');
+    
+    // Try to fetch Google Ads accounts
+    await fetchGoogleAdsAccounts(tokenData.access_token, config, user.id);
+    
+    return new Response(
+      JSON.stringify({ 
+        success: true,
+        message: 'Account sync completed successfully'
+      }),
+      { status: 200, headers: { 'Content-Type': 'application/json' } }
+    );
+    
+  } catch (error) {
+    console.error('Error in handleSyncAccounts:', error);
+    
+    return new Response(
+      JSON.stringify({ 
+        success: false, 
+        error: (error as Error).message,
+        details: 'Check the edge function logs for more information'
+      }),
+      { status: 500, headers: { 'Content-Type': 'application/json' } }
+    );
+  }
+}
+
 export async function handleExchangeCode(req: Request, requestData: any) {
   const { code, redirectUri } = requestData;
   
@@ -60,10 +107,11 @@ export async function handleExchangeCode(req: Request, requestData: any) {
       return new Response(
         JSON.stringify({ 
           success: true, 
-          warning: 'Google authentication successful, but failed to fetch Google Ads accounts. This could be due to missing developer token, API permissions, or no Google Ads accounts associated with your Google account.',
+          warning: 'Google authentication successful, but failed to fetch Google Ads accounts. You can try manual sync from the integrations page.',
           error: (accountError as Error).message,
           troubleshooting: {
             suggestions: [
+              'Try the manual account sync feature',
               'Ensure Google Ads API is enabled in Google Cloud Console',
               'Verify you have a Google Ads Developer Token configured',
               'Check that your Google account has access to Google Ads accounts',
