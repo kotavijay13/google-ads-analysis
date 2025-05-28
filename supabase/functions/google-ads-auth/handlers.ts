@@ -31,17 +31,40 @@ export async function handleExchangeCode(req: Request, requestData: any) {
   
   console.log(`Exchanging code for tokens for user ${user.email}`);
   
-  // Exchange code for tokens
-  const tokenData = await exchangeCodeForTokens(code, redirectUri, config);
-  
-  // Store tokens in database
-  await storeTokens(supabase, user.id, tokenData);
-  
-  // Fetch Google Ads accounts
-  await fetchGoogleAdsAccounts(tokenData.access_token, config, user.id);
-  
-  return new Response(
-    JSON.stringify({ success: true }),
-    { status: 200, headers: { 'Content-Type': 'application/json' } }
-  );
+  try {
+    // Exchange code for tokens
+    const tokenData = await exchangeCodeForTokens(code, redirectUri, config);
+    
+    // Store tokens in database
+    await storeTokens(supabase, user.id, tokenData);
+    
+    // Fetch Google Ads accounts
+    console.log('Attempting to fetch Google Ads accounts...');
+    await fetchGoogleAdsAccounts(tokenData.access_token, config, user.id);
+    console.log('Google Ads accounts fetch completed');
+    
+    return new Response(
+      JSON.stringify({ success: true }),
+      { status: 200, headers: { 'Content-Type': 'application/json' } }
+    );
+  } catch (error) {
+    console.error('Error in handleExchangeCode:', error);
+    
+    // If it's a Google Ads accounts fetch error, still return success for the OAuth
+    // but log the specific error
+    if (error instanceof Error && error.message.includes('Google Ads API error')) {
+      console.error('Google Ads API failed, but OAuth was successful:', error.message);
+      return new Response(
+        JSON.stringify({ 
+          success: true, 
+          warning: 'OAuth successful but failed to fetch accounts. Try refreshing accounts later.',
+          error: error.message 
+        }),
+        { status: 200, headers: { 'Content-Type': 'application/json' } }
+      );
+    }
+    
+    // For other errors, re-throw
+    throw error;
+  }
 }
