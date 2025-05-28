@@ -21,9 +21,12 @@ export async function fetchGoogleAdsAccounts(
       'Content-Type': 'application/json',
     };
     
-    // Add developer token if available
+    // Add developer token if available - this is required for Google Ads API
     if (config.developToken) {
       headers['developer-token'] = config.developToken;
+    } else {
+      console.error('Developer token is missing - this is required for Google Ads API');
+      throw new Error('Google Ads Developer Token is not configured. Please check your environment variables.');
     }
     
     console.log('Request headers:', Object.keys(headers));
@@ -44,23 +47,32 @@ export async function fetchGoogleAdsAccounts(
       let errorDetails = errorText;
       try {
         const errorJson = JSON.parse(errorText);
+        console.log('Parsed error JSON:', errorJson);
         errorDetails = errorJson.error?.message || errorJson.message || errorText;
+        
+        // Log additional error details for debugging
+        if (errorJson.error?.details) {
+          console.log('Error details:', errorJson.error.details);
+        }
       } catch (e) {
-        // Keep original error text if not JSON
+        console.log('Could not parse error as JSON:', e);
       }
       
       // Special handling for common errors
-      if (accountsResponse.status === 404) {
-        console.error('404 Error - This usually means:');
-        console.error('1. Invalid API endpoint URL');
-        console.error('2. Missing developer token');
-        console.error('3. API not enabled in Google Cloud');
+      if (accountsResponse.status === 400) {
+        console.error('400 Error - This usually means:');
+        console.error('1. Missing or invalid developer token');
+        console.error('2. Invalid request format or missing required parameters');
+        console.error('3. Account doesn\'t have Google Ads API access');
+        console.error('4. OAuth scope insufficient for Google Ads API');
         
-        throw new Error(`Google Ads API 404 error. Please ensure: 1) Google Ads API is enabled in Google Cloud Console, 2) Developer token is configured, 3) Account has Google Ads access. Details: ${errorDetails}`);
+        throw new Error(`Google Ads API 400 error. Common causes: 1) Missing developer token, 2) Insufficient OAuth scopes (need 'https://www.googleapis.com/auth/adwords'), 3) Account lacks Google Ads API access. Details: ${errorDetails}`);
       } else if (accountsResponse.status === 401) {
         throw new Error(`Google Ads API authentication error. Please reconnect your Google account. Details: ${errorDetails}`);
       } else if (accountsResponse.status === 403) {
         throw new Error(`Google Ads API permission error. Please ensure your Google account has access to Google Ads and the API is enabled. Details: ${errorDetails}`);
+      } else if (accountsResponse.status === 404) {
+        throw new Error(`Google Ads API 404 error. Please ensure: 1) Google Ads API is enabled in Google Cloud Console, 2) Developer token is configured, 3) Account has Google Ads access. Details: ${errorDetails}`);
       }
       
       throw new Error(`Google Ads API error: ${accountsResponse.status} - ${errorDetails}`);
@@ -91,9 +103,15 @@ export async function fetchGoogleAdsAccounts(
           try {
             const customerDetailUrl = `https://googleads.googleapis.com/v17/customers/${customerId}`;
             
+            const detailHeaders = {
+              ...headers,
+              // Add login customer ID for accessing customer details
+              'login-customer-id': customerId
+            };
+            
             const detailResponse = await fetch(customerDetailUrl, {
               method: 'GET',
-              headers: headers,
+              headers: detailHeaders,
             });
             
             if (detailResponse.ok) {
@@ -101,7 +119,9 @@ export async function fetchGoogleAdsAccounts(
               console.log(`Customer ${customerId} details:`, detailData);
               accountName = detailData.descriptiveName || detailData.name || accountName;
             } else {
-              console.log(`Could not fetch details for customer ${customerId}, using default name`);
+              console.log(`Could not fetch details for customer ${customerId}, status: ${detailResponse.status}`);
+              const detailError = await detailResponse.text();
+              console.log(`Detail error for ${customerId}:`, detailError);
             }
           } catch (error) {
             console.log(`Error fetching details for customer ${customerId}:`, error);
@@ -143,12 +163,14 @@ export async function fetchGoogleAdsAccounts(
       // 1. User has no Google Ads accounts
       // 2. User doesn't have permission to access Google Ads accounts
       // 3. The Google account is not linked to any Google Ads accounts
+      // 4. OAuth scope is insufficient
       
       console.warn('Possible reasons for no accounts:');
       console.warn('1. No Google Ads accounts associated with this Google account');
       console.warn('2. Google Ads accounts not properly linked to this Google account');
       console.warn('3. Missing permissions or developer token');
-      console.warn('4. User needs to accept Google Ads API terms');
+      console.warn('4. OAuth scope insufficient - need https://www.googleapis.com/auth/adwords');
+      console.warn('5. User needs to accept Google Ads API terms');
       
       // Don't throw an error here - this is a valid case where user has no accounts
       // Just log it for debugging
