@@ -99,29 +99,66 @@ export async function fetchGoogleAdsAccounts(
           
           let accountName = `Google Ads Account ${customerId}`;
           
-          // Try to get customer details (this might fail if we don't have access)
+          // Try to get customer details using GoogleAdsQuery API which is more reliable
           try {
-            const customerDetailUrl = `https://googleads.googleapis.com/v17/customers/${customerId}`;
+            const customerDetailUrl = `https://googleads.googleapis.com/v17/customers/${customerId}/googleAds:searchStream`;
             
             const detailHeaders = {
               ...headers,
-              // Add login customer ID for accessing customer details
               'login-customer-id': customerId
             };
             
+            const queryBody = {
+              query: `SELECT customer.descriptive_name, customer.id FROM customer WHERE customer.id = ${customerId}`
+            };
+            
+            console.log(`Fetching customer details for ${customerId} with query:`, queryBody.query);
+            
             const detailResponse = await fetch(customerDetailUrl, {
-              method: 'GET',
+              method: 'POST',
               headers: detailHeaders,
+              body: JSON.stringify(queryBody)
             });
             
             if (detailResponse.ok) {
               const detailData = await detailResponse.json();
-              console.log(`Customer ${customerId} details:`, detailData);
-              accountName = detailData.descriptiveName || detailData.name || accountName;
+              console.log(`Customer ${customerId} details response:`, detailData);
+              
+              // Parse the response to get customer details
+              if (detailData.results && detailData.results.length > 0) {
+                const customerInfo = detailData.results[0];
+                if (customerInfo.customer && customerInfo.customer.descriptiveName) {
+                  accountName = customerInfo.customer.descriptiveName;
+                  console.log(`Found descriptive name for ${customerId}: ${accountName}`);
+                } else {
+                  console.log(`No descriptive name found for ${customerId}, using default`);
+                }
+              }
             } else {
-              console.log(`Could not fetch details for customer ${customerId}, status: ${detailResponse.status}`);
               const detailError = await detailResponse.text();
-              console.log(`Detail error for ${customerId}:`, detailError);
+              console.log(`Could not fetch details for customer ${customerId}, status: ${detailResponse.status}, error:`, detailError);
+              
+              // Try alternative method using direct customer endpoint
+              try {
+                const altCustomerUrl = `https://googleads.googleapis.com/v17/customers/${customerId}`;
+                const altResponse = await fetch(altCustomerUrl, {
+                  method: 'GET',
+                  headers: detailHeaders,
+                });
+                
+                if (altResponse.ok) {
+                  const altData = await altResponse.json();
+                  console.log(`Alternative customer ${customerId} details:`, altData);
+                  if (altData.descriptiveName) {
+                    accountName = altData.descriptiveName;
+                    console.log(`Found descriptive name via alternative method for ${customerId}: ${accountName}`);
+                  }
+                } else {
+                  console.log(`Alternative method also failed for ${customerId}`);
+                }
+              } catch (altError) {
+                console.log(`Alternative method error for ${customerId}:`, altError);
+              }
             }
           } catch (error) {
             console.log(`Error fetching details for customer ${customerId}:`, error);
@@ -144,7 +181,7 @@ export async function fetchGoogleAdsAccounts(
           if (upsertError) {
             console.error(`Error storing account ${customerId}:`, upsertError);
           } else {
-            console.log(`Successfully stored account ${customerId}`);
+            console.log(`Successfully stored account ${customerId} with name: ${accountName}`);
           }
           
         } catch (error) {
