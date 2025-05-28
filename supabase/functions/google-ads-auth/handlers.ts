@@ -38,33 +38,45 @@ export async function handleExchangeCode(req: Request, requestData: any) {
     // Store tokens in database
     await storeTokens(supabase, user.id, tokenData);
     
-    // Fetch Google Ads accounts
-    console.log('Attempting to fetch Google Ads accounts...');
-    await fetchGoogleAdsAccounts(tokenData.access_token, config, user.id);
-    console.log('Google Ads accounts fetch completed');
+    console.log('OAuth token exchange successful, now attempting to fetch Google Ads accounts...');
     
-    return new Response(
-      JSON.stringify({ success: true }),
-      { status: 200, headers: { 'Content-Type': 'application/json' } }
-    );
-  } catch (error) {
-    console.error('Error in handleExchangeCode:', error);
-    
-    // If it's a Google Ads accounts fetch error, still return success for the OAuth
-    // but log the specific error
-    if (error instanceof Error && error.message.includes('Google Ads API error')) {
-      console.error('Google Ads API failed, but OAuth was successful:', error.message);
+    // Try to fetch Google Ads accounts
+    try {
+      await fetchGoogleAdsAccounts(tokenData.access_token, config, user.id);
+      console.log('Google Ads accounts fetch completed successfully');
+      
+      return new Response(
+        JSON.stringify({ 
+          success: true,
+          message: 'Successfully connected to Google Ads and fetched accounts'
+        }),
+        { status: 200, headers: { 'Content-Type': 'application/json' } }
+      );
+    } catch (accountError) {
+      console.error('Error fetching Google Ads accounts:', accountError);
+      
+      // OAuth was successful but account fetching failed
+      // Return success for OAuth but include warning about accounts
       return new Response(
         JSON.stringify({ 
           success: true, 
-          warning: 'OAuth successful but failed to fetch accounts. Try refreshing accounts later.',
-          error: error.message 
+          warning: 'Google authentication successful, but failed to fetch Google Ads accounts. This could be due to missing developer token, API permissions, or no Google Ads accounts associated with your Google account.',
+          error: (accountError as Error).message,
+          troubleshooting: {
+            suggestions: [
+              'Ensure Google Ads API is enabled in Google Cloud Console',
+              'Verify you have a Google Ads Developer Token configured',
+              'Check that your Google account has access to Google Ads accounts',
+              'Make sure Google Ads accounts are properly linked to your Google account'
+            ]
+          }
         }),
         { status: 200, headers: { 'Content-Type': 'application/json' } }
       );
     }
     
-    // For other errors, re-throw
+  } catch (error) {
+    console.error('Error in handleExchangeCode:', error);
     throw error;
   }
 }
