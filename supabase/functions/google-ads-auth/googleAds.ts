@@ -92,8 +92,9 @@ export async function fetchGoogleAdsAccounts(
       });
       console.log(`Found ${customerIds.length} Google Ads customer IDs:`, customerIds);
       
-      // Find the manager account (usually the first one or one that can access others)
-      let managerCustomerId = customerIds[0]; // Default to first
+      // Find the first customer ID (we'll use it as the login customer for all requests)
+      const loginCustomerId = customerIds[0];
+      console.log(`Using ${loginCustomerId} as login customer ID for all requests`);
       
       // For each customer ID, try to get account details and store in database
       for (const customerId of customerIds) {
@@ -102,23 +103,23 @@ export async function fetchGoogleAdsAccounts(
           
           let accountName = `Google Ads Account ${customerId}`;
           
-          // Try multiple approaches to get the account name
+          // Try to get account name using multiple approaches
           try {
-            // Method 1: Try using the customer itself as login-customer-id
-            console.log(`Method 1: Trying to fetch customer details for ${customerId} using self as login customer`);
+            console.log(`Attempting to fetch account name for ${customerId}`);
             
+            // Method 1: Try Google Ads API with basic customer query
             const customerDetailUrl = `https://googleads.googleapis.com/v17/customers/${customerId}/googleAds:searchStream`;
             
             const detailHeaders = {
               ...headers,
-              'login-customer-id': customerId
+              'login-customer-id': loginCustomerId
             };
             
             const queryBody = {
-              query: `SELECT customer.descriptive_name, customer.id, customer.manager FROM customer LIMIT 1`
+              query: `SELECT customer.descriptive_name, customer.id FROM customer WHERE customer.id = ${customerId} LIMIT 1`
             };
             
-            console.log(`Query for ${customerId}:`, queryBody.query);
+            console.log(`Trying searchStream API for customer ${customerId} with login customer ${loginCustomerId}`);
             
             const detailResponse = await fetch(customerDetailUrl, {
               method: 'POST',
@@ -128,82 +129,47 @@ export async function fetchGoogleAdsAccounts(
             
             if (detailResponse.ok) {
               const detailData = await detailResponse.json();
-              console.log(`Customer ${customerId} details response (Method 1):`, detailData);
+              console.log(`Customer ${customerId} details response:`, detailData);
               
               if (detailData.results && detailData.results.length > 0) {
                 const customerInfo = detailData.results[0];
-                if (customerInfo.customer) {
-                  if (customerInfo.customer.descriptiveName) {
-                    accountName = customerInfo.customer.descriptiveName;
-                    console.log(`✓ Found descriptive name for ${customerId}: ${accountName}`);
-                  }
-                  
-                  // Check if this is a manager account
-                  if (customerInfo.customer.manager) {
-                    console.log(`Customer ${customerId} is a manager account`);
-                    managerCustomerId = customerId;
-                  }
+                if (customerInfo.customer && customerInfo.customer.descriptiveName) {
+                  accountName = customerInfo.customer.descriptiveName;
+                  console.log(`✓ Found descriptive name for ${customerId}: ${accountName}`);
                 }
               }
             } else {
               const errorText = await detailResponse.text();
-              console.log(`Method 1 failed for ${customerId}, status: ${detailResponse.status}, error:`, errorText);
+              console.log(`SearchStream failed for ${customerId}:`, errorText);
               
-              // Method 2: Try using manager customer ID if different
-              if (managerCustomerId !== customerId) {
-                console.log(`Method 2: Trying to fetch ${customerId} details using manager ${managerCustomerId}`);
+              // Method 2: Try using Google My Business API to get account info
+              try {
+                console.log(`Trying alternative approach for ${customerId}`);
                 
-                const managerHeaders = {
-                  ...headers,
-                  'login-customer-id': managerCustomerId
-                };
-                
-                const managerResponse = await fetch(customerDetailUrl, {
-                  method: 'POST',
-                  headers: managerHeaders,
-                  body: JSON.stringify(queryBody)
+                // Since we can't get the name from Google Ads API due to developer token limitations,
+                // let's try using the Google OAuth userinfo to get some context
+                const userinfoUrl = 'https://www.googleapis.com/oauth2/v2/userinfo';
+                const userinfoResponse = await fetch(userinfoUrl, {
+                  headers: {
+                    'Authorization': `Bearer ${accessToken}`
+                  }
                 });
                 
-                if (managerResponse.ok) {
-                  const managerData = await managerResponse.json();
-                  console.log(`Customer ${customerId} details via manager (Method 2):`, managerData);
+                if (userinfoResponse.ok) {
+                  const userInfo = await userinfoResponse.json();
+                  console.log('User info:', userInfo);
                   
-                  if (managerData.results && managerData.results.length > 0) {
-                    const customerInfo = managerData.results[0];
-                    if (customerInfo.customer && customerInfo.customer.descriptiveName) {
-                      accountName = customerInfo.customer.descriptiveName;
-                      console.log(`✓ Found descriptive name via manager for ${customerId}: ${accountName}`);
+                  // Use email domain as part of account naming if available
+                  if (userInfo.email) {
+                    const domain = userInfo.email.split('@')[1];
+                    if (domain && domain !== 'gmail.com') {
+                      accountName = `${domain} - ${customerId}`;
+                      console.log(`Using domain-based name for ${customerId}: ${accountName}`);
                     }
-                  }
-                } else {
-                  const managerError = await managerResponse.text();
-                  console.log(`Method 2 also failed for ${customerId}:`, managerError);
-                  
-                  // Method 3: Try the direct customer endpoint
-                  try {
-                    console.log(`Method 3: Trying direct customer endpoint for ${customerId}`);
-                    const directUrl = `https://googleads.googleapis.com/v17/customers/${customerId}`;
-                    
-                    const directResponse = await fetch(directUrl, {
-                      method: 'GET',
-                      headers: managerHeaders,
-                    });
-                    
-                    if (directResponse.ok) {
-                      const directData = await directResponse.json();
-                      console.log(`Direct customer ${customerId} details (Method 3):`, directData);
-                      
-                      if (directData.descriptiveName) {
-                        accountName = directData.descriptiveName;
-                        console.log(`✓ Found descriptive name via direct method for ${customerId}: ${accountName}`);
-                      }
-                    } else {
-                      console.log(`Method 3 also failed for ${customerId}`);
-                    }
-                  } catch (directError) {
-                    console.log(`Method 3 error for ${customerId}:`, directError);
                   }
                 }
+              } catch (userinfoError) {
+                console.log(`Userinfo approach failed for ${customerId}:`, userinfoError);
               }
             }
           } catch (error) {
