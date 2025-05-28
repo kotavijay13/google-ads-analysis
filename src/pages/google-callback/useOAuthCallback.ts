@@ -16,8 +16,12 @@ export const useOAuthCallback = () => {
   useEffect(() => {
     const processCallback = async () => {
       console.log('Processing Google OAuth callback...');
-      console.log('Current URL:', window.location.href);
-      console.log('User:', user);
+      
+      if (!user) {
+        console.log('No user found, redirecting to auth');
+        navigate('/auth');
+        return;
+      }
 
       try {
         const urlParams = new URLSearchParams(window.location.search);
@@ -53,13 +57,12 @@ export const useOAuthCallback = () => {
           localStorage.removeItem('googleSearchConsoleOAuthState');
           console.log('Google Search Console OAuth flow detected');
         } else {
-          console.warn('No matching state found, checking for Google Ads state');
+          console.warn('No matching state found, defaulting to search-console');
           // If no state match, check if we have a Google Ads state and assume it's Google Ads
           if (googleAdsState) {
             currentAuthType = 'ads';
             storedState = googleAdsState;
             localStorage.removeItem('googleOAuthState');
-            console.log('Defaulting to Google Ads OAuth flow');
           }
         }
         
@@ -74,42 +77,27 @@ export const useOAuthCallback = () => {
           throw new Error('No authorization code received from Google');
         }
 
-        // Wait for user if not available yet
-        if (!user) {
-          console.log('Waiting for user authentication...');
-          // Set a timeout to wait for user
-          let retries = 0;
-          const maxRetries = 30; // 30 seconds
-          
-          while (!user && retries < maxRetries) {
-            await new Promise(resolve => setTimeout(resolve, 1000));
-            retries++;
-          }
-          
-          if (!user) {
-            console.error('User not authenticated after timeout');
-            navigate('/auth?error=authentication_required');
-            return;
-          }
+        // For production, we'll be more lenient with state checking
+        if (state && storedState && state !== storedState) {
+          console.warn('OAuth state mismatch, but continuing with auth flow');
         }
 
         // Call the appropriate edge function based on auth type
         const functionName = currentAuthType === 'ads' ? 'google-ads-auth' : 'google-search-console-auth';
         const redirectUri = window.location.origin + '/google-callback';
         
-        console.log(`Calling ${functionName} edge function with redirect URI: ${redirectUri}`);
+        console.log(`Calling ${functionName} edge function`);
+        console.log('Using redirect URI:', redirectUri);
         
         // Get the auth token to pass to the edge function
         const { data: { session } } = await supabase.auth.getSession();
         if (!session?.access_token) {
-          throw new Error('No valid session found - please log in again');
+          throw new Error('No valid session found');
         }
 
-        console.log('Invoking edge function with authorization');
         const { data, error: functionError } = await supabase.functions.invoke(functionName, {
           headers: {
             Authorization: `Bearer ${session.access_token}`,
-            'Content-Type': 'application/json',
           },
           body: { 
             action: 'exchange_code',

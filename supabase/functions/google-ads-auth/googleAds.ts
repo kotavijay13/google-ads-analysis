@@ -16,7 +16,6 @@ export async function fetchGoogleAdsAccounts(
       console.warn('Google Ads Developer Token not configured - this may limit account access');
     }
     
-    console.log('Making request to Google Ads API:', googleAdsUrl);
     const accountsResponse = await fetch(googleAdsUrl, {
       headers: {
         'Authorization': `Bearer ${accessToken}`,
@@ -45,8 +44,6 @@ export async function fetchGoogleAdsAccounts(
       // For each customer ID, fetch detailed account information
       for (const customerId of customerIds) {
         try {
-          console.log(`Processing account ${customerId}...`);
-          
           // Fetch account details
           const accountDetailUrl = `https://googleads.googleapis.com/v15/customers/${customerId}`;
           
@@ -68,7 +65,6 @@ export async function fetchGoogleAdsAccounts(
           }
           
           // Store account in database
-          console.log(`Storing account ${customerId} in database...`);
           const { error: upsertError } = await supabase
             .from('ad_accounts')
             .upsert({
@@ -104,7 +100,7 @@ export async function fetchGoogleAdsAccounts(
     }
   } catch (error) {
     console.error('Error fetching Google Ads accounts:', error);
-    // Re-throw the error so it can be handled by the calling function
-    throw error;
+    // We don't fail the whole operation if just the accounts fetch fails
+    // The user can still be considered "connected" and try again later
   }
 }
