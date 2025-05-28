@@ -1,4 +1,3 @@
-
 import { useState, useCallback, useEffect } from 'react';
 import Header from '@/components/Header';
 import DateRangePicker from '@/components/DateRangePicker';
@@ -104,45 +103,26 @@ const GoogleAdsPage = () => {
     );
   }
 
-  // Create metrics for overview component
-  const overviewMetrics = metrics ? [
-    {
-      title: "Total Spend",
-      value: `$${metrics.totalSpend?.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 }) || '0.00'}`,
-      change: "+0.0%",
-      trend: "up" as const
-    },
-    {
-      title: "Clicks",
-      value: metrics.totalClicks?.toLocaleString() || '0',
-      change: "+0.0%",
-      trend: "up" as const
-    },
-    {
-      title: "Impressions",
-      value: metrics.totalImpressions?.toLocaleString() || '0',
-      change: "+0.0%",
-      trend: "up" as const
-    },
-    {
-      title: "Conversions",
-      value: metrics.totalConversions?.toLocaleString() || '0',
-      change: "+0.0%",
-      trend: "up" as const
-    },
-    {
-      title: "CTR",
-      value: `${metrics.avgCtr?.toFixed(2) || '0.00'}%`,
-      change: "+0.0%",
-      trend: "up" as const
-    },
-    {
-      title: "Avg. CPC",
-      value: `$${metrics.avgCpc?.toFixed(2) || '0.00'}`,
-      change: "+0.0%",
-      trend: "down" as const
-    }
-  ] : [];
+  // Create metrics for overview component in the correct format
+  const overviewMetrics = metrics ? {
+    totalSpend: metrics.totalSpend || 0,
+    totalClicks: metrics.totalClicks || 0,
+    totalImpressions: metrics.totalImpressions || 0,
+    totalConversions: metrics.totalConversions || 0,
+    avgCTR: metrics.avgCtr || 0,
+    avgCPC: metrics.avgCpc || 0,
+    avgConvRate: metrics.conversionRate || 0,
+    avgCPA: metrics.costPerConversion || 0
+  } : {
+    totalSpend: 0,
+    totalClicks: 0,
+    totalImpressions: 0,
+    totalConversions: 0,
+    avgCTR: 0,
+    avgCPC: 0,
+    avgConvRate: 0,
+    avgCPA: 0
+  };
 
   return (
     <div className="container mx-auto py-6 px-4 max-w-7xl">

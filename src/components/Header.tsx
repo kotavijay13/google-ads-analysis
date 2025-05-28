@@ -1,4 +1,3 @@
-
 import { useState } from 'react';
 import { Button } from "@/components/ui/button";
 import { LineChart, Settings, User } from "lucide-react";
@@ -22,9 +21,10 @@ import { toast } from "@/hooks/use-toast";
 interface HeaderProps {
   onRefresh: () => void;
   title: string;
+  isLoading?: boolean;
 }
 
-const Header = ({ onRefresh, title }: HeaderProps) => {
+const Header = ({ onRefresh, title, isLoading }: HeaderProps) => {
   const [lastUpdated, setLastUpdated] = useState<Date>(new Date());
   const { accounts, currentAccount, switchAccount } = useGoogleAccounts();
 
@@ -58,7 +58,9 @@ const Header = ({ onRefresh, title }: HeaderProps) => {
         </div>
       </div>
       <div className="flex items-center gap-3">
-        <Button onClick={handleRefresh} size="sm">Refresh Data</Button>
+        <Button onClick={handleRefresh} size="sm" disabled={isLoading}>
+          {isLoading ? 'Refreshing...' : 'Refresh Data'}
+        </Button>
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
             <Button variant="ghost" size="sm" className="w-9 h-9 p-0">
