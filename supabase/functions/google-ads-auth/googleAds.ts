@@ -1,3 +1,4 @@
+
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 import { GoogleAdsConfig } from './config.ts';
 
@@ -9,8 +10,8 @@ export async function fetchGoogleAdsAccounts(
   try {
     console.log('Attempting to fetch Google Ads accounts for user:', userId);
     
-    // First, try to get accessible customers using the correct Google Ads API endpoint
-    const listCustomersUrl = 'https://googleads.googleapis.com/v16/customers:listAccessibleCustomers';
+    // Use the current Google Ads API version (v17 is the latest stable)
+    const listCustomersUrl = 'https://googleads.googleapis.com/v17/customers:listAccessibleCustomers';
     
     console.log('Calling Google Ads API:', listCustomersUrl);
     console.log('Using developer token:', config.developToken ? 'Present' : 'Missing');
@@ -88,7 +89,7 @@ export async function fetchGoogleAdsAccounts(
           
           // Try to get customer details (this might fail if we don't have access)
           try {
-            const customerDetailUrl = `https://googleads.googleapis.com/v16/customers/${customerId}`;
+            const customerDetailUrl = `https://googleads.googleapis.com/v17/customers/${customerId}`;
             
             const detailResponse = await fetch(customerDetailUrl, {
               method: 'GET',
