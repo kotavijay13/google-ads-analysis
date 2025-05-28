@@ -92,6 +92,9 @@ export async function fetchGoogleAdsAccounts(
       });
       console.log(`Found ${customerIds.length} Google Ads customer IDs:`, customerIds);
       
+      // Find the manager account (usually the first one or one that can access others)
+      let managerCustomerId = customerIds[0]; // Default to first
+      
       // For each customer ID, try to get account details and store in database
       for (const customerId of customerIds) {
         try {
@@ -99,8 +102,11 @@ export async function fetchGoogleAdsAccounts(
           
           let accountName = `Google Ads Account ${customerId}`;
           
-          // Try to get customer details using GoogleAdsQuery API which is more reliable
+          // Try multiple approaches to get the account name
           try {
+            // Method 1: Try using the customer itself as login-customer-id
+            console.log(`Method 1: Trying to fetch customer details for ${customerId} using self as login customer`);
+            
             const customerDetailUrl = `https://googleads.googleapis.com/v17/customers/${customerId}/googleAds:searchStream`;
             
             const detailHeaders = {
@@ -109,10 +115,10 @@ export async function fetchGoogleAdsAccounts(
             };
             
             const queryBody = {
-              query: `SELECT customer.descriptive_name, customer.id FROM customer WHERE customer.id = ${customerId}`
+              query: `SELECT customer.descriptive_name, customer.id, customer.manager FROM customer LIMIT 1`
             };
             
-            console.log(`Fetching customer details for ${customerId} with query:`, queryBody.query);
+            console.log(`Query for ${customerId}:`, queryBody.query);
             
             const detailResponse = await fetch(customerDetailUrl, {
               method: 'POST',
@@ -122,42 +128,82 @@ export async function fetchGoogleAdsAccounts(
             
             if (detailResponse.ok) {
               const detailData = await detailResponse.json();
-              console.log(`Customer ${customerId} details response:`, detailData);
+              console.log(`Customer ${customerId} details response (Method 1):`, detailData);
               
-              // Parse the response to get customer details
               if (detailData.results && detailData.results.length > 0) {
                 const customerInfo = detailData.results[0];
-                if (customerInfo.customer && customerInfo.customer.descriptiveName) {
-                  accountName = customerInfo.customer.descriptiveName;
-                  console.log(`Found descriptive name for ${customerId}: ${accountName}`);
-                } else {
-                  console.log(`No descriptive name found for ${customerId}, using default`);
+                if (customerInfo.customer) {
+                  if (customerInfo.customer.descriptiveName) {
+                    accountName = customerInfo.customer.descriptiveName;
+                    console.log(`✓ Found descriptive name for ${customerId}: ${accountName}`);
+                  }
+                  
+                  // Check if this is a manager account
+                  if (customerInfo.customer.manager) {
+                    console.log(`Customer ${customerId} is a manager account`);
+                    managerCustomerId = customerId;
+                  }
                 }
               }
             } else {
-              const detailError = await detailResponse.text();
-              console.log(`Could not fetch details for customer ${customerId}, status: ${detailResponse.status}, error:`, detailError);
+              const errorText = await detailResponse.text();
+              console.log(`Method 1 failed for ${customerId}, status: ${detailResponse.status}, error:`, errorText);
               
-              // Try alternative method using direct customer endpoint
-              try {
-                const altCustomerUrl = `https://googleads.googleapis.com/v17/customers/${customerId}`;
-                const altResponse = await fetch(altCustomerUrl, {
-                  method: 'GET',
-                  headers: detailHeaders,
+              // Method 2: Try using manager customer ID if different
+              if (managerCustomerId !== customerId) {
+                console.log(`Method 2: Trying to fetch ${customerId} details using manager ${managerCustomerId}`);
+                
+                const managerHeaders = {
+                  ...headers,
+                  'login-customer-id': managerCustomerId
+                };
+                
+                const managerResponse = await fetch(customerDetailUrl, {
+                  method: 'POST',
+                  headers: managerHeaders,
+                  body: JSON.stringify(queryBody)
                 });
                 
-                if (altResponse.ok) {
-                  const altData = await altResponse.json();
-                  console.log(`Alternative customer ${customerId} details:`, altData);
-                  if (altData.descriptiveName) {
-                    accountName = altData.descriptiveName;
-                    console.log(`Found descriptive name via alternative method for ${customerId}: ${accountName}`);
+                if (managerResponse.ok) {
+                  const managerData = await managerResponse.json();
+                  console.log(`Customer ${customerId} details via manager (Method 2):`, managerData);
+                  
+                  if (managerData.results && managerData.results.length > 0) {
+                    const customerInfo = managerData.results[0];
+                    if (customerInfo.customer && customerInfo.customer.descriptiveName) {
+                      accountName = customerInfo.customer.descriptiveName;
+                      console.log(`✓ Found descriptive name via manager for ${customerId}: ${accountName}`);
+                    }
                   }
                 } else {
-                  console.log(`Alternative method also failed for ${customerId}`);
+                  const managerError = await managerResponse.text();
+                  console.log(`Method 2 also failed for ${customerId}:`, managerError);
+                  
+                  // Method 3: Try the direct customer endpoint
+                  try {
+                    console.log(`Method 3: Trying direct customer endpoint for ${customerId}`);
+                    const directUrl = `https://googleads.googleapis.com/v17/customers/${customerId}`;
+                    
+                    const directResponse = await fetch(directUrl, {
+                      method: 'GET',
+                      headers: managerHeaders,
+                    });
+                    
+                    if (directResponse.ok) {
+                      const directData = await directResponse.json();
+                      console.log(`Direct customer ${customerId} details (Method 3):`, directData);
+                      
+                      if (directData.descriptiveName) {
+                        accountName = directData.descriptiveName;
+                        console.log(`✓ Found descriptive name via direct method for ${customerId}: ${accountName}`);
+                      }
+                    } else {
+                      console.log(`Method 3 also failed for ${customerId}`);
+                    }
+                  } catch (directError) {
+                    console.log(`Method 3 error for ${customerId}:`, directError);
+                  }
                 }
-              } catch (altError) {
-                console.log(`Alternative method error for ${customerId}:`, altError);
               }
             }
           } catch (error) {
