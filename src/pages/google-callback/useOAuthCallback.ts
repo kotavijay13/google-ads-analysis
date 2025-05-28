@@ -16,12 +16,8 @@ export const useOAuthCallback = () => {
   useEffect(() => {
     const processCallback = async () => {
       console.log('Processing Google OAuth callback...');
-      
-      if (!user) {
-        console.log('No user found, redirecting to auth');
-        navigate('/auth');
-        return;
-      }
+      console.log('Current URL:', window.location.href);
+      console.log('User:', user);
 
       try {
         const urlParams = new URLSearchParams(window.location.search);
@@ -78,6 +74,25 @@ export const useOAuthCallback = () => {
           throw new Error('No authorization code received from Google');
         }
 
+        // Wait for user if not available yet
+        if (!user) {
+          console.log('Waiting for user authentication...');
+          // Set a timeout to wait for user
+          let retries = 0;
+          const maxRetries = 30; // 30 seconds
+          
+          while (!user && retries < maxRetries) {
+            await new Promise(resolve => setTimeout(resolve, 1000));
+            retries++;
+          }
+          
+          if (!user) {
+            console.error('User not authenticated after timeout');
+            navigate('/auth?error=authentication_required');
+            return;
+          }
+        }
+
         // Call the appropriate edge function based on auth type
         const functionName = currentAuthType === 'ads' ? 'google-ads-auth' : 'google-search-console-auth';
         const redirectUri = window.location.origin + '/google-callback';
@@ -87,7 +102,7 @@ export const useOAuthCallback = () => {
         // Get the auth token to pass to the edge function
         const { data: { session } } = await supabase.auth.getSession();
         if (!session?.access_token) {
-          throw new Error('No valid session found');
+          throw new Error('No valid session found - please log in again');
         }
 
         console.log('Invoking edge function with authorization');
