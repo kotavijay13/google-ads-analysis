@@ -1,6 +1,6 @@
 
 import { Button } from '@/components/ui/button';
-import { Check, RefreshCw, Loader2, Sync } from 'lucide-react';
+import { Check, RefreshCw, Loader2, RefreshCcw } from 'lucide-react';
 import { useState } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from '@/components/ui/sonner';
@@ -80,7 +80,7 @@ const GoogleAdsConnectionStatus = ({ refreshing, onRefreshAccounts }: GoogleAdsC
             </>
           ) : (
             <>
-              <Sync className="h-3 w-3" />
+              <RefreshCcw className="h-3 w-3" />
               Sync Accounts
             </>
           )}
