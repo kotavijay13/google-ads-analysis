@@ -16,10 +16,18 @@ export const useOAuthCallback = () => {
   useEffect(() => {
     const processCallback = async () => {
       console.log('Processing Google OAuth callback...');
+      console.log('Current URL:', window.location.href);
+      console.log('Search params:', window.location.search);
       
       if (!user) {
-        console.log('No user found, redirecting to auth');
-        navigate('/auth');
+        console.log('No user found during callback, waiting for auth...');
+        // Wait a bit for auth to load
+        setTimeout(() => {
+          if (!user) {
+            console.log('Still no user, redirecting to auth');
+            navigate('/auth');
+          }
+        }, 2000);
         return;
       }
 
@@ -57,12 +65,13 @@ export const useOAuthCallback = () => {
           localStorage.removeItem('googleSearchConsoleOAuthState');
           console.log('Google Search Console OAuth flow detected');
         } else {
-          console.warn('No matching state found, defaulting to search-console');
+          console.warn('No matching state found, checking for Google Ads state');
           // If no state match, check if we have a Google Ads state and assume it's Google Ads
           if (googleAdsState) {
             currentAuthType = 'ads';
             storedState = googleAdsState;
             localStorage.removeItem('googleOAuthState');
+            console.log('Assuming Google Ads OAuth flow');
           }
         }
         
@@ -75,11 +84,6 @@ export const useOAuthCallback = () => {
 
         if (!code) {
           throw new Error('No authorization code received from Google');
-        }
-
-        // For production, we'll be more lenient with state checking
-        if (state && storedState && state !== storedState) {
-          console.warn('OAuth state mismatch, but continuing with auth flow');
         }
 
         // Call the appropriate edge function based on auth type
@@ -129,6 +133,7 @@ export const useOAuthCallback = () => {
         
         // Dispatch success event for Google Ads
         if (currentAuthType === 'ads') {
+          console.log('Dispatching Google Ads success event');
           window.dispatchEvent(new CustomEvent('google-oauth-success', { 
             detail: { service: 'google-ads' } 
           }));
@@ -149,7 +154,13 @@ export const useOAuthCallback = () => {
       }
     };
 
-    processCallback();
+    // Only process if we have URL parameters
+    if (window.location.search) {
+      processCallback();
+    } else {
+      console.log('No search parameters, redirecting to auth');
+      navigate('/auth');
+    }
   }, [user, navigate]);
 
   return {
