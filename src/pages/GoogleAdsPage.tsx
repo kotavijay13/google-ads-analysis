@@ -1,3 +1,4 @@
+
 import { useState, useCallback, useEffect } from 'react';
 import Header from '@/components/Header';
 import DateRangePicker from '@/components/DateRangePicker';
@@ -25,7 +26,10 @@ import {
   searchTermsData
 } from '@/data/mockData';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { useGoogleAccounts } from '@/hooks/use-google-accounts';
+import { useGoogleAdsIntegration } from '@/components/google-ads/useGoogleAdsIntegration';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Button } from '@/components/ui/button';
+import { ExternalLink } from 'lucide-react';
 
 const GoogleAdsPage = () => {
   const [metrics, setMetrics] = useState(getOverviewMetrics());
@@ -34,20 +38,22 @@ const GoogleAdsPage = () => {
     to: new Date()
   });
   
-  // Use the hooks to fetch Google Ads data and accounts
+  // Use the Google Ads integration hook
+  const { 
+    accounts, 
+    connected, 
+    selectedAccount, 
+    handleSelectAccount,
+    handleRefreshAccounts,
+    refreshing
+  } = useGoogleAdsIntegration();
+  
+  // Use the API hook for data fetching
   const { 
     fetchData, 
     isLoading, 
     error 
   } = useGoogleAdsAPI();
-  
-  const { accounts, currentAccount, switchAccount, setCurrentAccount } = useGoogleAccounts();
-  
-  // Add debugging logs
-  useEffect(() => {
-    console.log('GoogleAdsPage - Current accounts:', accounts);
-    console.log('GoogleAdsPage - Current account:', currentAccount);
-  }, [accounts, currentAccount]);
 
   const handleRefresh = () => {
     // Fetch fresh data from Google Ads API
@@ -62,10 +68,31 @@ const GoogleAdsPage = () => {
     fetchData(range.from, range.to);
   }, [fetchData]);
 
-  // Initial data fetch when component mounts
-  useEffect(() => {
-    console.log('Initial Google Ads data fetch with date range:', dateRange);
-  }, []);
+  // If not connected, show connection prompt
+  if (!connected) {
+    return (
+      <div className="container mx-auto py-6 px-4 max-w-7xl">
+        <Header onRefresh={handleRefresh} title="Google Ads Dashboard" />
+        
+        <Card className="mt-6">
+          <CardHeader>
+            <CardTitle>Google Ads Not Connected</CardTitle>
+            <CardDescription>
+              You need to connect your Google Ads account first to view your dashboard data.
+            </CardDescription>
+          </CardHeader>
+          <CardContent>
+            <Button asChild className="gap-2">
+              <a href="/integrations">
+                <ExternalLink className="h-4 w-4" />
+                Go to Integrations
+              </a>
+            </Button>
+          </CardContent>
+        </Card>
+      </div>
+    );
+  }
 
   return (
     <div className="container mx-auto py-6 px-4 max-w-7xl">
@@ -75,14 +102,9 @@ const GoogleAdsPage = () => {
         <div className="flex flex-col lg:flex-row items-start lg:items-center gap-4">
           <h2 className="text-lg font-medium">Google Ads Overview</h2>
           <Select 
-            value={currentAccount?.id || ''} 
-            onValueChange={(value) => {
-              const account = accounts.find(acc => acc.id === value);
-              if (account) {
-                console.log('Switching to account:', account);
-                setCurrentAccount(account);
-              }
-            }}
+            value={selectedAccount || ''} 
+            onValueChange={handleSelectAccount}
+            disabled={refreshing}
           >
             <SelectTrigger className="w-[250px]">
               <SelectValue placeholder={accounts.length === 0 ? "No accounts available" : "Select ad account"} />
@@ -105,12 +127,31 @@ const GoogleAdsPage = () => {
           {accounts.length === 0 && (
             <div className="text-sm text-muted-foreground bg-yellow-50 border border-yellow-200 rounded-md p-3">
               <p className="font-medium">No Google Ads accounts found</p>
-              <p>Please go to the Integrations page to connect your Google Ads account.</p>
+              <p>Please try refreshing accounts or go to the Integrations page to reconnect.</p>
+              <Button 
+                onClick={handleRefreshAccounts} 
+                className="mt-2" 
+                size="sm" 
+                variant="outline"
+                disabled={refreshing}
+              >
+                {refreshing ? 'Refreshing...' : 'Refresh Accounts'}
+              </Button>
             </div>
           )}
         </div>
         <DateRangePicker onDateChange={handleDateChange} />
       </div>
+
+      {selectedAccount && (
+        <div className="mb-4 bg-primary/10 p-3 rounded-md">
+          <p className="text-sm font-medium">Current Account:</p>
+          <h4 className="text-lg font-bold">
+            {accounts.find(a => a.id === selectedAccount)?.name || selectedAccount}
+          </h4>
+          <p className="text-xs text-muted-foreground">ID: {selectedAccount}</p>
+        </div>
+      )}
 
       <ChannelMetricsOverview metrics={metrics} />
       

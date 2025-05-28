@@ -1,6 +1,5 @@
 import { useState } from 'react';
 import { toast } from './use-toast';
-import { useGoogleAccounts } from './use-google-accounts';
 
 interface GoogleAdsData {
   isLoading: boolean;
@@ -21,7 +20,6 @@ export function useGoogleAdsAPI() {
     isLoading: false, 
     error: null 
   });
-  const { currentAccount } = useGoogleAccounts();
 
   /**
    * This function would normally connect to the Google Ads API
@@ -32,8 +30,17 @@ export function useGoogleAdsAPI() {
     setData(prev => ({ ...prev, isLoading: true, error: null }));
     
     try {
+      // Get the current selected account from localStorage
+      const selectedAccountId = localStorage.getItem('selectedGoogleAdsAccount');
+      
+      if (!selectedAccountId) {
+        console.log('No Google Ads account selected');
+        setData(prev => ({ ...prev, isLoading: false }));
+        return;
+      }
+      
       // In a real implementation, this would be an API call to Google Ads
-      console.log(`Fetching data for account ${currentAccount.id} (${currentAccount.name})`);
+      console.log(`Fetching data for account ${selectedAccountId}`);
       console.log(`Date range: ${startDate.toISOString()} to ${endDate.toISOString()}`);
       
       // Simulate API delay
@@ -45,7 +52,7 @@ export function useGoogleAdsAPI() {
       // Success notification
       toast({
         title: "Data refreshed",
-        description: `Successfully fetched data for ${currentAccount.name}`
+        description: `Successfully fetched data for account ${selectedAccountId}`
       });
       
       setData(prev => ({ 
