@@ -1,5 +1,7 @@
+
 import { useState } from 'react';
 import { toast } from './use-toast';
+import { supabase } from '@/integrations/supabase/client';
 
 interface GoogleAdsData {
   isLoading: boolean;
@@ -22,8 +24,7 @@ export function useGoogleAdsAPI() {
   });
 
   /**
-   * This function would normally connect to the Google Ads API
-   * and fetch real data based on the account, date range, etc.
+   * Fetch real Google Ads data from the API
    */
   const fetchData = async (startDate: Date, endDate: Date) => {
     // Show loading state
@@ -36,30 +37,57 @@ export function useGoogleAdsAPI() {
       if (!selectedAccountId) {
         console.log('No Google Ads account selected');
         setData(prev => ({ ...prev, isLoading: false }));
+        toast({
+          title: "No account selected",
+          description: "Please select a Google Ads account first",
+          variant: "destructive"
+        });
         return;
       }
       
-      // In a real implementation, this would be an API call to Google Ads
-      console.log(`Fetching data for account ${selectedAccountId}`);
+      console.log(`Fetching real data for account ${selectedAccountId}`);
       console.log(`Date range: ${startDate.toISOString()} to ${endDate.toISOString()}`);
       
-      // Simulate API delay
-      await new Promise(resolve => setTimeout(resolve, 1500));
-      
-      // For now, we'll keep using mock data
-      // In a production app, this would be replaced with real API data
-      
-      // Success notification
-      toast({
-        title: "Data refreshed",
-        description: `Successfully fetched data for account ${selectedAccountId}`
+      // Call the Google Ads data fetch function
+      const { data: fetchResult, error } = await supabase.functions.invoke('google-ads-data', {
+        body: {
+          accountId: selectedAccountId,
+          startDate: startDate.toISOString().split('T')[0], // YYYY-MM-DD format
+          endDate: endDate.toISOString().split('T')[0]
+        }
       });
-      
-      setData(prev => ({ 
-        ...prev, 
-        isLoading: false,
-        // In a real implementation, we would set actual data from the API here
-      }));
+
+      if (error) {
+        console.error('Error fetching Google Ads data:', error);
+        throw new Error(error.message || 'Failed to fetch Google Ads data');
+      }
+
+      if (fetchResult) {
+        console.log('Received real Google Ads data:', fetchResult);
+        
+        // Update state with real data
+        setData(prev => ({ 
+          ...prev, 
+          isLoading: false,
+          campaigns: fetchResult.campaigns || [],
+          keywords: fetchResult.keywords || [],
+          adGroups: fetchResult.adGroups || [],
+          metrics: fetchResult.metrics || {},
+          deviceData: fetchResult.deviceData || [],
+          geoData: fetchResult.geoData || [],
+          dailyPerformance: fetchResult.dailyPerformance || [],
+          adCopies: fetchResult.adCopies || [],
+          assets: fetchResult.assets || []
+        }));
+        
+        // Success notification
+        toast({
+          title: "Data refreshed",
+          description: `Successfully fetched real data for account ${selectedAccountId}`
+        });
+      } else {
+        throw new Error('No data returned from API');
+      }
       
     } catch (error) {
       console.error('Error fetching Google Ads data:', error);
@@ -72,7 +100,7 @@ export function useGoogleAdsAPI() {
       // Error notification
       toast({
         title: "Error refreshing data",
-        description: "Failed to fetch Google Ads data. Please try again.",
+        description: error instanceof Error ? error.message : "Failed to fetch Google Ads data. Please try again.",
         variant: "destructive"
       });
     }

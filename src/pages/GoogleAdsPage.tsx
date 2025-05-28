@@ -14,11 +14,8 @@ import SearchTermsPerformance from '@/components/SearchTermsPerformance';
 import { useGoogleAdsAPI } from '@/hooks/use-google-ads-api';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { 
-  campaignsData, 
-  dailyPerformance, 
   deviceData, 
   geoData, 
-  getOverviewMetrics,
   keywordPerformanceData,
   adCopyPerformanceData,
   adGroupsData,
@@ -32,7 +29,6 @@ import { Button } from '@/components/ui/button';
 import { ExternalLink } from 'lucide-react';
 
 const GoogleAdsPage = () => {
-  const [metrics, setMetrics] = useState(getOverviewMetrics());
   const [dateRange, setDateRange] = useState<{ from: Date; to: Date }>({
     from: new Date(new Date().setDate(new Date().getDate() - 30)),
     to: new Date()
@@ -52,12 +48,24 @@ const GoogleAdsPage = () => {
   const { 
     fetchData, 
     isLoading, 
-    error 
+    error,
+    campaigns,
+    dailyPerformance,
+    metrics
   } = useGoogleAdsAPI();
+
+  // Fetch data when component mounts or when account/date changes
+  useEffect(() => {
+    if (selectedAccount) {
+      fetchData(dateRange.from, dateRange.to);
+    }
+  }, [selectedAccount, fetchData]);
 
   const handleRefresh = () => {
     // Fetch fresh data from Google Ads API
-    fetchData(dateRange.from, dateRange.to);
+    if (selectedAccount) {
+      fetchData(dateRange.from, dateRange.to);
+    }
     console.log('Refreshing Google Ads data...');
   };
 
@@ -65,8 +73,10 @@ const GoogleAdsPage = () => {
     setDateRange(range);
     console.log('Date range changed:', range);
     // Fetch updated data with new date range
-    fetchData(range.from, range.to);
-  }, [fetchData]);
+    if (selectedAccount) {
+      fetchData(range.from, range.to);
+    }
+  }, [fetchData, selectedAccount]);
 
   // If not connected, show connection prompt
   if (!connected) {
@@ -94,9 +104,49 @@ const GoogleAdsPage = () => {
     );
   }
 
+  // Create metrics for overview component
+  const overviewMetrics = metrics ? [
+    {
+      title: "Total Spend",
+      value: `$${metrics.totalSpend?.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 }) || '0.00'}`,
+      change: "+0.0%",
+      trend: "up" as const
+    },
+    {
+      title: "Clicks",
+      value: metrics.totalClicks?.toLocaleString() || '0',
+      change: "+0.0%",
+      trend: "up" as const
+    },
+    {
+      title: "Impressions",
+      value: metrics.totalImpressions?.toLocaleString() || '0',
+      change: "+0.0%",
+      trend: "up" as const
+    },
+    {
+      title: "Conversions",
+      value: metrics.totalConversions?.toLocaleString() || '0',
+      change: "+0.0%",
+      trend: "up" as const
+    },
+    {
+      title: "CTR",
+      value: `${metrics.avgCtr?.toFixed(2) || '0.00'}%`,
+      change: "+0.0%",
+      trend: "up" as const
+    },
+    {
+      title: "Avg. CPC",
+      value: `$${metrics.avgCpc?.toFixed(2) || '0.00'}`,
+      change: "+0.0%",
+      trend: "down" as const
+    }
+  ] : [];
+
   return (
     <div className="container mx-auto py-6 px-4 max-w-7xl">
-      <Header onRefresh={handleRefresh} title="Google Ads Dashboard" />
+      <Header onRefresh={handleRefresh} title="Google Ads Dashboard" isLoading={isLoading} />
       
       <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-6 gap-4">
         <div className="flex flex-col lg:flex-row items-start lg:items-center gap-4">
@@ -153,10 +203,17 @@ const GoogleAdsPage = () => {
         </div>
       )}
 
-      <ChannelMetricsOverview metrics={metrics} />
+      {error && (
+        <div className="mb-4 bg-red-50 border border-red-200 rounded-md p-3">
+          <p className="text-red-800 font-medium">Error loading data</p>
+          <p className="text-red-600 text-sm">{error}</p>
+        </div>
+      )}
+
+      <ChannelMetricsOverview metrics={overviewMetrics} />
       
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
-        <PerformanceChart data={dailyPerformance} />
+        <PerformanceChart data={dailyPerformance || []} />
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
           <DeviceBreakdown data={deviceData} />
           <GeoPerformance data={geoData} />
@@ -173,13 +230,13 @@ const GoogleAdsPage = () => {
         </TabsList>
         
         <TabsContent value="campaigns" className="mt-0">
-          <CampaignTable campaigns={campaignsData} />
+          <CampaignTable campaigns={campaigns || []} />
         </TabsContent>
         
         <TabsContent value="keywords" className="mt-0">
           <KeywordPerformance 
             keywords={keywordPerformanceData} 
-            campaigns={campaignsData}
+            campaigns={campaigns || []}
             adGroups={adGroupsData}
           />
         </TabsContent>
@@ -187,7 +244,7 @@ const GoogleAdsPage = () => {
         <TabsContent value="adcopy" className="mt-0">
           <AdCopyPerformance 
             adCopies={adCopyPerformanceData} 
-            campaigns={campaignsData}
+            campaigns={campaigns || []}
             adGroups={adGroupsData}
           />
         </TabsContent>
@@ -195,7 +252,7 @@ const GoogleAdsPage = () => {
         <TabsContent value="assets" className="mt-0">
           <AssetPerformance 
             assets={assetPerformanceData} 
-            campaigns={campaignsData}
+            campaigns={campaigns || []}
             adGroups={adGroupsData}
           />
         </TabsContent>
@@ -203,7 +260,7 @@ const GoogleAdsPage = () => {
         <TabsContent value="searchterms" className="mt-0">
           <SearchTermsPerformance 
             searchTerms={searchTermsData} 
-            campaigns={campaignsData}
+            campaigns={campaigns || []}
             adGroups={adGroupsData}
           />
         </TabsContent>
