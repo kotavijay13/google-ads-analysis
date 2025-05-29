@@ -51,6 +51,8 @@ export const useSEOData = () => {
     if (!user) return;
     
     try {
+      console.log('Checking Google Search Console connection...');
+      
       // Check if Google Search Console is connected
       const { data: tokens, error: tokensError } = await supabase
         .from('api_tokens')
@@ -65,6 +67,8 @@ export const useSEOData = () => {
       }
 
       if (tokens) {
+        console.log('GSC tokens found, fetching properties...');
+        
         // Fetch Google Search Console properties
         const { data: gscProperties, error: gscError } = await supabase
           .from('ad_accounts')
@@ -75,6 +79,8 @@ export const useSEOData = () => {
         if (gscError) {
           console.error('Error fetching GSC properties:', gscError);
         } else if (gscProperties && gscProperties.length > 0) {
+          console.log(`Found ${gscProperties.length} GSC properties`);
+          
           const websites = gscProperties.map(property => {
             // Extract domain from the account_id (which stores the full URL)
             try {
@@ -89,11 +95,14 @@ export const useSEOData = () => {
           setAvailableWebsites(websites);
           if (!selectedWebsite && websites.length > 0) {
             setSelectedWebsite(websites[0]);
+            console.log(`Auto-selected website: ${websites[0]}`);
           }
           return;
         }
       }
 
+      console.log('No GSC connection found, checking Google Ads...');
+      
       // Fallback: Check for Google Ads accounts if no GSC properties
       const { data: googleAdsTokens } = await supabase
         .from('api_tokens')
@@ -104,6 +113,7 @@ export const useSEOData = () => {
 
       if (googleAdsTokens) {
         setGoogleAdsConnected(true);
+        console.log('Google Ads connection found');
         
         const { data: googleAdsAccounts } = await supabase
           .from('ad_accounts')
@@ -117,21 +127,25 @@ export const useSEOData = () => {
             return `${accountName}.com`;
           });
           
-          const defaultWebsites = ['mergeinsights.ai', 'example.com'];
+          const defaultWebsites = ['www.vantagesecurity.com', 'mergeinsights.ai'];
           const allWebsites = [...new Set([...defaultWebsites, ...websites])];
           
           setAvailableWebsites(allWebsites);
           
           if (!selectedWebsite && allWebsites.length > 0) {
             setSelectedWebsite(allWebsites[0]);
+            console.log(`Auto-selected website from Google Ads: ${allWebsites[0]}`);
           }
         }
       } else {
+        console.log('No connections found, using default websites');
+        
         // No connections found, use default websites
-        const defaultWebsites = ['mergeinsights.ai', 'example.com', 'testsite.org', 'mydomain.net'];
+        const defaultWebsites = ['www.vantagesecurity.com', 'mergeinsights.ai', 'example.com', 'testsite.org'];
         setAvailableWebsites(defaultWebsites);
         if (!selectedWebsite) {
           setSelectedWebsite(defaultWebsites[0]);
+          console.log(`Auto-selected default website: ${defaultWebsites[0]}`);
         }
       }
     } catch (error) {
@@ -147,7 +161,7 @@ export const useSEOData = () => {
       
       const { data, error } = await supabase.functions.invoke('google-search-console-data', {
         body: { 
-          websiteUrl: `https://${websiteUrl}`,
+          websiteUrl: websiteUrl,
           startDate: new Date(Date.now() - 30 * 24 * 60 * 60 * 1000).toISOString().split('T')[0],
           endDate: new Date().toISOString().split('T')[0]
         }
@@ -158,20 +172,28 @@ export const useSEOData = () => {
         throw error;
       }
 
+      console.log('GSC API response:', data);
+
       if (data && data.success) {
         if (data.keywords && data.keywords.length > 0) {
+          console.log(`Successfully loaded ${data.keywords.length} keywords from GSC`);
           setSerpKeywords(data.keywords);
           toast.success(`Successfully loaded ${data.keywords.length} keywords from Google Search Console`);
+        } else {
+          console.log('No keywords returned from GSC');
         }
 
         if (data.pages && data.pages.length > 0) {
+          console.log(`Successfully loaded ${data.pages.length} pages from GSC`);
           setPages(data.pages);
           toast.success(`Successfully loaded ${data.pages.length} pages from Google Search Console`);
+        } else {
+          console.log('No pages returned from GSC');
         }
 
         if (data.urlMetaData) {
           setUrlMetaData(data.urlMetaData);
-          console.log('URL Meta Data loaded:', data.urlMetaData.length);
+          console.log(`URL Meta Data loaded: ${data.urlMetaData.length}`);
         }
 
         if (data.sitePerformance) {
@@ -183,12 +205,18 @@ export const useSEOData = () => {
           setSerpStats(data.stats);
           console.log('Comprehensive stats loaded:', data.stats);
         }
+
+        if (data.keywords.length === 0 && data.pages.length === 0) {
+          toast.warning('No data found for this website in Google Search Console. Make sure the website is verified and has recent data.');
+        }
       } else {
-        throw new Error(data?.error || 'Failed to fetch GSC data');
+        const errorMessage = data?.error || 'Failed to fetch GSC data';
+        console.error('GSC data fetch failed:', errorMessage);
+        throw new Error(errorMessage);
       }
     } catch (error) {
       console.error('Error fetching real-time GSC data:', error);
-      toast.error('Failed to fetch real-time data from Google Search Console');
+      toast.error('Failed to fetch real-time data from Google Search Console. Please check your connection and try again.');
       throw error;
     }
   };
@@ -228,7 +256,7 @@ export const useSEOData = () => {
         }
       } catch (serpError) {
         console.error('Error fetching SERP data:', serpError);
-        toast.error('Failed to fetch data. Please try again.');
+        toast.error('Failed to fetch data. Please ensure your Google Search Console is connected and the website is verified.');
       }
     } finally {
       setIsRefreshing(false);

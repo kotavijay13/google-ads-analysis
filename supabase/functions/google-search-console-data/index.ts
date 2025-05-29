@@ -18,6 +18,7 @@ serve(async (req) => {
     const supabaseKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY');
     
     if (!supabaseUrl || !supabaseKey) {
+      console.error('Missing Supabase configuration');
       throw new Error('Missing Supabase configuration');
     }
     
@@ -26,6 +27,7 @@ serve(async (req) => {
     // Get user from JWT token
     const authHeader = req.headers.get('Authorization');
     if (!authHeader) {
+      console.error('No authorization header provided');
       throw new Error('No authorization header');
     }
 
@@ -34,16 +36,20 @@ serve(async (req) => {
     );
 
     if (authError || !user) {
+      console.error('Authentication failed:', authError);
       throw new Error('Authentication failed');
     }
+
+    console.log(`Processing GSC data request for user: ${user.email}`);
 
     const { websiteUrl, startDate, endDate } = await req.json();
     
     if (!websiteUrl) {
+      console.error('Website URL is required');
       throw new Error('Website URL is required');
     }
 
-    console.log(`Fetching comprehensive GSC data for: ${websiteUrl}`);
+    console.log(`Fetching GSC data for website: ${websiteUrl}`);
 
     // Get the user's Google Search Console access token
     const { data: tokenData, error: tokenError } = await supabase
@@ -53,9 +59,17 @@ serve(async (req) => {
       .eq('provider', 'google_search_console')
       .maybeSingle();
 
-    if (tokenError || !tokenData) {
+    if (tokenError) {
+      console.error('Token query error:', tokenError);
+      throw new Error('Error fetching token data');
+    }
+
+    if (!tokenData) {
+      console.error('No Google Search Console token found for user');
       throw new Error('Google Search Console token not found. Please reconnect your account.');
     }
+
+    console.log(`Token found, expires at: ${tokenData.expires_at}`);
 
     let accessToken = tokenData.access_token;
 
@@ -63,12 +77,13 @@ serve(async (req) => {
     const now = new Date();
     const expiresAt = new Date(tokenData.expires_at);
     if (expiresAt <= now && tokenData.refresh_token) {
-      console.log('Token expired, attempting to refresh...');
+      console.log('Token expired, refreshing...');
       
       const clientId = Deno.env.get('GOOGLE_CLIENT_ID');
       const clientSecret = Deno.env.get('GOOGLE_CLIENT_SECRET');
       
       if (!clientId || !clientSecret) {
+        console.error('Google OAuth credentials not configured');
         throw new Error('Google OAuth credentials not configured');
       }
 
@@ -110,18 +125,25 @@ serve(async (req) => {
       console.log('Token refreshed successfully');
     }
 
+    // Ensure website URL starts with https://
+    const formattedWebsiteUrl = websiteUrl.startsWith('http') ? websiteUrl : `https://${websiteUrl}`;
+    console.log(`Using formatted URL: ${formattedWebsiteUrl}`);
+
     const baseStartDate = startDate || new Date(Date.now() - 30 * 24 * 60 * 60 * 1000).toISOString().split('T')[0];
     const baseEndDate = endDate || new Date().toISOString().split('T')[0];
 
+    console.log(`Date range: ${baseStartDate} to ${baseEndDate}`);
+
     // 1. Fetch Keywords Data
+    console.log('Fetching keywords data...');
     const keywordsQuery = {
       startDate: baseStartDate,
       endDate: baseEndDate,
       dimensions: ['query'],
-      rowLimit: 25000
+      rowLimit: 1000
     };
 
-    const keywordsResponse = await fetch(`https://searchconsole.googleapis.com/webmasters/v3/sites/${encodeURIComponent(websiteUrl)}/searchAnalytics/query`, {
+    const keywordsResponse = await fetch(`https://searchconsole.googleapis.com/webmasters/v3/sites/${encodeURIComponent(formattedWebsiteUrl)}/searchAnalytics/query`, {
       method: 'POST',
       headers: {
         'Authorization': `Bearer ${accessToken}`,
@@ -133,6 +155,7 @@ serve(async (req) => {
     let keywords = [];
     if (keywordsResponse.ok) {
       const keywordsData = await keywordsResponse.json();
+      console.log(`Keywords API response:`, keywordsData);
       keywords = keywordsData.rows ? keywordsData.rows.map((row: any, index: number) => ({
         keyword: row.keys[0],
         impressions: row.impressions || 0,
@@ -141,17 +164,22 @@ serve(async (req) => {
         position: row.position ? row.position.toFixed(1) : '0.0',
         change: index < 5 ? '+' + Math.floor(Math.random() * 5 + 1) : (Math.random() > 0.5 ? '+' : '-') + Math.floor(Math.random() * 3 + 1)
       })) : [];
+      console.log(`Processed ${keywords.length} keywords`);
+    } else {
+      const errorText = await keywordsResponse.text();
+      console.error(`Keywords API error (${keywordsResponse.status}):`, errorText);
     }
 
     // 2. Fetch Pages Data
+    console.log('Fetching pages data...');
     const pagesQuery = {
       startDate: baseStartDate,
       endDate: baseEndDate,
       dimensions: ['page'],
-      rowLimit: 1000
+      rowLimit: 500
     };
 
-    const pagesResponse = await fetch(`https://searchconsole.googleapis.com/webmasters/v3/sites/${encodeURIComponent(websiteUrl)}/searchAnalytics/query`, {
+    const pagesResponse = await fetch(`https://searchconsole.googleapis.com/webmasters/v3/sites/${encodeURIComponent(formattedWebsiteUrl)}/searchAnalytics/query`, {
       method: 'POST',
       headers: {
         'Authorization': `Bearer ${accessToken}`,
@@ -163,6 +191,7 @@ serve(async (req) => {
     let pages = [];
     if (pagesResponse.ok) {
       const pagesData = await pagesResponse.json();
+      console.log(`Pages API response:`, pagesData);
       pages = pagesData.rows ? pagesData.rows.map((row: any) => ({
         url: row.keys[0],
         impressions: row.impressions || 0,
@@ -170,15 +199,20 @@ serve(async (req) => {
         ctr: row.ctr ? (row.ctr * 100).toFixed(1) : '0.0',
         position: row.position ? row.position.toFixed(1) : '0.0'
       })) : [];
+      console.log(`Processed ${pages.length} pages`);
+    } else {
+      const errorText = await pagesResponse.text();
+      console.error(`Pages API error (${pagesResponse.status}):`, errorText);
     }
 
-    // 3. Fetch URL Inspection Data (for meta data analysis)
+    // 3. Generate URL Meta Data (using top pages for inspection)
     let urlMetaData = [];
-    const topPages = pages.slice(0, 10); // Get top 10 pages for inspection
+    const topPages = pages.slice(0, 5); // Limit to top 5 pages to avoid too many API calls
     
+    console.log(`Inspecting ${topPages.length} URLs for meta data...`);
     for (const page of topPages) {
       try {
-        const inspectionResponse = await fetch(`https://searchconsole.googleapis.com/webmasters/v3/sites/${encodeURIComponent(websiteUrl)}/urlInspection/index:inspect`, {
+        const inspectionResponse = await fetch(`https://searchconsole.googleapis.com/webmasters/v3/sites/${encodeURIComponent(formattedWebsiteUrl)}/urlInspection/index:inspect`, {
           method: 'POST',
           headers: {
             'Authorization': `Bearer ${accessToken}`,
@@ -186,7 +220,7 @@ serve(async (req) => {
           },
           body: JSON.stringify({
             inspectionUrl: page.url,
-            siteUrl: websiteUrl
+            siteUrl: formattedWebsiteUrl
           })
         });
 
@@ -194,14 +228,16 @@ serve(async (req) => {
           const inspectionData = await inspectionResponse.json();
           urlMetaData.push({
             url: page.url,
-            indexStatus: inspectionData.inspectionResult?.indexStatusResult?.verdict || 'Unknown',
-            crawlStatus: inspectionData.inspectionResult?.indexStatusResult?.crawledAs || 'Unknown',
+            indexStatus: inspectionData.inspectionResult?.indexStatusResult?.verdict || 'UNKNOWN',
+            crawlStatus: inspectionData.inspectionResult?.indexStatusResult?.crawledAs || 'UNKNOWN',
             lastCrawled: inspectionData.inspectionResult?.indexStatusResult?.lastCrawlTime || null,
-            userAgent: inspectionData.inspectionResult?.indexStatusResult?.googleCanonical || 'Unknown'
+            userAgent: inspectionData.inspectionResult?.indexStatusResult?.userAgent || 'Unknown'
           });
+        } else {
+          console.log(`Failed to inspect URL ${page.url}: ${inspectionResponse.status}`);
         }
       } catch (error) {
-        console.error(`Failed to inspect URL ${page.url}:`, error);
+        console.error(`Error inspecting URL ${page.url}:`, error);
       }
     }
 
@@ -209,7 +245,7 @@ serve(async (req) => {
     const sitePerformance = {
       totalPages: pages.length,
       indexedPages: urlMetaData.filter(page => page.indexStatus === 'PASS').length,
-      crawlErrors: urlMetaData.filter(page => page.crawlStatus === 'UNKNOWN').length,
+      crawlErrors: urlMetaData.filter(page => page.indexStatus !== 'PASS').length,
       avgLoadTime: '2.1s', // This would need Core Web Vitals API integration
       mobileUsability: 'Good', // This would need Mobile Usability API
       coreWebVitals: {
@@ -220,24 +256,28 @@ serve(async (req) => {
     };
 
     // 5. Calculate comprehensive stats
+    const totalClicks = keywords.reduce((acc, k) => acc + k.clicks, 0);
+    const totalImpressions = keywords.reduce((acc, k) => acc + k.impressions, 0);
+    
     const stats = {
       totalKeywords: keywords.length,
       top10Keywords: keywords.filter(k => parseFloat(k.position) <= 10).length,
       top3Keywords: keywords.filter(k => parseFloat(k.position) <= 3).length,
       avgPosition: keywords.length > 0 ? (keywords.reduce((acc, k) => acc + parseFloat(k.position), 0) / keywords.length).toFixed(1) : '0.0',
-      totalClicks: keywords.reduce((acc, k) => acc + k.clicks, 0),
-      totalImpressions: keywords.reduce((acc, k) => acc + k.impressions, 0),
+      totalClicks: totalClicks,
+      totalImpressions: totalImpressions,
       avgCTR: keywords.length > 0 ? (keywords.reduce((acc, k) => acc + parseFloat(k.ctr), 0) / keywords.length).toFixed(1) : '0.0',
-      estTraffic: keywords.reduce((acc, k) => acc + k.clicks, 0),
+      estTraffic: totalClicks,
       totalPages: pages.length,
       topPerformingPages: pages.slice(0, 10)
     };
 
-    console.log(`Successfully fetched comprehensive GSC data:
+    console.log(`Successfully processed GSC data:
     - Keywords: ${keywords.length}
     - Pages: ${pages.length}
     - URL Meta Data: ${urlMetaData.length}
-    - Site Performance metrics calculated`);
+    - Total Clicks: ${totalClicks}
+    - Total Impressions: ${totalImpressions}`);
 
     return new Response(JSON.stringify({
       success: true,
@@ -257,6 +297,11 @@ serve(async (req) => {
     return new Response(JSON.stringify({
       success: false,
       error: error instanceof Error ? error.message : 'Unknown error occurred',
+      keywords: [],
+      pages: [],
+      urlMetaData: [],
+      sitePerformance: {},
+      stats: {}
     }), {
       headers: { ...corsHeaders, 'Content-Type': 'application/json' },
       status: 500,
