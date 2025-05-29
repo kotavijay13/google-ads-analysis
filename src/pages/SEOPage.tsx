@@ -4,7 +4,6 @@ import { useSearchConsoleIntegration } from '@/components/google-search-console/
 import WebsiteSelector from '@/components/seo/WebsiteSelector';
 import SEOStatsCards from '@/components/seo/SEOStatsCards';
 import SEOHeader from '@/components/seo/SEOHeader';
-import GoogleAdsNotification from '@/components/seo/GoogleAdsNotification';
 import SEOTabsContent from '@/components/seo/SEOTabsContent';
 import { useSEOData } from '@/hooks/useSEOData';
 
@@ -34,8 +33,6 @@ const SEOPage = () => {
   return (
     <div className="container mx-auto py-6 px-4 max-w-7xl">
       <SEOHeader />
-
-      <GoogleAdsNotification googleAdsConnected={googleAdsConnected} />
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-6">
         {/* Website Selection */}

@@ -2,6 +2,7 @@
 import { Card, CardContent } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import KeywordTable from './KeywordTable';
+import DownloadButton from './DownloadButton';
 import { Badge } from '@/components/ui/badge';
 
 interface SEOTabsContentProps {
@@ -33,13 +34,28 @@ const SEOTabsContent = ({
       </TabsList>
 
       <TabsContent value="keywords" className="space-y-4">
+        <div className="flex justify-between items-center">
+          <h3 className="text-lg font-semibold">Top Ranking Keywords</h3>
+          <DownloadButton 
+            data={serpKeywords}
+            filename={`keywords-${selectedWebsite}`}
+            title={`Keywords Report - ${selectedWebsite}`}
+          />
+        </div>
         <KeywordTable keywords={serpKeywords} />
       </TabsContent>
 
       <TabsContent value="pages">
         <Card>
           <CardContent className="pt-6">
-            <h3 className="text-lg font-semibold mb-4">Top Performing Pages</h3>
+            <div className="flex justify-between items-center mb-4">
+              <h3 className="text-lg font-semibold">Top Performing Pages</h3>
+              <DownloadButton 
+                data={pages}
+                filename={`pages-${selectedWebsite}`}
+                title={`Pages Report - ${selectedWebsite}`}
+              />
+            </div>
             <div className="overflow-x-auto">
               <table className="w-full">
                 <thead>
@@ -71,8 +87,17 @@ const SEOTabsContent = ({
       <TabsContent value="urlData">
         <Card>
           <CardContent className="pt-6">
-            <h3 className="text-lg font-semibold mb-4">URL Meta Data Analysis</h3>
-            <p className="text-muted-foreground mb-6">Meta title and description optimization status for {selectedWebsite}</p>
+            <div className="flex justify-between items-center mb-4">
+              <div>
+                <h3 className="text-lg font-semibold">URL Meta Data Analysis</h3>
+                <p className="text-muted-foreground">Meta title and description optimization status for {selectedWebsite}</p>
+              </div>
+              <DownloadButton 
+                data={urlMetaData}
+                filename={`url-meta-data-${selectedWebsite}`}
+                title={`URL Meta Data Report - ${selectedWebsite}`}
+              />
+            </div>
             
             {urlMetaData.length > 0 ? (
               <div className="overflow-x-auto">
@@ -121,8 +146,17 @@ const SEOTabsContent = ({
       <TabsContent value="sitePerformance">
         <Card>
           <CardContent className="pt-6">
-            <h3 className="text-lg font-semibold mb-4">Site Performance Metrics</h3>
-            <p className="text-muted-foreground mb-6">Page speed and core web vitals for {selectedWebsite}</p>
+            <div className="flex justify-between items-center mb-4">
+              <div>
+                <h3 className="text-lg font-semibold">Site Performance Metrics</h3>
+                <p className="text-muted-foreground">Page speed and core web vitals for {selectedWebsite}</p>
+              </div>
+              <DownloadButton 
+                data={Object.keys(sitePerformance).length > 0 ? [sitePerformance] : []}
+                filename={`site-performance-${selectedWebsite}`}
+                title={`Site Performance Report - ${selectedWebsite}`}
+              />
+            </div>
             
             {Object.keys(sitePerformance).length > 0 ? (
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
