@@ -172,6 +172,7 @@ serve(async (req) => {
       
       return {
         keyword: keywordText,
+        landingUrl: result.link || `https://${domain}`,
         position: position,
         searchVolume: searchVolume,
         competitorUrl: result.link || `https://${domain}`,

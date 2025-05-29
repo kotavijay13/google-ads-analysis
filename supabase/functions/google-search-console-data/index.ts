@@ -134,12 +134,12 @@ serve(async (req) => {
 
     console.log(`Date range: ${baseStartDate} to ${baseEndDate}`);
 
-    // 1. Fetch Keywords Data
-    console.log('Fetching keywords data...');
+    // 1. Fetch Keywords Data with Landing URLs
+    console.log('Fetching keywords data with landing URLs...');
     const keywordsQuery = {
       startDate: baseStartDate,
       endDate: baseEndDate,
-      dimensions: ['query'],
+      dimensions: ['query', 'page'],
       rowLimit: 1000
     };
 
@@ -158,6 +158,7 @@ serve(async (req) => {
       console.log(`Keywords API response:`, keywordsData);
       keywords = keywordsData.rows ? keywordsData.rows.map((row: any, index: number) => ({
         keyword: row.keys[0],
+        landingUrl: row.keys[1] || formattedWebsiteUrl,
         impressions: row.impressions || 0,
         clicks: row.clicks || 0,
         ctr: row.ctr ? (row.ctr * 100).toFixed(1) : '0.0',
@@ -205,7 +206,7 @@ serve(async (req) => {
       console.error(`Pages API error (${pagesResponse.status}):`, errorText);
     }
 
-    // 3. Generate URL Meta Data (using top pages for inspection)
+    // 3. Fetch URL Meta Data (this will show why it's 0 - we need actual meta tags scraping)
     let urlMetaData = [];
     const topPages = pages.slice(0, 5); // Limit to top 5 pages to avoid too many API calls
     
@@ -231,7 +232,9 @@ serve(async (req) => {
             indexStatus: inspectionData.inspectionResult?.indexStatusResult?.verdict || 'UNKNOWN',
             crawlStatus: inspectionData.inspectionResult?.indexStatusResult?.crawledAs || 'UNKNOWN',
             lastCrawled: inspectionData.inspectionResult?.indexStatusResult?.lastCrawlTime || null,
-            userAgent: inspectionData.inspectionResult?.indexStatusResult?.userAgent || 'Unknown'
+            userAgent: inspectionData.inspectionResult?.indexStatusResult?.userAgent || 'Unknown',
+            metaTitle: 'Not available via GSC API',
+            metaDescription: 'Not available via GSC API'
           });
         } else {
           console.log(`Failed to inspect URL ${page.url}: ${inspectionResponse.status}`);

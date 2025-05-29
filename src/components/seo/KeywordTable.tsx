@@ -3,6 +3,7 @@ import { cn } from '@/lib/utils';
 
 interface Keyword {
   keyword: string;
+  landingUrl?: string;
   impressions?: number;
   clicks?: number;
   ctr?: number;
@@ -26,6 +27,7 @@ const KeywordTable = ({ keywords }: KeywordTableProps) => {
           <thead>
             <tr className="border-b bg-muted/50">
               <th className="text-left py-3 px-4">Keyword</th>
+              <th className="text-left py-3 px-4">Landing URL</th>
               <th className="text-center py-3 px-4">Position</th>
               <th className="text-center py-3 px-4">Change</th>
               <th className="text-center py-3 px-4">Search Volume</th>
@@ -36,6 +38,17 @@ const KeywordTable = ({ keywords }: KeywordTableProps) => {
             {keywords.map((keyword, index) => (
               <tr key={index} className="border-b hover:bg-muted/20">
                 <td className="py-3 px-4">{keyword.keyword}</td>
+                <td className="py-3 px-4">
+                  <a 
+                    href={keyword.landingUrl} 
+                    target="_blank" 
+                    rel="noopener noreferrer"
+                    className="text-blue-600 hover:text-blue-800 truncate block max-w-xs"
+                    title={keyword.landingUrl}
+                  >
+                    {keyword.landingUrl ? keyword.landingUrl.replace(/^https?:\/\//, '') : 'N/A'}
+                  </a>
+                </td>
                 <td className="py-3 px-4 text-center">{keyword.position}</td>
                 <td className="py-3 px-4 text-center">
                   <span className={cn(

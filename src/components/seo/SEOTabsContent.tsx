@@ -90,7 +90,7 @@ const SEOTabsContent = ({
             <div className="flex justify-between items-center mb-4">
               <div>
                 <h3 className="text-lg font-semibold">URL Meta Data Analysis</h3>
-                <p className="text-muted-foreground">Meta title and description optimization status for {selectedWebsite}</p>
+                <p className="text-muted-foreground">Indexing status and crawl information for {selectedWebsite}</p>
               </div>
               <DownloadButton 
                 data={urlMetaData}
@@ -136,7 +136,15 @@ const SEOTabsContent = ({
               </div>
             ) : (
               <div className="p-6 border rounded-lg bg-muted/20">
-                <p>URL meta data will be populated from Google Search Console when available. Please ensure your account has proper permissions.</p>
+                <h4 className="font-semibold mb-2">Why is URL Meta Data showing 0?</h4>
+                <p className="text-sm text-muted-foreground mb-4">
+                  The Google Search Console API and SERP API don't provide actual meta titles and descriptions. 
+                  They only provide indexing status and crawl information.
+                </p>
+                <p className="text-sm text-muted-foreground">
+                  To get actual meta titles and descriptions, we would need to scrape the web pages directly 
+                  or use a specialized SEO API that provides this data.
+                </p>
               </div>
             )}
           </CardContent>
