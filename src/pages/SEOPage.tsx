@@ -1,5 +1,5 @@
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import Header from '@/components/Header';
 import { Card, CardContent } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
@@ -8,6 +8,7 @@ import GoogleSearchConsoleIntegration from '@/components/GoogleSearchConsoleInte
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from '@/components/ui/sonner';
 import { useSearchConsoleIntegration } from '@/components/google-search-console/useSearchConsoleIntegration';
+import { useGoogleAdsIntegration } from '@/components/google-ads/useGoogleAdsIntegration';
 import WebsiteSelector from '@/components/seo/WebsiteSelector';
 import SEOStatsCards from '@/components/seo/SEOStatsCards';
 import KeywordTable from '@/components/seo/KeywordTable';
@@ -30,18 +31,11 @@ const initialKeywords = [
   { keyword: 'seo services', impressions: 1500, clicks: 130, ctr: 8.7, position: 4, change: '+3' },
 ];
 
-// Available websites for selection
-const availableWebsites = [
-  'mergeinsights.ai',
-  'example.com',
-  'testsite.org',
-  'mydomain.net'
-];
-
 const SEOPage = () => {
   const [activeTab, setActiveTab] = useState('keywords');
   const [isRefreshing, setIsRefreshing] = useState(false);
-  const [selectedWebsite, setSelectedWebsite] = useState<string>('mergeinsights.ai');
+  const [selectedWebsite, setSelectedWebsite] = useState<string>('');
+  const [availableWebsites, setAvailableWebsites] = useState<string[]>([]);
   const [serpKeywords, setSerpKeywords] = useState(initialKeywords);
   const [serpStats, setSerpStats] = useState({
     totalKeywords: 5,
@@ -55,6 +49,43 @@ const SEOPage = () => {
     handleConnect,
     isLoading: gscLoading
   } = useSearchConsoleIntegration();
+
+  // Use Google Ads integration to get connected accounts
+  const { 
+    accounts: googleAdsAccounts, 
+    connected: googleAdsConnected 
+  } = useGoogleAdsIntegration();
+
+  // Extract websites from Google Ads accounts
+  useEffect(() => {
+    if (googleAdsConnected && googleAdsAccounts.length > 0) {
+      // Extract website domains from Google Ads account names or create mock websites
+      // In real implementation, you'd get actual website URLs from campaigns or account data
+      const websites = googleAdsAccounts.map(account => {
+        // Try to extract domain from account name or use a default pattern
+        const accountName = account.name.toLowerCase().replace(/\s+/g, '');
+        return `${accountName}.com`;
+      });
+      
+      // Add some default websites as fallback
+      const defaultWebsites = ['mergeinsights.ai', 'example.com'];
+      const allWebsites = [...new Set([...defaultWebsites, ...websites])];
+      
+      setAvailableWebsites(allWebsites);
+      
+      // Set first website as default if none selected
+      if (!selectedWebsite && allWebsites.length > 0) {
+        setSelectedWebsite(allWebsites[0]);
+      }
+    } else {
+      // Fallback to default websites if Google Ads not connected
+      const defaultWebsites = ['mergeinsights.ai', 'example.com', 'testsite.org', 'mydomain.net'];
+      setAvailableWebsites(defaultWebsites);
+      if (!selectedWebsite) {
+        setSelectedWebsite(defaultWebsites[0]);
+      }
+    }
+  }, [googleAdsAccounts, googleAdsConnected, selectedWebsite]);
 
   const handleRefreshSerpData = async () => {
     if (!selectedWebsite) {
@@ -110,6 +141,24 @@ const SEOPage = () => {
           </div>
         </div>
       </div>
+
+      {!googleAdsConnected && (
+        <Card className="mb-6 border-orange-200 bg-orange-50">
+          <CardContent className="pt-6">
+            <div className="flex items-center gap-3">
+              <div className="text-orange-600">
+                <Globe className="w-5 h-5" />
+              </div>
+              <div>
+                <h3 className="font-medium text-orange-800">Connect Google Ads for Better SEO Insights</h3>
+                <p className="text-sm text-orange-600 mt-1">
+                  Connect your Google Ads account to automatically populate website options and get more comprehensive SEO data.
+                </p>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+      )}
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-6">
         {/* Website Selection */}
