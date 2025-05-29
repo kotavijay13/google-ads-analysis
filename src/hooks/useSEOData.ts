@@ -13,17 +13,30 @@ const initialKeywords = [
   { keyword: 'seo services', impressions: 1500, clicks: 130, ctr: 8.7, position: 4, change: '+3' },
 ];
 
+const initialPages = [
+  { url: '/homepage', impressions: 3500, clicks: 320, ctr: 9.1, position: 2.3 },
+  { url: '/product', impressions: 2800, clicks: 240, ctr: 8.6, position: 3.1 },
+  { url: '/blog', impressions: 2200, clicks: 195, ctr: 8.9, position: 2.8 },
+  { url: '/contact', impressions: 1900, clicks: 175, ctr: 9.2, position: 2.2 },
+  { url: '/about', impressions: 1600, clicks: 140, ctr: 8.8, position: 3.0 },
+];
+
 export const useSEOData = () => {
   const { user } = useAuth();
   const [isRefreshing, setIsRefreshing] = useState(false);
   const [selectedWebsite, setSelectedWebsite] = useState<string>('');
   const [availableWebsites, setAvailableWebsites] = useState<string[]>([]);
   const [serpKeywords, setSerpKeywords] = useState(initialKeywords);
+  const [pages, setPages] = useState(initialPages);
+  const [urlMetaData, setUrlMetaData] = useState<any[]>([]);
+  const [sitePerformance, setSitePerformance] = useState<any>({});
   const [serpStats, setSerpStats] = useState({
     totalKeywords: 5,
     top10Keywords: 3,
     avgPosition: '3.6',
-    estTraffic: 970
+    estTraffic: 970,
+    totalPages: 5,
+    topPerformingPages: initialPages.slice(0, 3)
   });
   const [googleAdsConnected, setGoogleAdsConnected] = useState(false);
 
@@ -130,13 +143,13 @@ export const useSEOData = () => {
     if (!user) return;
 
     try {
-      console.log(`Fetching real-time GSC data for: ${websiteUrl}`);
+      console.log(`Fetching comprehensive GSC data for: ${websiteUrl}`);
       
       const { data, error } = await supabase.functions.invoke('google-search-console-data', {
         body: { 
           websiteUrl: `https://${websiteUrl}`,
-          startDate: new Date(Date.now() - 30 * 24 * 60 * 60 * 1000).toISOString().split('T')[0], // 30 days ago
-          endDate: new Date().toISOString().split('T')[0] // today
+          startDate: new Date(Date.now() - 30 * 24 * 60 * 60 * 1000).toISOString().split('T')[0],
+          endDate: new Date().toISOString().split('T')[0]
         }
       });
 
@@ -148,10 +161,27 @@ export const useSEOData = () => {
       if (data && data.success) {
         if (data.keywords && data.keywords.length > 0) {
           setSerpKeywords(data.keywords);
-          setSerpStats(data.stats);
           toast.success(`Successfully loaded ${data.keywords.length} keywords from Google Search Console`);
-        } else {
-          toast.warning('No keyword data found in Google Search Console for this website');
+        }
+
+        if (data.pages && data.pages.length > 0) {
+          setPages(data.pages);
+          toast.success(`Successfully loaded ${data.pages.length} pages from Google Search Console`);
+        }
+
+        if (data.urlMetaData) {
+          setUrlMetaData(data.urlMetaData);
+          console.log('URL Meta Data loaded:', data.urlMetaData.length);
+        }
+
+        if (data.sitePerformance) {
+          setSitePerformance(data.sitePerformance);
+          console.log('Site Performance loaded:', data.sitePerformance);
+        }
+
+        if (data.stats) {
+          setSerpStats(data.stats);
+          console.log('Comprehensive stats loaded:', data.stats);
         }
       } else {
         throw new Error(data?.error || 'Failed to fetch GSC data');
@@ -170,7 +200,7 @@ export const useSEOData = () => {
     }
 
     setIsRefreshing(true);
-    console.log(`Refreshing data for: ${selectedWebsite}`);
+    console.log(`Refreshing comprehensive data for: ${selectedWebsite}`);
 
     try {
       // Try to fetch real-time Google Search Console data
@@ -220,6 +250,9 @@ export const useSEOData = () => {
     selectedWebsite,
     availableWebsites,
     serpKeywords,
+    pages,
+    urlMetaData,
+    sitePerformance,
     serpStats,
     googleAdsConnected,
     handleRefreshSerpData,

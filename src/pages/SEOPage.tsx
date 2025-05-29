@@ -22,6 +22,9 @@ const SEOPage = () => {
     selectedWebsite,
     availableWebsites,
     serpKeywords,
+    pages,
+    urlMetaData,
+    sitePerformance,
     serpStats,
     googleAdsConnected,
     handleRefreshSerpData,
@@ -59,6 +62,9 @@ const SEOPage = () => {
         activeTab={activeTab}
         onTabChange={setActiveTab}
         serpKeywords={serpKeywords}
+        pages={pages}
+        urlMetaData={urlMetaData}
+        sitePerformance={sitePerformance}
         selectedWebsite={selectedWebsite}
       />
     </div>
