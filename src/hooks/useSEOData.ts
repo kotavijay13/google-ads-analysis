@@ -11,7 +11,13 @@ export const useSEOData = () => {
   const [serpKeywords, setSerpKeywords] = useState<KeywordData[]>(initialKeywords);
   const [pages, setPages] = useState<PageData[]>(initialPages);
   const [urlMetaData, setUrlMetaData] = useState<UrlMetaData[]>([]);
-  const [sitePerformance, setSitePerformance] = useState<SitePerformance>({});
+  const [sitePerformance, setSitePerformance] = useState<SitePerformance>({
+    totalPages: 0,
+    indexedPages: 0,
+    crawlErrors: 0,
+    avgLoadTime: '0ms',
+    mobileUsability: 'Good'
+  });
   const [serpStats, setSerpStats] = useState<SerpStats>({
     totalKeywords: 5,
     top10Keywords: 3,
