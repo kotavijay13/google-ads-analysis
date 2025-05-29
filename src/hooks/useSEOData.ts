@@ -81,18 +81,22 @@ export const useSEOData = () => {
         } else if (gscProperties && gscProperties.length > 0) {
           console.log(`Found ${gscProperties.length} GSC properties`);
           
-          const websites = gscProperties.map(property => {
-            // Extract domain from the account_id (which stores the full URL)
-            try {
-              const url = new URL(property.account_id);
-              return url.hostname;
-            } catch {
-              // If URL parsing fails, use the account_name as fallback
-              return property.account_name || property.account_id;
-            }
-          });
+          const websites = gscProperties
+            .map(property => {
+              // Extract domain from the account_id (which stores the full URL)
+              try {
+                const url = new URL(property.account_id);
+                return url.hostname;
+              } catch {
+                // If URL parsing fails, use the account_name as fallback
+                return property.account_name || property.account_id;
+              }
+            })
+            .filter(website => website && typeof website === 'string' && website.trim().length > 0); // Filter here too
           
+          console.log('Processed websites:', websites);
           setAvailableWebsites(websites);
+          
           if (!selectedWebsite && websites.length > 0) {
             setSelectedWebsite(websites[0]);
             console.log(`Auto-selected website: ${websites[0]}`);
@@ -122,14 +126,17 @@ export const useSEOData = () => {
           .eq('platform', 'google_ads');
 
         if (googleAdsAccounts && googleAdsAccounts.length > 0) {
-          const websites = googleAdsAccounts.map(account => {
-            const accountName = account.account_name?.toLowerCase().replace(/\s+/g, '') || 'website';
-            return `${accountName}.com`;
-          });
+          const websites = googleAdsAccounts
+            .map(account => {
+              const accountName = account.account_name?.toLowerCase().replace(/\s+/g, '') || 'website';
+              return `${accountName}.com`;
+            })
+            .filter(website => website && website !== '.com' && website.trim().length > 0);
           
           const defaultWebsites = ['www.vantagesecurity.com', 'mergeinsights.ai'];
           const allWebsites = [...new Set([...defaultWebsites, ...websites])];
           
+          console.log('Combined websites from Google Ads:', allWebsites);
           setAvailableWebsites(allWebsites);
           
           if (!selectedWebsite && allWebsites.length > 0) {
@@ -264,13 +271,18 @@ export const useSEOData = () => {
   };
 
   const handleWebsiteChange = (website: string) => {
-    setSelectedWebsite(website);
-    console.log(`Selected website: ${website}`);
-    
-    // Auto-refresh data when website changes
-    setTimeout(() => {
-      handleRefreshSerpData();
-    }, 500);
+    console.log(`Website change requested: "${website}"`);
+    if (website && website.trim().length > 0) {
+      setSelectedWebsite(website);
+      console.log(`Selected website: ${website}`);
+      
+      // Auto-refresh data when website changes
+      setTimeout(() => {
+        handleRefreshSerpData();
+      }, 500);
+    } else {
+      console.warn('Empty website value received, ignoring');
+    }
   };
 
   return {
