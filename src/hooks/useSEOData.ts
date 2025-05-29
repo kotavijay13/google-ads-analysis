@@ -2,7 +2,7 @@
 import { useState, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from '@/components/ui/sonner';
-import { useGoogleAdsIntegration } from '@/components/google-ads/useGoogleAdsIntegration';
+import { useAuth } from '@/context/AuthContext';
 
 // Initial sample keywords
 const initialKeywords = [
@@ -14,6 +14,7 @@ const initialKeywords = [
 ];
 
 export const useSEOData = () => {
+  const { user } = useAuth();
   const [isRefreshing, setIsRefreshing] = useState(false);
   const [selectedWebsite, setSelectedWebsite] = useState<string>('');
   const [availableWebsites, setAvailableWebsites] = useState<string[]>([]);
@@ -24,36 +25,147 @@ export const useSEOData = () => {
     avgPosition: '3.6',
     estTraffic: 970
   });
+  const [googleAdsConnected, setGoogleAdsConnected] = useState(false);
 
-  const { 
-    accounts: googleAdsAccounts, 
-    connected: googleAdsConnected 
-  } = useGoogleAdsIntegration();
-
-  // Extract websites from Google Ads accounts
+  // Check Google Search Console connection and fetch properties
   useEffect(() => {
-    if (googleAdsConnected && googleAdsAccounts.length > 0) {
-      const websites = googleAdsAccounts.map(account => {
-        const accountName = account.name.toLowerCase().replace(/\s+/g, '');
-        return `${accountName}.com`;
-      });
-      
-      const defaultWebsites = ['mergeinsights.ai', 'example.com'];
-      const allWebsites = [...new Set([...defaultWebsites, ...websites])];
-      
-      setAvailableWebsites(allWebsites);
-      
-      if (!selectedWebsite && allWebsites.length > 0) {
-        setSelectedWebsite(allWebsites[0]);
-      }
-    } else {
-      const defaultWebsites = ['mergeinsights.ai', 'example.com', 'testsite.org', 'mydomain.net'];
-      setAvailableWebsites(defaultWebsites);
-      if (!selectedWebsite) {
-        setSelectedWebsite(defaultWebsites[0]);
-      }
+    if (user) {
+      checkGoogleSearchConsoleConnection();
     }
-  }, [googleAdsAccounts, googleAdsConnected, selectedWebsite]);
+  }, [user]);
+
+  const checkGoogleSearchConsoleConnection = async () => {
+    if (!user) return;
+    
+    try {
+      // Check if Google Search Console is connected
+      const { data: tokens, error: tokensError } = await supabase
+        .from('api_tokens')
+        .select('*')
+        .eq('user_id', user.id)
+        .eq('provider', 'google_search_console')
+        .maybeSingle();
+
+      if (tokensError) {
+        console.error('Error checking GSC tokens:', tokensError);
+        return;
+      }
+
+      if (tokens) {
+        // Fetch Google Search Console properties
+        const { data: gscProperties, error: gscError } = await supabase
+          .from('ad_accounts')
+          .select('*')
+          .eq('user_id', user.id)
+          .eq('platform', 'google_search_console');
+
+        if (gscError) {
+          console.error('Error fetching GSC properties:', gscError);
+        } else if (gscProperties && gscProperties.length > 0) {
+          const websites = gscProperties.map(property => {
+            // Extract domain from the account_id (which stores the full URL)
+            try {
+              const url = new URL(property.account_id);
+              return url.hostname;
+            } catch {
+              // If URL parsing fails, use the account_name as fallback
+              return property.account_name || property.account_id;
+            }
+          });
+          
+          setAvailableWebsites(websites);
+          if (!selectedWebsite && websites.length > 0) {
+            setSelectedWebsite(websites[0]);
+          }
+          return;
+        }
+      }
+
+      // Fallback: Check for Google Ads accounts if no GSC properties
+      const { data: googleAdsTokens } = await supabase
+        .from('api_tokens')
+        .select('*')
+        .eq('user_id', user.id)
+        .eq('provider', 'google_ads')
+        .maybeSingle();
+
+      if (googleAdsTokens) {
+        setGoogleAdsConnected(true);
+        
+        const { data: googleAdsAccounts } = await supabase
+          .from('ad_accounts')
+          .select('*')
+          .eq('user_id', user.id)
+          .eq('platform', 'google_ads');
+
+        if (googleAdsAccounts && googleAdsAccounts.length > 0) {
+          const websites = googleAdsAccounts.map(account => {
+            const accountName = account.account_name?.toLowerCase().replace(/\s+/g, '') || 'website';
+            return `${accountName}.com`;
+          });
+          
+          const defaultWebsites = ['mergeinsights.ai', 'example.com'];
+          const allWebsites = [...new Set([...defaultWebsites, ...websites])];
+          
+          setAvailableWebsites(allWebsites);
+          
+          if (!selectedWebsite && allWebsites.length > 0) {
+            setSelectedWebsite(allWebsites[0]);
+          }
+        }
+      } else {
+        // No connections found, use default websites
+        const defaultWebsites = ['mergeinsights.ai', 'example.com', 'testsite.org', 'mydomain.net'];
+        setAvailableWebsites(defaultWebsites);
+        if (!selectedWebsite) {
+          setSelectedWebsite(defaultWebsites[0]);
+        }
+      }
+    } catch (error) {
+      console.error('Error checking connections:', error);
+    }
+  };
+
+  const fetchRealTimeGSCData = async (websiteUrl: string) => {
+    if (!user) return;
+
+    try {
+      console.log(`Fetching real-time GSC data for: ${websiteUrl}`);
+      
+      const { data, error } = await supabase.functions.invoke('google-search-console-data', {
+        body: { 
+          websiteUrl: `https://${websiteUrl}`,
+          startDate: new Date(Date.now() - 30 * 24 * 60 * 60 * 1000).toISOString().split('T')[0], // 30 days ago
+          endDate: new Date().toISOString().split('T')[0] // today
+        }
+      });
+
+      if (error) {
+        console.error('GSC API error:', error);
+        throw error;
+      }
+
+      if (data && data.success) {
+        if (data.keywords && data.keywords.length > 0) {
+          setSerpKeywords(data.keywords);
+          setSerpStats({
+            totalKeywords: data.keywords.length,
+            top10Keywords: data.keywords.filter((k: any) => k.position <= 10).length,
+            avgPosition: (data.keywords.reduce((acc: number, k: any) => acc + k.position, 0) / data.keywords.length).toFixed(1),
+            estTraffic: data.keywords.reduce((acc: number, k: any) => acc + (k.clicks || 0), 0)
+          });
+          toast.success(`Successfully loaded ${data.keywords.length} keywords from Google Search Console`);
+        } else {
+          toast.warning('No keyword data found in Google Search Console for this website');
+        }
+      } else {
+        throw new Error(data?.error || 'Failed to fetch GSC data');
+      }
+    } catch (error) {
+      console.error('Error fetching real-time GSC data:', error);
+      toast.error('Failed to fetch real-time data from Google Search Console');
+    }
+  };
 
   const handleRefreshSerpData = async () => {
     if (!selectedWebsite) {
@@ -62,28 +174,36 @@ export const useSEOData = () => {
     }
 
     setIsRefreshing(true);
-    console.log(`Fetching SERP data for: ${selectedWebsite}`);
+    console.log(`Refreshing data for: ${selectedWebsite}`);
 
     try {
-      const { data, error } = await supabase.functions.invoke('serp-api', {
-        body: { websiteUrl: selectedWebsite }
-      });
+      // First try to fetch real-time Google Search Console data
+      await fetchRealTimeGSCData(selectedWebsite);
+    } catch (gscError) {
+      console.log('GSC data fetch failed, falling back to SERP API');
+      
+      // Fallback to SERP API if GSC fails
+      try {
+        const { data, error } = await supabase.functions.invoke('serp-api', {
+          body: { websiteUrl: selectedWebsite }
+        });
 
-      if (error) {
-        console.error('SERP API error:', error);
-        throw error;
-      }
+        if (error) {
+          console.error('SERP API error:', error);
+          throw error;
+        }
 
-      if (data.keywords && data.keywords.length > 0) {
-        setSerpKeywords(data.keywords);
-        setSerpStats(data.stats);
-        toast.success(`Successfully loaded ${data.keywords.length} keywords from SERP analysis`);
-      } else {
-        toast.warning('No keyword data found for this website');
+        if (data.keywords && data.keywords.length > 0) {
+          setSerpKeywords(data.keywords);
+          setSerpStats(data.stats);
+          toast.success(`Successfully loaded ${data.keywords.length} keywords from SERP analysis`);
+        } else {
+          toast.warning('No keyword data found for this website');
+        }
+      } catch (serpError) {
+        console.error('Error fetching SERP data:', serpError);
+        toast.error('Failed to fetch data. Please try again.');
       }
-    } catch (error) {
-      console.error('Error fetching SERP data:', error);
-      toast.error('Failed to fetch SERP data. Please try again.');
     } finally {
       setIsRefreshing(false);
     }
@@ -92,6 +212,11 @@ export const useSEOData = () => {
   const handleWebsiteChange = (website: string) => {
     setSelectedWebsite(website);
     console.log(`Selected website: ${website}`);
+    
+    // Auto-refresh data when website changes
+    setTimeout(() => {
+      handleRefreshSerpData();
+    }, 500);
   };
 
   return {
