@@ -25,6 +25,11 @@ const WebsiteSelector = ({
   onConnect,
   onRefresh
 }: WebsiteSelectorProps) => {
+  // Filter out empty, null, or undefined websites
+  const validWebsites = availableWebsites.filter(website => 
+    website && typeof website === 'string' && website.trim().length > 0
+  );
+
   return (
     <Card>
       <CardHeader>
@@ -35,12 +40,12 @@ const WebsiteSelector = ({
           <label className="text-sm font-medium text-muted-foreground mb-2 block">
             Select Website
           </label>
-          <Select value={selectedWebsite} onValueChange={onWebsiteChange}>
+          <Select value={selectedWebsite || ''} onValueChange={onWebsiteChange}>
             <SelectTrigger className="w-full">
               <SelectValue placeholder="Choose a website" />
             </SelectTrigger>
             <SelectContent>
-              {availableWebsites.map((website) => (
+              {validWebsites.map((website) => (
                 <SelectItem key={website} value={website}>
                   <div className="flex items-center gap-2">
                     <Globe className="h-4 w-4" />
@@ -52,17 +57,19 @@ const WebsiteSelector = ({
           </Select>
         </div>
         
-        <div className="flex items-center gap-2 pt-2">
-          <span className="text-lg font-semibold text-blue-600">{selectedWebsite}</span>
-          <Button
-            variant="ghost"
-            size="sm"
-            onClick={() => window.open(`https://${selectedWebsite}`, '_blank')}
-            className="p-1 h-6 w-6"
-          >
-            <ExternalLink className="h-4 w-4" />
-          </Button>
-        </div>
+        {selectedWebsite && (
+          <div className="flex items-center gap-2 pt-2">
+            <span className="text-lg font-semibold text-blue-600">{selectedWebsite}</span>
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={() => window.open(`https://${selectedWebsite}`, '_blank')}
+              className="p-1 h-6 w-6"
+            >
+              <ExternalLink className="h-4 w-4" />
+            </Button>
+          </div>
+        )}
 
         <div className="flex flex-col gap-2">
           <Button 
@@ -81,7 +88,7 @@ const WebsiteSelector = ({
           
           <Button 
             onClick={onRefresh}
-            disabled={isRefreshing}
+            disabled={isRefreshing || !selectedWebsite}
             variant="outline"
             className="flex items-center gap-2 w-full"
           >
