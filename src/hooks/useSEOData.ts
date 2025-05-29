@@ -36,7 +36,10 @@ export const useSEOData = () => {
     avgPosition: '3.6',
     estTraffic: 970,
     totalPages: 5,
-    topPerformingPages: initialPages.slice(0, 3)
+    topPerformingPages: initialPages.slice(0, 3),
+    totalClicks: 0,
+    totalImpressions: 0,
+    avgCTR: 0
   });
   const [googleAdsConnected, setGoogleAdsConnected] = useState(false);
 
@@ -92,7 +95,7 @@ export const useSEOData = () => {
                 return property.account_name || property.account_id;
               }
             })
-            .filter(website => website && typeof website === 'string' && website.trim().length > 0); // Filter here too
+            .filter(website => website && typeof website === 'string' && website.trim().length > 0);
           
           console.log('Processed websites:', websites);
           setAvailableWebsites(websites);
@@ -100,6 +103,10 @@ export const useSEOData = () => {
           if (!selectedWebsite && websites.length > 0) {
             setSelectedWebsite(websites[0]);
             console.log(`Auto-selected website: ${websites[0]}`);
+            // Auto-refresh data for the first website
+            setTimeout(() => {
+              fetchRealTimeGSCData(websites[0]);
+            }, 1000);
           }
           return;
         }
@@ -188,6 +195,7 @@ export const useSEOData = () => {
           toast.success(`Successfully loaded ${data.keywords.length} keywords from Google Search Console`);
         } else {
           console.log('No keywords returned from GSC');
+          setSerpKeywords([]);
         }
 
         if (data.pages && data.pages.length > 0) {
@@ -196,6 +204,7 @@ export const useSEOData = () => {
           toast.success(`Successfully loaded ${data.pages.length} pages from Google Search Console`);
         } else {
           console.log('No pages returned from GSC');
+          setPages([]);
         }
 
         if (data.urlMetaData) {
@@ -209,7 +218,12 @@ export const useSEOData = () => {
         }
 
         if (data.stats) {
-          setSerpStats(data.stats);
+          setSerpStats({
+            ...data.stats,
+            totalClicks: data.stats.totalClicks || 0,
+            totalImpressions: data.stats.totalImpressions || 0,
+            avgCTR: data.stats.avgCTR || 0
+          });
           console.log('Comprehensive stats loaded:', data.stats);
         }
 
@@ -276,9 +290,12 @@ export const useSEOData = () => {
       setSelectedWebsite(website);
       console.log(`Selected website: ${website}`);
       
-      // Auto-refresh data when website changes
+      // Auto-refresh data when website changes - use the selected website
       setTimeout(() => {
-        handleRefreshSerpData();
+        setIsRefreshing(true);
+        fetchRealTimeGSCData(website).finally(() => {
+          setIsRefreshing(false);
+        });
       }, 500);
     } else {
       console.warn('Empty website value received, ignoring');

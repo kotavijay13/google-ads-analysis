@@ -7,10 +7,21 @@ interface SEOStatsCardsProps {
     top10Keywords: number;
     avgPosition: string;
     estTraffic: number;
+    totalClicks?: number;
+    totalImpressions?: number;
+    avgCTR?: number;
   };
 }
 
 const SEOStatsCards = ({ serpStats }: SEOStatsCardsProps) => {
+  const formatNumber = (value: number) => {
+    return new Intl.NumberFormat('en-US').format(value);
+  };
+
+  const formatPercent = (value: number) => {
+    return `${value.toFixed(1)}%`;
+  };
+
   return (
     <div>
       <div className="mb-4">
@@ -21,9 +32,9 @@ const SEOStatsCards = ({ serpStats }: SEOStatsCardsProps) => {
         <Card>
           <CardContent className="pt-6">
             <div className="space-y-2">
-              <p className="text-sm font-medium text-muted-foreground">Organic Traffic</p>
-              <p className="text-3xl font-bold">5,238</p>
-              <p className="text-sm text-green-500">+12% from last month</p>
+              <p className="text-sm font-medium text-muted-foreground">Total Clicks</p>
+              <p className="text-3xl font-bold">{formatNumber(serpStats.totalClicks || 0)}</p>
+              <p className="text-sm text-green-500">From GSC data</p>
             </div>
           </CardContent>
         </Card>
@@ -43,7 +54,7 @@ const SEOStatsCards = ({ serpStats }: SEOStatsCardsProps) => {
             <div className="space-y-2">
               <p className="text-sm font-medium text-muted-foreground">Average Position</p>
               <p className="text-3xl font-bold">{serpStats.avgPosition}</p>
-              <p className="text-sm text-green-500">Improved by 1.2</p>
+              <p className="text-sm text-green-500">From GSC data</p>
             </div>
           </CardContent>
         </Card>
@@ -51,9 +62,9 @@ const SEOStatsCards = ({ serpStats }: SEOStatsCardsProps) => {
         <Card>
           <CardContent className="pt-6">
             <div className="space-y-2">
-              <p className="text-sm font-medium text-muted-foreground">Est. Traffic</p>
-              <p className="text-3xl font-bold">{serpStats.estTraffic.toLocaleString()}</p>
-              <p className="text-sm text-green-500">+18% from SERP data</p>
+              <p className="text-sm font-medium text-muted-foreground">Total Impressions</p>
+              <p className="text-3xl font-bold">{formatNumber(serpStats.totalImpressions || 0)}</p>
+              <p className="text-sm text-green-500">CTR: {formatPercent(serpStats.avgCTR || 0)}</p>
             </div>
           </CardContent>
         </Card>
