@@ -14,11 +14,13 @@ interface SEOStatsCardsProps {
 }
 
 const SEOStatsCards = ({ serpStats }: SEOStatsCardsProps) => {
-  const formatNumber = (value: number) => {
+  const formatNumber = (value: number | undefined) => {
+    if (typeof value !== 'number' || isNaN(value)) return '0';
     return new Intl.NumberFormat('en-US').format(value);
   };
 
-  const formatPercent = (value: number) => {
+  const formatPercent = (value: number | undefined) => {
+    if (typeof value !== 'number' || isNaN(value)) return '0.0%';
     return `${value.toFixed(1)}%`;
   };
 
@@ -33,7 +35,7 @@ const SEOStatsCards = ({ serpStats }: SEOStatsCardsProps) => {
           <CardContent className="pt-6">
             <div className="space-y-2">
               <p className="text-sm font-medium text-muted-foreground">Total Clicks</p>
-              <p className="text-3xl font-bold">{formatNumber(serpStats.totalClicks || 0)}</p>
+              <p className="text-3xl font-bold">{formatNumber(serpStats.totalClicks)}</p>
               <p className="text-sm text-green-500">From GSC data</p>
             </div>
           </CardContent>
@@ -43,8 +45,8 @@ const SEOStatsCards = ({ serpStats }: SEOStatsCardsProps) => {
           <CardContent className="pt-6">
             <div className="space-y-2">
               <p className="text-sm font-medium text-muted-foreground">Keywords Ranked</p>
-              <p className="text-3xl font-bold">{serpStats.totalKeywords}</p>
-              <p className="text-sm text-green-500">+{serpStats.top10Keywords} in top 10</p>
+              <p className="text-3xl font-bold">{formatNumber(serpStats.totalKeywords)}</p>
+              <p className="text-sm text-green-500">+{formatNumber(serpStats.top10Keywords)} in top 10</p>
             </div>
           </CardContent>
         </Card>
@@ -53,7 +55,7 @@ const SEOStatsCards = ({ serpStats }: SEOStatsCardsProps) => {
           <CardContent className="pt-6">
             <div className="space-y-2">
               <p className="text-sm font-medium text-muted-foreground">Average Position</p>
-              <p className="text-3xl font-bold">{serpStats.avgPosition}</p>
+              <p className="text-3xl font-bold">{serpStats.avgPosition || '0.0'}</p>
               <p className="text-sm text-green-500">From GSC data</p>
             </div>
           </CardContent>
@@ -63,8 +65,8 @@ const SEOStatsCards = ({ serpStats }: SEOStatsCardsProps) => {
           <CardContent className="pt-6">
             <div className="space-y-2">
               <p className="text-sm font-medium text-muted-foreground">Total Impressions</p>
-              <p className="text-3xl font-bold">{formatNumber(serpStats.totalImpressions || 0)}</p>
-              <p className="text-sm text-green-500">CTR: {formatPercent(serpStats.avgCTR || 0)}</p>
+              <p className="text-3xl font-bold">{formatNumber(serpStats.totalImpressions)}</p>
+              <p className="text-sm text-green-500">CTR: {formatPercent(serpStats.avgCTR)}</p>
             </div>
           </CardContent>
         </Card>
