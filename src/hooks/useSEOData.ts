@@ -148,12 +148,7 @@ export const useSEOData = () => {
       if (data && data.success) {
         if (data.keywords && data.keywords.length > 0) {
           setSerpKeywords(data.keywords);
-          setSerpStats({
-            totalKeywords: data.keywords.length,
-            top10Keywords: data.keywords.filter((k: any) => k.position <= 10).length,
-            avgPosition: (data.keywords.reduce((acc: number, k: any) => acc + k.position, 0) / data.keywords.length).toFixed(1),
-            estTraffic: data.keywords.reduce((acc: number, k: any) => acc + (k.clicks || 0), 0)
-          });
+          setSerpStats(data.stats);
           toast.success(`Successfully loaded ${data.keywords.length} keywords from Google Search Console`);
         } else {
           toast.warning('No keyword data found in Google Search Console for this website');
@@ -164,6 +159,7 @@ export const useSEOData = () => {
     } catch (error) {
       console.error('Error fetching real-time GSC data:', error);
       toast.error('Failed to fetch real-time data from Google Search Console');
+      throw error;
     }
   };
 
@@ -177,7 +173,7 @@ export const useSEOData = () => {
     console.log(`Refreshing data for: ${selectedWebsite}`);
 
     try {
-      // First try to fetch real-time Google Search Console data
+      // Try to fetch real-time Google Search Console data
       await fetchRealTimeGSCData(selectedWebsite);
     } catch (gscError) {
       console.log('GSC data fetch failed, falling back to SERP API');

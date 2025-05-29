@@ -1,6 +1,5 @@
 
 import { useState } from 'react';
-import GoogleSearchConsoleIntegration from '@/components/GoogleSearchConsoleIntegration';
 import { useSearchConsoleIntegration } from '@/components/google-search-console/useSearchConsoleIntegration';
 import WebsiteSelector from '@/components/seo/WebsiteSelector';
 import SEOStatsCards from '@/components/seo/SEOStatsCards';
@@ -54,11 +53,6 @@ const SEOPage = () => {
         <div className="lg:col-span-2">
           <SEOStatsCards serpStats={serpStats} />
         </div>
-      </div>
-
-      {/* Google Search Console Integration */}
-      <div className="mb-6">
-        <GoogleSearchConsoleIntegration />
       </div>
 
       <SEOTabsContent
