@@ -5,14 +5,22 @@ import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
+  'Access-Control-Allow-Methods': 'POST, OPTIONS',
 };
 
 const LINKPREVIEW_API_KEY = Deno.env.get('LINKPREVIEW_API_KEY');
 
 serve(async (req) => {
+  console.log(`Request method: ${req.method}`);
+  console.log(`Request headers:`, Object.fromEntries(req.headers.entries()));
+
   // Handle CORS preflight requests
   if (req.method === 'OPTIONS') {
-    return new Response(null, { headers: corsHeaders });
+    console.log('Handling CORS preflight request');
+    return new Response(null, { 
+      headers: corsHeaders,
+      status: 200 
+    });
   }
 
   try {
@@ -57,9 +65,8 @@ serve(async (req) => {
 
     const metaDataResults = [];
 
-    // Process URLs in batches to avoid rate limiting - increased from 50 to 200
-    // Process in smaller batches to avoid timeouts
-    const batchSize = 20;
+    // Process URLs in batches to avoid rate limiting - process up to 200 URLs
+    const batchSize = 10; // Reduced batch size to avoid timeouts
     const totalUrls = Math.min(urls.length, 200);
     
     for (let i = 0; i < totalUrls; i += batchSize) {
@@ -74,8 +81,7 @@ serve(async (req) => {
           
           if (!linkPreviewResponse.ok) {
             if (linkPreviewResponse.status === 429) {
-              console.log(`Rate limit hit for ${url}, adding longer delay...`);
-              await new Promise(resolve => setTimeout(resolve, 2000));
+              console.log(`Rate limit hit for ${url}, skipping...`);
               continue;
             }
             console.error(`LinkPreview API error for ${url}: ${linkPreviewResponse.status}`);
@@ -99,8 +105,8 @@ serve(async (req) => {
             domain: linkPreviewData.domain || null
           });
 
-          // Add a delay to respect rate limits
-          await new Promise(resolve => setTimeout(resolve, 200));
+          // Add a small delay to respect rate limits
+          await new Promise(resolve => setTimeout(resolve, 100));
           
         } catch (error) {
           console.error(`Error scraping ${url}:`, error);
@@ -116,7 +122,7 @@ serve(async (req) => {
       // Add a longer delay between batches
       if (i + batchSize < totalUrls) {
         console.log('Waiting between batches...');
-        await new Promise(resolve => setTimeout(resolve, 1000));
+        await new Promise(resolve => setTimeout(resolve, 500));
       }
     }
 
