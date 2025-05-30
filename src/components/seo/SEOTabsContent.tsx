@@ -90,7 +90,7 @@ const SEOTabsContent = ({
             <div className="flex justify-between items-center mb-4">
               <div>
                 <h3 className="text-lg font-semibold">URL Meta Data Analysis</h3>
-                <p className="text-muted-foreground">Indexing status and crawl information for {selectedWebsite}</p>
+                <p className="text-muted-foreground">Meta titles, descriptions and indexing status for {selectedWebsite}</p>
               </div>
               <DownloadButton 
                 data={urlMetaData}
@@ -105,16 +105,18 @@ const SEOTabsContent = ({
                   <thead>
                     <tr className="border-b">
                       <th className="text-left pb-2">URL</th>
+                      <th className="text-left pb-2">Meta Title</th>
+                      <th className="text-left pb-2">Meta Description</th>
                       <th className="text-center pb-2">Index Status</th>
                       <th className="text-center pb-2">Crawl Status</th>
-                      <th className="text-center pb-2">Last Crawled</th>
-                      <th className="text-center pb-2">User Agent</th>
                     </tr>
                   </thead>
                   <tbody>
                     {urlMetaData.map((url, index) => (
                       <tr key={index} className="border-b last:border-0 hover:bg-muted/20">
-                        <td className="py-3 text-blue-600 font-medium">{url.url}</td>
+                        <td className="py-3 text-blue-600 font-medium max-w-xs truncate" title={url.url}>{url.url}</td>
+                        <td className="py-3 max-w-sm truncate" title={url.metaTitle || 'N/A'}>{url.metaTitle || 'N/A'}</td>
+                        <td className="py-3 max-w-sm truncate" title={url.metaDescription || 'N/A'}>{url.metaDescription || 'N/A'}</td>
                         <td className="py-3 text-center">
                           <Badge variant={url.indexStatus === 'PASS' ? 'default' : 'destructive'}>
                             {url.indexStatus}
@@ -125,10 +127,6 @@ const SEOTabsContent = ({
                             {url.crawlStatus}
                           </Badge>
                         </td>
-                        <td className="py-3 text-center">
-                          {url.lastCrawled ? new Date(url.lastCrawled).toLocaleDateString() : 'N/A'}
-                        </td>
-                        <td className="py-3 text-center">{url.userAgent}</td>
                       </tr>
                     ))}
                   </tbody>
@@ -136,14 +134,12 @@ const SEOTabsContent = ({
               </div>
             ) : (
               <div className="p-6 border rounded-lg bg-muted/20">
-                <h4 className="font-semibold mb-2">Why is URL Meta Data showing 0?</h4>
+                <h4 className="font-semibold mb-2">Loading URL Meta Data...</h4>
                 <p className="text-sm text-muted-foreground mb-4">
-                  The Google Search Console API and SERP API don't provide actual meta titles and descriptions. 
-                  They only provide indexing status and crawl information.
+                  Meta data is being scraped from the top performing pages using the LinkPreview API.
                 </p>
                 <p className="text-sm text-muted-foreground">
-                  To get actual meta titles and descriptions, we would need to scrape the web pages directly 
-                  or use a specialized SEO API that provides this data.
+                  This includes actual meta titles and descriptions from the web pages.
                 </p>
               </div>
             )}
