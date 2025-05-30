@@ -57,8 +57,8 @@ serve(async (req) => {
 
     const metaDataResults = [];
 
-    // Process URLs in batches to avoid rate limiting
-    for (const url of urls.slice(0, 10)) { // Limit to 10 URLs to avoid timeouts
+    // Process URLs in batches to avoid rate limiting - increased from 10 to 50
+    for (const url of urls.slice(0, 50)) {
       try {
         console.log(`Scraping meta data for: ${url}`);
         

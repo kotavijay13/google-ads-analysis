@@ -1,4 +1,3 @@
-
 import { serve } from "https://deno.land/std@0.177.0/http/server.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 
@@ -134,13 +133,13 @@ serve(async (req) => {
 
     console.log(`Date range: ${baseStartDate} to ${baseEndDate}`);
 
-    // 1. Fetch Keywords Data with Landing URLs
+    // 1. Fetch Keywords Data with Landing URLs - Increased limit to 25000
     console.log('Fetching keywords data with landing URLs...');
     const keywordsQuery = {
       startDate: baseStartDate,
       endDate: baseEndDate,
       dimensions: ['query', 'page'],
-      rowLimit: 1000
+      rowLimit: 25000
     };
 
     const keywordsResponse = await fetch(`https://searchconsole.googleapis.com/webmasters/v3/sites/${encodeURIComponent(formattedWebsiteUrl)}/searchAnalytics/query`, {
@@ -171,13 +170,13 @@ serve(async (req) => {
       console.error(`Keywords API error (${keywordsResponse.status}):`, errorText);
     }
 
-    // 2. Fetch Pages Data
+    // 2. Fetch Pages Data - Increased limit to 10000
     console.log('Fetching pages data...');
     const pagesQuery = {
       startDate: baseStartDate,
       endDate: baseEndDate,
       dimensions: ['page'],
-      rowLimit: 500
+      rowLimit: 10000
     };
 
     const pagesResponse = await fetch(`https://searchconsole.googleapis.com/webmasters/v3/sites/${encodeURIComponent(formattedWebsiteUrl)}/searchAnalytics/query`, {
@@ -206,9 +205,9 @@ serve(async (req) => {
       console.error(`Pages API error (${pagesResponse.status}):`, errorText);
     }
 
-    // 3. Fetch URL Meta Data (this will show why it's 0 - we need actual meta tags scraping)
+    // 3. Fetch URL Meta Data for top 50 pages instead of 5
     let urlMetaData = [];
-    const topPages = pages.slice(0, 5); // Limit to top 5 pages to avoid too many API calls
+    const topPages = pages.slice(0, 50); // Increased from 5 to 50 pages
     
     console.log(`Inspecting ${topPages.length} URLs for meta data...`);
     for (const page of topPages) {
