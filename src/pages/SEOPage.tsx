@@ -5,10 +5,15 @@ import WebsiteSelector from '@/components/seo/WebsiteSelector';
 import SEOStatsCards from '@/components/seo/SEOStatsCards';
 import SEOHeader from '@/components/seo/SEOHeader';
 import SEOTabsContent from '@/components/seo/SEOTabsContent';
+import DateRangePicker from '@/components/DateRangePicker';
 import { useSEOData } from '@/hooks/useSEOData';
 
 const SEOPage = () => {
   const [activeTab, setActiveTab] = useState('keywords');
+  const [dateRange, setDateRange] = useState({
+    from: new Date(Date.now() - 28 * 24 * 60 * 60 * 1000), // Last 28 days
+    to: new Date()
+  });
 
   const {
     connected,
@@ -28,7 +33,13 @@ const SEOPage = () => {
     googleAdsConnected,
     handleRefreshSerpData,
     handleWebsiteChange,
+    handleDateRangeChange,
   } = useSEOData();
+
+  const handleDateChange = (range: { from: Date; to: Date }) => {
+    setDateRange(range);
+    handleDateRangeChange(range);
+  };
 
   return (
     <div className="container mx-auto py-6 px-4 max-w-7xl">
@@ -52,6 +63,14 @@ const SEOPage = () => {
         {/* SEO Overview Stats */}
         <div className="lg:col-span-2">
           <SEOStatsCards serpStats={serpStats} />
+        </div>
+      </div>
+
+      {/* Date Range Picker */}
+      <div className="mb-6">
+        <div className="flex items-center gap-4">
+          <h3 className="text-lg font-semibold">Date Range</h3>
+          <DateRangePicker onDateChange={handleDateChange} />
         </div>
       </div>
 

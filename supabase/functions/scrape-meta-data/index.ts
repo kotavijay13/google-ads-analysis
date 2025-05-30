@@ -57,46 +57,66 @@ serve(async (req) => {
 
     const metaDataResults = [];
 
-    // Process URLs in batches to avoid rate limiting - increased from 10 to 50
-    for (const url of urls.slice(0, 50)) {
-      try {
-        console.log(`Scraping meta data for: ${url}`);
-        
-        const linkPreviewResponse = await fetch(`https://api.linkpreview.net/?key=${LINKPREVIEW_API_KEY}&q=${encodeURIComponent(url)}`);
-        
-        if (!linkPreviewResponse.ok) {
-          console.error(`LinkPreview API error for ${url}: ${linkPreviewResponse.status}`);
+    // Process URLs in batches to avoid rate limiting - increased from 50 to 200
+    // Process in smaller batches to avoid timeouts
+    const batchSize = 20;
+    const totalUrls = Math.min(urls.length, 200);
+    
+    for (let i = 0; i < totalUrls; i += batchSize) {
+      const batch = urls.slice(i, i + batchSize);
+      console.log(`Processing batch ${i / batchSize + 1} of ${Math.ceil(totalUrls / batchSize)} (${batch.length} URLs)`);
+      
+      for (const url of batch) {
+        try {
+          console.log(`Scraping meta data for: ${url}`);
+          
+          const linkPreviewResponse = await fetch(`https://api.linkpreview.net/?key=${LINKPREVIEW_API_KEY}&q=${encodeURIComponent(url)}`);
+          
+          if (!linkPreviewResponse.ok) {
+            if (linkPreviewResponse.status === 429) {
+              console.log(`Rate limit hit for ${url}, adding longer delay...`);
+              await new Promise(resolve => setTimeout(resolve, 2000));
+              continue;
+            }
+            console.error(`LinkPreview API error for ${url}: ${linkPreviewResponse.status}`);
+            metaDataResults.push({
+              url: url,
+              metaTitle: 'Error fetching',
+              metaDescription: 'Error fetching',
+              error: `HTTP ${linkPreviewResponse.status}`
+            });
+            continue;
+          }
+
+          const linkPreviewData = await linkPreviewResponse.json();
+          
+          metaDataResults.push({
+            url: url,
+            metaTitle: linkPreviewData.title || 'No title found',
+            metaDescription: linkPreviewData.description || 'No description found',
+            image: linkPreviewData.image || null,
+            siteName: linkPreviewData.siteName || null,
+            domain: linkPreviewData.domain || null
+          });
+
+          // Add a delay to respect rate limits
+          await new Promise(resolve => setTimeout(resolve, 200));
+          
+        } catch (error) {
+          console.error(`Error scraping ${url}:`, error);
           metaDataResults.push({
             url: url,
             metaTitle: 'Error fetching',
             metaDescription: 'Error fetching',
-            error: `HTTP ${linkPreviewResponse.status}`
+            error: error.message
           });
-          continue;
         }
-
-        const linkPreviewData = await linkPreviewResponse.json();
-        
-        metaDataResults.push({
-          url: url,
-          metaTitle: linkPreviewData.title || 'No title found',
-          metaDescription: linkPreviewData.description || 'No description found',
-          image: linkPreviewData.image || null,
-          siteName: linkPreviewData.siteName || null,
-          domain: linkPreviewData.domain || null
-        });
-
-        // Add a small delay to respect rate limits
-        await new Promise(resolve => setTimeout(resolve, 100));
-        
-      } catch (error) {
-        console.error(`Error scraping ${url}:`, error);
-        metaDataResults.push({
-          url: url,
-          metaTitle: 'Error fetching',
-          metaDescription: 'Error fetching',
-          error: error.message
-        });
+      }
+      
+      // Add a longer delay between batches
+      if (i + batchSize < totalUrls) {
+        console.log('Waiting between batches...');
+        await new Promise(resolve => setTimeout(resolve, 1000));
       }
     }
 

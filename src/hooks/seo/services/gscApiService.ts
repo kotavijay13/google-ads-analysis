@@ -3,16 +3,16 @@ import { supabase } from '@/integrations/supabase/client';
 import { toast } from '@/components/ui/sonner';
 
 export const gscApiService = {
-  async fetchData(websiteUrl: string, user: any) {
+  async fetchData(websiteUrl: string, user: any, startDate?: string, endDate?: string) {
     if (!user) throw new Error('User not authenticated');
 
-    console.log(`Fetching comprehensive GSC data for: ${websiteUrl}`);
+    console.log(`Fetching comprehensive GSC data for: ${websiteUrl} (${startDate} to ${endDate})`);
     
     const { data, error } = await supabase.functions.invoke('google-search-console-data', {
       body: { 
         websiteUrl: websiteUrl,
-        startDate: new Date(Date.now() - 30 * 24 * 60 * 60 * 1000).toISOString().split('T')[0],
-        endDate: new Date().toISOString().split('T')[0]
+        startDate: startDate || new Date(Date.now() - 28 * 24 * 60 * 60 * 1000).toISOString().split('T')[0],
+        endDate: endDate || new Date().toISOString().split('T')[0]
       }
     });
 

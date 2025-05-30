@@ -29,20 +29,20 @@ export const useSEOData = () => {
     totalImpressions: 0,
     avgCTR: 0
   });
+  const [dateRange, setDateRange] = useState({
+    from: new Date(Date.now() - 28 * 24 * 60 * 60 * 1000),
+    to: new Date()
+  });
 
   const { availableWebsites, googleAdsConnected, checkGoogleSearchConsoleConnection } = useGSCConnection();
   const { fetchRealTimeGSCData, fallbackToSerpAPI } = useGSCData();
 
-  const handleRefreshSerpData = async () => {
-    if (!selectedWebsite) {
-      return;
-    }
-
+  const fetchDataWithDateRange = async (websiteUrl: string, startDate?: string, endDate?: string) => {
     setIsRefreshing(true);
-    console.log(`Refreshing comprehensive data for: ${selectedWebsite}`);
+    console.log(`Refreshing comprehensive data for: ${websiteUrl} (${startDate} to ${endDate})`);
 
     try {
-      const result = await fetchRealTimeGSCData(selectedWebsite);
+      const result = await fetchRealTimeGSCData(websiteUrl, startDate, endDate);
       
       if (result) {
         setSerpKeywords(result.keywords || []);
@@ -89,47 +89,41 @@ export const useSEOData = () => {
     }
   };
 
+  const handleRefreshSerpData = async () => {
+    if (!selectedWebsite) {
+      return;
+    }
+
+    const startDate = dateRange.from.toISOString().split('T')[0];
+    const endDate = dateRange.to.toISOString().split('T')[0];
+    
+    await fetchDataWithDateRange(selectedWebsite, startDate, endDate);
+  };
+
   const handleWebsiteChange = async (website: string) => {
     console.log(`Website change requested: "${website}"`);
     if (website && website.trim().length > 0) {
       setSelectedWebsite(website);
       console.log(`Selected website: ${website}`);
       
+      const startDate = dateRange.from.toISOString().split('T')[0];
+      const endDate = dateRange.to.toISOString().split('T')[0];
+      
       // Auto-refresh data when website changes
-      setIsRefreshing(true);
-      try {
-        const result = await fetchRealTimeGSCData(website);
-        
-        if (result) {
-          setSerpKeywords(result.keywords || []);
-          setPages(result.pages || []);
-          setUrlMetaData(result.urlMetaData || []);
-          setSitePerformance(result.sitePerformance || {
-            totalPages: 0,
-            indexedPages: 0,
-            crawlErrors: 0,
-            avgLoadTime: '0ms',
-            mobileUsability: 'Good'
-          });
-          setSerpStats({
-            totalKeywords: result.stats?.totalKeywords || 0,
-            top10Keywords: result.stats?.top10Keywords || 0,
-            avgPosition: result.stats?.avgPosition || '0.0',
-            estTraffic: result.stats?.estTraffic || 0,
-            totalPages: result.stats?.totalPages || 0,
-            topPerformingPages: result.stats?.topPerformingPages || [],
-            totalClicks: typeof result.stats?.totalClicks === 'number' ? result.stats.totalClicks : 0,
-            totalImpressions: typeof result.stats?.totalImpressions === 'number' ? result.stats.totalImpressions : 0,
-            avgCTR: typeof result.stats?.avgCTR === 'number' ? result.stats.avgCTR : 0
-          });
-        }
-      } catch (error) {
-        console.error('Auto-refresh failed:', error);
-      } finally {
-        setIsRefreshing(false);
-      }
+      await fetchDataWithDateRange(website, startDate, endDate);
     } else {
       console.warn('Empty website value received, ignoring');
+    }
+  };
+
+  const handleDateRangeChange = async (newDateRange: { from: Date; to: Date }) => {
+    setDateRange(newDateRange);
+    
+    if (selectedWebsite) {
+      const startDate = newDateRange.from.toISOString().split('T')[0];
+      const endDate = newDateRange.to.toISOString().split('T')[0];
+      
+      await fetchDataWithDateRange(selectedWebsite, startDate, endDate);
     }
   };
 
@@ -159,5 +153,6 @@ export const useSEOData = () => {
     googleAdsConnected,
     handleRefreshSerpData,
     handleWebsiteChange,
+    handleDateRangeChange,
   };
 };
