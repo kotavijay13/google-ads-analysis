@@ -50,21 +50,9 @@ serve(async (req) => {
       throw new Error('Authentication failed');
     }
 
-    // Parse request body with error handling
-    let requestBody;
-    try {
-      const bodyText = await req.text();
-      console.log('Request body text:', bodyText);
-      
-      if (!bodyText || bodyText.trim() === '') {
-        throw new Error('Request body is empty');
-      }
-      
-      requestBody = JSON.parse(bodyText);
-    } catch (parseError) {
-      console.error('Failed to parse request body:', parseError);
-      throw new Error('Invalid JSON in request body');
-    }
+    // Parse request body - supabase.functions.invoke sends JSON directly
+    const requestBody = await req.json();
+    console.log('Request body:', requestBody);
 
     const { urls } = requestBody;
     
