@@ -50,7 +50,23 @@ serve(async (req) => {
       throw new Error('Authentication failed');
     }
 
-    const { urls } = await req.json();
+    // Parse request body with error handling
+    let requestBody;
+    try {
+      const bodyText = await req.text();
+      console.log('Request body text:', bodyText);
+      
+      if (!bodyText || bodyText.trim() === '') {
+        throw new Error('Request body is empty');
+      }
+      
+      requestBody = JSON.parse(bodyText);
+    } catch (parseError) {
+      console.error('Failed to parse request body:', parseError);
+      throw new Error('Invalid JSON in request body');
+    }
+
+    const { urls } = requestBody;
     
     if (!urls || !Array.isArray(urls)) {
       throw new Error('URLs array is required');
