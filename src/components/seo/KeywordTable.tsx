@@ -12,13 +12,17 @@ interface Keyword {
   ctr?: number;
   position: number;
   change: string;
+  searchVolume?: number;
+  estimatedVisits?: number;
+  difficulty?: number;
+  difficultyLevel?: string;
 }
 
 interface KeywordTableProps {
   keywords: Keyword[];
 }
 
-type SortField = 'keyword' | 'position' | 'change' | 'impressions';
+type SortField = 'keyword' | 'position' | 'change' | 'searchVolume' | 'impressions';
 type SortDirection = 'asc' | 'desc' | null;
 
 const KeywordTable = ({ keywords }: KeywordTableProps) => {
@@ -61,8 +65,13 @@ const KeywordTable = ({ keywords }: KeywordTableProps) => {
           bValue = b.position;
           break;
         case 'change':
-          aValue = parseInt(a.change.replace(/[^-\d]/g, '')) || 0;
-          bValue = parseInt(b.change.replace(/[^-\d]/g, '')) || 0;
+          // Parse change values like "+1", "-2", "+5"
+          aValue = parseFloat(a.change.replace(/[^-\d.]/g, '')) || 0;
+          bValue = parseFloat(b.change.replace(/[^-\d.]/g, '')) || 0;
+          break;
+        case 'searchVolume':
+          aValue = a.searchVolume || 0;
+          bValue = b.searchVolume || 0;
           break;
         case 'impressions':
           aValue = a.impressions || 0;
@@ -71,6 +80,11 @@ const KeywordTable = ({ keywords }: KeywordTableProps) => {
         default:
           return 0;
       }
+
+      // Handle null/undefined values
+      if (aValue == null && bValue == null) return 0;
+      if (aValue == null) return sortDirection === 'asc' ? 1 : -1;
+      if (bValue == null) return sortDirection === 'asc' ? -1 : 1;
 
       if (aValue < bValue) {
         return sortDirection === 'asc' ? -1 : 1;
@@ -130,7 +144,7 @@ const KeywordTable = ({ keywords }: KeywordTableProps) => {
                 <SortButton field="change">Change</SortButton>
               </th>
               <th className="text-center py-3 px-4">
-                <SortButton field="impressions">Search Volume</SortButton>
+                <SortButton field="searchVolume">Search Volume</SortButton>
               </th>
               <th className="text-right py-3 px-4">Difficulty</th>
             </tr>
@@ -159,7 +173,7 @@ const KeywordTable = ({ keywords }: KeywordTableProps) => {
                     {keyword.change}
                   </span>
                 </td>
-                <td className="py-3 px-4 text-center">{keyword.impressions?.toLocaleString()}</td>
+                <td className="py-3 px-4 text-center">{keyword.searchVolume?.toLocaleString()}</td>
                 <td className="py-3 px-4 text-right">
                   <span className={cn(
                     "px-2 py-1 rounded text-xs font-medium",
