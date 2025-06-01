@@ -3,6 +3,7 @@ import { useState } from 'react';
 import { cn } from '@/lib/utils';
 import { ArrowUpDown, ArrowUp, ArrowDown } from 'lucide-react';
 import { Button } from '@/components/ui/button';
+import { ScrollArea } from '@/components/ui/scroll-area';
 
 interface Keyword {
   keyword: string;
@@ -129,63 +130,65 @@ const KeywordTable = ({ keywords }: KeywordTableProps) => {
         <h3 className="text-lg font-semibold">Top Ranking Keywords</h3>
         <p className="text-sm text-muted-foreground">Data from SERP API analysis</p>
       </div>
-      <div className="overflow-x-auto">
-        <table className="w-full">
-          <thead>
-            <tr className="border-b bg-muted/50">
-              <th className="text-left py-3 px-4">
-                <SortButton field="keyword">Keyword</SortButton>
-              </th>
-              <th className="text-left py-3 px-4">Landing URL</th>
-              <th className="text-center py-3 px-4">
-                <SortButton field="position">Position</SortButton>
-              </th>
-              <th className="text-center py-3 px-4">
-                <SortButton field="change">Change</SortButton>
-              </th>
-              <th className="text-center py-3 px-4">
-                <SortButton field="searchVolume">Search Volume</SortButton>
-              </th>
-              <th className="text-right py-3 px-4">Difficulty</th>
-            </tr>
-          </thead>
-          <tbody>
-            {sortedKeywords.map((keyword, index) => (
-              <tr key={index} className="border-b hover:bg-muted/20">
-                <td className="py-3 px-4">{keyword.keyword}</td>
-                <td className="py-3 px-4">
-                  <a 
-                    href={keyword.landingUrl} 
-                    target="_blank" 
-                    rel="noopener noreferrer"
-                    className="text-blue-600 hover:text-blue-800 truncate block max-w-xs"
-                    title={keyword.landingUrl}
-                  >
-                    {keyword.landingUrl ? keyword.landingUrl.replace(/^https?:\/\//, '') : 'N/A'}
-                  </a>
-                </td>
-                <td className="py-3 px-4 text-center">{keyword.position}</td>
-                <td className="py-3 px-4 text-center">
-                  <span className={cn(
-                    "font-medium",
-                    keyword.change.startsWith("+") ? "text-green-500" : "text-red-500"
-                  )}>
-                    {keyword.change}
-                  </span>
-                </td>
-                <td className="py-3 px-4 text-center">{keyword.searchVolume?.toLocaleString()}</td>
-                <td className="py-3 px-4 text-right">
-                  <span className={cn(
-                    "px-2 py-1 rounded text-xs font-medium",
-                    keyword.position <= 3 ? "bg-red-100 text-red-700" : "bg-yellow-100 text-yellow-700"
-                  )}>
-                    {keyword.position <= 3 ? "High" : "Medium"}
-                  </span>
-                </td>
+      <div className="relative">
+        <ScrollArea className="h-[600px]">
+          <table className="w-full">
+            <thead className="sticky top-0 z-10 bg-white border-b">
+              <tr className="bg-muted/50">
+                <th className="text-left py-3 px-4 bg-white">
+                  <SortButton field="keyword">Keyword</SortButton>
+                </th>
+                <th className="text-left py-3 px-4 bg-white">Landing URL</th>
+                <th className="text-center py-3 px-4 bg-white">
+                  <SortButton field="position">Position</SortButton>
+                </th>
+                <th className="text-center py-3 px-4 bg-white">
+                  <SortButton field="change">Change</SortButton>
+                </th>
+                <th className="text-center py-3 px-4 bg-white">
+                  <SortButton field="searchVolume">Search Volume</SortButton>
+                </th>
+                <th className="text-right py-3 px-4 bg-white">Difficulty</th>
               </tr>
-            ))}
-          </tbody>
-        </table>
+            </thead>
+            <tbody>
+              {sortedKeywords.map((keyword, index) => (
+                <tr key={index} className="border-b hover:bg-muted/20">
+                  <td className="py-3 px-4">{keyword.keyword}</td>
+                  <td className="py-3 px-4">
+                    <a 
+                      href={keyword.landingUrl} 
+                      target="_blank" 
+                      rel="noopener noreferrer"
+                      className="text-blue-600 hover:text-blue-800 truncate block max-w-xs"
+                      title={keyword.landingUrl}
+                    >
+                      {keyword.landingUrl ? keyword.landingUrl.replace(/^https?:\/\//, '') : 'N/A'}
+                    </a>
+                  </td>
+                  <td className="py-3 px-4 text-center">{keyword.position}</td>
+                  <td className="py-3 px-4 text-center">
+                    <span className={cn(
+                      "font-medium",
+                      keyword.change.startsWith("+") ? "text-green-500" : "text-red-500"
+                    )}>
+                      {keyword.change}
+                    </span>
+                  </td>
+                  <td className="py-3 px-4 text-center">{keyword.searchVolume?.toLocaleString()}</td>
+                  <td className="py-3 px-4 text-right">
+                    <span className={cn(
+                      "px-2 py-1 rounded text-xs font-medium",
+                      keyword.position <= 3 ? "bg-red-100 text-red-700" : "bg-yellow-100 text-yellow-700"
+                    )}>
+                      {keyword.position <= 3 ? "High" : "Medium"}
+                    </span>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </ScrollArea>
       </div>
     </div>
   );

@@ -10,6 +10,7 @@ import {
   TableHeader,
   TableRow,
 } from '@/components/ui/table';
+import { ScrollArea } from '@/components/ui/scroll-area';
 
 interface Column {
   key: string;
@@ -115,32 +116,34 @@ const SortableTable = ({ data, columns, className }: SortableTableProps) => {
 
   return (
     <div className={className}>
-      <Table>
-        <TableHeader>
-          <TableRow>
-            {columns.map((column) => (
-              <TableHead key={column.key} className={column.className}>
-                {column.sortable ? (
-                  <SortButton field={column.key}>{column.label}</SortButton>
-                ) : (
-                  column.label
-                )}
-              </TableHead>
-            ))}
-          </TableRow>
-        </TableHeader>
-        <TableBody>
-          {sortedData.map((row, index) => (
-            <TableRow key={index}>
+      <ScrollArea className="h-[600px]">
+        <Table>
+          <TableHeader className="sticky top-0 z-10 bg-white">
+            <TableRow className="bg-muted/50">
               {columns.map((column) => (
-                <TableCell key={column.key} className={column.className}>
-                  {column.render ? column.render(row[column.key], row) : row[column.key]}
-                </TableCell>
+                <TableHead key={column.key} className={`${column.className} bg-white`}>
+                  {column.sortable ? (
+                    <SortButton field={column.key}>{column.label}</SortButton>
+                  ) : (
+                    column.label
+                  )}
+                </TableHead>
               ))}
             </TableRow>
-          ))}
-        </TableBody>
-      </Table>
+          </TableHeader>
+          <TableBody>
+            {sortedData.map((row, index) => (
+              <TableRow key={index}>
+                {columns.map((column) => (
+                  <TableCell key={column.key} className={column.className}>
+                    {column.render ? column.render(row[column.key], row) : row[column.key]}
+                  </TableCell>
+                ))}
+              </TableRow>
+            ))}
+          </TableBody>
+        </Table>
+      </ScrollArea>
     </div>
   );
 };
