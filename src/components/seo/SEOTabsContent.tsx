@@ -2,8 +2,10 @@
 import { Card, CardContent } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import KeywordTable from './KeywordTable';
+import SortableTable from './SortableTable';
 import DownloadButton from './DownloadButton';
 import { Badge } from '@/components/ui/badge';
+import { cn } from '@/lib/utils';
 
 interface SEOTabsContentProps {
   activeTab: string;
@@ -24,6 +26,109 @@ const SEOTabsContent = ({
   sitePerformance, 
   selectedWebsite 
 }: SEOTabsContentProps) => {
+  
+  const pagesColumns = [
+    {
+      key: 'url',
+      label: 'Page URL',
+      sortable: true,
+      render: (value: string) => (
+        <span className="text-blue-600 font-medium">{value}</span>
+      ),
+    },
+    {
+      key: 'impressions',
+      label: 'Impressions',
+      sortable: true,
+      className: 'text-right',
+      render: (value: number) => value.toLocaleString(),
+    },
+    {
+      key: 'clicks',
+      label: 'Clicks',
+      sortable: true,
+      className: 'text-right',
+      render: (value: number) => value.toLocaleString(),
+    },
+    {
+      key: 'ctr',
+      label: 'CTR (%)',
+      sortable: true,
+      className: 'text-right',
+      render: (value: number) => `${value}%`,
+    },
+    {
+      key: 'position',
+      label: 'Avg Position',
+      sortable: true,
+      className: 'text-right',
+    },
+  ];
+
+  const urlMetaDataColumns = [
+    {
+      key: 'url',
+      label: 'URL',
+      sortable: true,
+      render: (value: string) => (
+        <span 
+          className="text-blue-600 font-medium max-w-xs truncate block" 
+          title={value}
+        >
+          {value}
+        </span>
+      ),
+    },
+    {
+      key: 'metaTitle',
+      label: 'Meta Title',
+      sortable: true,
+      render: (value: string) => (
+        <span 
+          className="max-w-sm truncate block" 
+          title={value || 'N/A'}
+        >
+          {value || 'N/A'}
+        </span>
+      ),
+    },
+    {
+      key: 'metaDescription',
+      label: 'Meta Description',
+      sortable: true,
+      render: (value: string) => (
+        <span 
+          className="max-w-sm truncate block" 
+          title={value || 'N/A'}
+        >
+          {value || 'N/A'}
+        </span>
+      ),
+    },
+    {
+      key: 'indexStatus',
+      label: 'Index Status',
+      sortable: true,
+      className: 'text-center',
+      render: (value: string) => (
+        <Badge variant={value === 'PASS' ? 'default' : 'destructive'}>
+          {value}
+        </Badge>
+      ),
+    },
+    {
+      key: 'crawlStatus',
+      label: 'Crawl Status',
+      sortable: true,
+      className: 'text-center',
+      render: (value: string) => (
+        <Badge variant={value === 'GOOGLEBOT' ? 'default' : 'secondary'}>
+          {value}
+        </Badge>
+      ),
+    },
+  ];
+
   return (
     <Tabs defaultValue="keywords" className="mt-6" onValueChange={onTabChange} value={activeTab}>
       <TabsList className="mb-6">
@@ -56,30 +161,11 @@ const SEOTabsContent = ({
                 title={`Pages Report - ${selectedWebsite}`}
               />
             </div>
-            <div className="overflow-x-auto">
-              <table className="w-full">
-                <thead>
-                  <tr className="border-b">
-                    <th className="text-left pb-2">Page URL</th>
-                    <th className="text-right pb-2">Impressions</th>
-                    <th className="text-right pb-2">Clicks</th>
-                    <th className="text-right pb-2">CTR (%)</th>
-                    <th className="text-right pb-2">Avg Position</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {pages.map((page, index) => (
-                    <tr key={index} className="border-b last:border-0 hover:bg-muted/20">
-                      <td className="py-3 text-blue-600 font-medium">{page.url}</td>
-                      <td className="py-3 text-right">{page.impressions.toLocaleString()}</td>
-                      <td className="py-3 text-right">{page.clicks.toLocaleString()}</td>
-                      <td className="py-3 text-right">{page.ctr}%</td>
-                      <td className="py-3 text-right">{page.position}</td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
+            <SortableTable 
+              data={pages} 
+              columns={pagesColumns}
+              className="overflow-x-auto"
+            />
           </CardContent>
         </Card>
       </TabsContent>
@@ -100,38 +186,11 @@ const SEOTabsContent = ({
             </div>
             
             {urlMetaData.length > 0 ? (
-              <div className="overflow-x-auto">
-                <table className="w-full">
-                  <thead>
-                    <tr className="border-b">
-                      <th className="text-left pb-2">URL</th>
-                      <th className="text-left pb-2">Meta Title</th>
-                      <th className="text-left pb-2">Meta Description</th>
-                      <th className="text-center pb-2">Index Status</th>
-                      <th className="text-center pb-2">Crawl Status</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {urlMetaData.map((url, index) => (
-                      <tr key={index} className="border-b last:border-0 hover:bg-muted/20">
-                        <td className="py-3 text-blue-600 font-medium max-w-xs truncate" title={url.url}>{url.url}</td>
-                        <td className="py-3 max-w-sm truncate" title={url.metaTitle || 'N/A'}>{url.metaTitle || 'N/A'}</td>
-                        <td className="py-3 max-w-sm truncate" title={url.metaDescription || 'N/A'}>{url.metaDescription || 'N/A'}</td>
-                        <td className="py-3 text-center">
-                          <Badge variant={url.indexStatus === 'PASS' ? 'default' : 'destructive'}>
-                            {url.indexStatus}
-                          </Badge>
-                        </td>
-                        <td className="py-3 text-center">
-                          <Badge variant={url.crawlStatus === 'GOOGLEBOT' ? 'default' : 'secondary'}>
-                            {url.crawlStatus}
-                          </Badge>
-                        </td>
-                      </tr>
-                    ))}
-                  </tbody>
-                </table>
-              </div>
+              <SortableTable 
+                data={urlMetaData} 
+                columns={urlMetaDataColumns}
+                className="overflow-x-auto"
+              />
             ) : (
               <div className="p-6 border rounded-lg bg-muted/20">
                 <h4 className="font-semibold mb-2">Loading URL Meta Data...</h4>
