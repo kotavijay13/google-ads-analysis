@@ -15,7 +15,7 @@ export const metaDataService = {
       console.log('Calling scrape-meta-data function...');
       
       const response = await supabase.functions.invoke('scrape-meta-data', {
-        body: { urls },
+        body: JSON.stringify({ urls }),
         headers: {
           'Authorization': `Bearer ${session.session.access_token}`,
           'Content-Type': 'application/json',

@@ -12,7 +12,6 @@ const LINKPREVIEW_API_KEY = Deno.env.get('LINKPREVIEW_API_KEY');
 
 serve(async (req) => {
   console.log(`Request method: ${req.method}`);
-  console.log(`Request headers:`, Object.fromEntries(req.headers.entries()));
 
   // Handle CORS preflight requests
   if (req.method === 'OPTIONS') {
@@ -50,9 +49,26 @@ serve(async (req) => {
       throw new Error('Authentication failed');
     }
 
-    // Parse request body - supabase.functions.invoke sends JSON directly
-    const requestBody = await req.json();
-    console.log('Request body:', requestBody);
+    // Parse request body
+    const contentType = req.headers.get('content-type');
+    console.log('Content-Type:', contentType);
+    
+    let requestBody;
+    const bodyText = await req.text();
+    console.log('Request body text:', bodyText);
+    
+    if (!bodyText || bodyText.trim() === '') {
+      throw new Error('Request body is empty');
+    }
+    
+    try {
+      requestBody = JSON.parse(bodyText);
+    } catch (parseError) {
+      console.error('JSON parse error:', parseError);
+      throw new Error('Invalid JSON in request body');
+    }
+
+    console.log('Parsed request body:', requestBody);
 
     const { urls } = requestBody;
     
