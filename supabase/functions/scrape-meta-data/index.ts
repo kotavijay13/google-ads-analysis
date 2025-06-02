@@ -49,23 +49,27 @@ serve(async (req) => {
       throw new Error('Authentication failed');
     }
 
-    // Parse request body
-    const contentType = req.headers.get('content-type');
-    console.log('Content-Type:', contentType);
-    
+    // Parse request body - handle both direct JSON and stringified JSON
     let requestBody;
-    const bodyText = await req.text();
-    console.log('Request body text:', bodyText);
-    
-    if (!bodyText || bodyText.trim() === '') {
-      throw new Error('Request body is empty');
-    }
-    
     try {
-      requestBody = JSON.parse(bodyText);
-    } catch (parseError) {
-      console.error('JSON parse error:', parseError);
-      throw new Error('Invalid JSON in request body');
+      const bodyText = await req.text();
+      console.log('Raw request body:', bodyText);
+      
+      if (!bodyText || bodyText.trim() === '') {
+        throw new Error('Request body is empty');
+      }
+      
+      // Try to parse as JSON
+      try {
+        requestBody = JSON.parse(bodyText);
+      } catch (parseError) {
+        // If it fails, maybe it's already an object (from Supabase invoke)
+        console.log('JSON parse failed, trying alternative parsing...');
+        requestBody = bodyText;
+      }
+    } catch (error) {
+      console.error('Error reading request body:', error);
+      throw new Error('Failed to read request body');
     }
 
     console.log('Parsed request body:', requestBody);
@@ -73,6 +77,7 @@ serve(async (req) => {
     const { urls } = requestBody;
     
     if (!urls || !Array.isArray(urls)) {
+      console.error('Invalid urls parameter:', urls);
       throw new Error('URLs array is required');
     }
 
@@ -85,9 +90,9 @@ serve(async (req) => {
 
     const metaDataResults = [];
 
-    // Process URLs in batches to avoid rate limiting - process up to 200 URLs
-    const batchSize = 10; // Reduced batch size to avoid timeouts
-    const totalUrls = Math.min(urls.length, 200);
+    // Process URLs in smaller batches to avoid timeouts
+    const batchSize = 5; // Reduced batch size further
+    const totalUrls = Math.min(urls.length, 50); // Reduce total URLs to process
     
     for (let i = 0; i < totalUrls; i += batchSize) {
       const batch = urls.slice(i, i + batchSize);
@@ -97,7 +102,21 @@ serve(async (req) => {
         try {
           console.log(`Scraping meta data for: ${url}`);
           
-          const linkPreviewResponse = await fetch(`https://api.linkpreview.net/?key=${LINKPREVIEW_API_KEY}&q=${encodeURIComponent(url)}`);
+          // Add timeout to the fetch request
+          const controller = new AbortController();
+          const timeoutId = setTimeout(() => controller.abort(), 10000); // 10 second timeout
+          
+          const linkPreviewResponse = await fetch(
+            `https://api.linkpreview.net/?key=${LINKPREVIEW_API_KEY}&q=${encodeURIComponent(url)}`,
+            { 
+              signal: controller.signal,
+              headers: {
+                'User-Agent': 'Mozilla/5.0 (compatible; LinkPreview/1.0)'
+              }
+            }
+          );
+          
+          clearTimeout(timeoutId);
           
           if (!linkPreviewResponse.ok) {
             if (linkPreviewResponse.status === 429) {
@@ -126,7 +145,7 @@ serve(async (req) => {
           });
 
           // Add a small delay to respect rate limits
-          await new Promise(resolve => setTimeout(resolve, 100));
+          await new Promise(resolve => setTimeout(resolve, 200));
           
         } catch (error) {
           console.error(`Error scraping ${url}:`, error);
@@ -142,7 +161,7 @@ serve(async (req) => {
       // Add a longer delay between batches
       if (i + batchSize < totalUrls) {
         console.log('Waiting between batches...');
-        await new Promise(resolve => setTimeout(resolve, 500));
+        await new Promise(resolve => setTimeout(resolve, 1000));
       }
     }
 

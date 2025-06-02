@@ -15,7 +15,7 @@ export const metaDataService = {
       console.log('Calling scrape-meta-data function...');
       
       const response = await supabase.functions.invoke('scrape-meta-data', {
-        body: JSON.stringify({ urls }),
+        body: { urls }, // Don't stringify - Supabase handles this
         headers: {
           'Authorization': `Bearer ${session.session.access_token}`,
           'Content-Type': 'application/json',
@@ -29,7 +29,17 @@ export const metaDataService = {
         throw new Error(response.error.message || 'Failed to fetch meta data');
       }
 
-      return response.data;
+      // Handle both success and error responses
+      if (response.data) {
+        if (response.data.success) {
+          return response.data;
+        } else {
+          console.error('Function returned error:', response.data.error);
+          throw new Error(response.data.error || 'Failed to fetch meta data');
+        }
+      }
+
+      throw new Error('No data received from function');
     } catch (error) {
       console.error('Error fetching meta data:', error);
       throw error;
