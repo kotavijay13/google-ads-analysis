@@ -1,4 +1,3 @@
-
 import { Card, CardContent } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import KeywordTable from './KeywordTable';
@@ -159,7 +158,16 @@ const SEOTabsContent = ({
             title={`Keywords Report - ${selectedWebsite}`}
           />
         </div>
-        <KeywordTable keywords={serpKeywords} />
+        {serpKeywords.length > 0 ? (
+          <KeywordTable keywords={serpKeywords} />
+        ) : (
+          <div className="p-6 border rounded-lg bg-muted/20">
+            <h4 className="font-semibold mb-2">No Keywords Found</h4>
+            <p className="text-sm text-muted-foreground">
+              Please select a website and refresh data to load keyword information.
+            </p>
+          </div>
+        )}
       </TabsContent>
 
       <TabsContent value="pages">
@@ -173,11 +181,20 @@ const SEOTabsContent = ({
                 title={`Pages Report - ${selectedWebsite}`}
               />
             </div>
-            <SortableTable 
-              data={pages} 
-              columns={pagesColumns}
-              className="overflow-x-auto"
-            />
+            {pages.length > 0 ? (
+              <SortableTable 
+                data={pages} 
+                columns={pagesColumns}
+                className="overflow-x-auto"
+              />
+            ) : (
+              <div className="p-6 border rounded-lg bg-muted/20">
+                <h4 className="font-semibold mb-2">No Pages Found</h4>
+                <p className="text-sm text-muted-foreground">
+                  Please select a website and refresh data to load page performance information.
+                </p>
+              </div>
+            )}
           </CardContent>
         </Card>
       </TabsContent>
