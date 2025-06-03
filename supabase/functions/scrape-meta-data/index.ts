@@ -103,7 +103,7 @@ serve(async (req) => {
 
     console.log(`Scraping meta data for ${urls.length} URLs`);
 
-    // Alternative: Use native scraping without external API if LinkPreview fails
+    // Native scraping function
     const scrapeWithNativeFetch = async (url: string) => {
       try {
         console.log(`Native scraping for: ${url}`);
@@ -153,7 +153,7 @@ serve(async (req) => {
 
     const metaDataResults = [];
     const batchSize = 5;
-    const totalUrls = Math.min(urls.length, 50);
+    const totalUrls = Math.min(urls.length, 500); // Increased from 50 to 500
     
     for (let i = 0; i < totalUrls; i += batchSize) {
       const batch = urls.slice(i, i + batchSize);
