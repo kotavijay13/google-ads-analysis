@@ -49,18 +49,24 @@ serve(async (req) => {
       throw new Error('Authentication failed');
     }
 
-    // Parse request body
+    // Parse request body with improved handling
     let requestBody;
     try {
+      const contentType = req.headers.get('content-type') || '';
+      console.log('Content-Type header:', contentType);
+      
       const bodyText = await req.text();
-      console.log('Raw request body:', bodyText);
+      console.log('Raw request body length:', bodyText.length);
+      console.log('Raw request body (first 200 chars):', bodyText.substring(0, 200));
       
       if (!bodyText || bodyText.trim() === '') {
+        console.error('Empty request body received');
         throw new Error('Empty request body');
       }
       
       requestBody = JSON.parse(bodyText);
-      console.log('Parsed request body:', requestBody);
+      console.log('Successfully parsed request body with', Object.keys(requestBody).length, 'keys');
+      console.log('URLs array length:', requestBody.urls?.length || 0);
     } catch (error) {
       console.error('Error parsing request body:', error);
       return new Response(JSON.stringify({
