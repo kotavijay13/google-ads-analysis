@@ -1,6 +1,5 @@
 
 import { useState } from 'react';
-import { useSearchConsoleIntegration } from '@/components/google-search-console/useSearchConsoleIntegration';
 import WebsiteSelector from '@/components/seo/WebsiteSelector';
 import SEOStatsCards from '@/components/seo/SEOStatsCards';
 import SEOHeader from '@/components/seo/SEOHeader';
@@ -14,12 +13,6 @@ const SEOPage = () => {
     from: new Date(Date.now() - 28 * 24 * 60 * 60 * 1000), // Last 28 days
     to: new Date()
   });
-
-  const {
-    connected,
-    handleConnect,
-    isLoading: gscLoading
-  } = useSearchConsoleIntegration();
 
   const {
     isRefreshing,
@@ -39,6 +32,15 @@ const SEOPage = () => {
   const handleDateChange = (range: { from: Date; to: Date }) => {
     setDateRange(range);
     handleDateRangeChange(range);
+  };
+
+  // Simple connection check based on available websites
+  const connected = availableWebsites.length > 0;
+  const gscLoading = false;
+
+  const handleConnect = () => {
+    // Redirect to integrations page for connection setup
+    window.location.href = '/integrations';
   };
 
   return (

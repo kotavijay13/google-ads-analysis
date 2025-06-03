@@ -2,7 +2,6 @@
 import Header from '@/components/Header';
 import GoogleAdsIntegration from '@/components/GoogleAdsIntegration';
 import MetaAdsIntegration from '@/components/MetaAdsIntegration';
-import GoogleSearchConsoleIntegration from '@/components/GoogleSearchConsoleIntegration';
 import { Card, CardContent, CardDescription, CardTitle, CardHeader } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 
@@ -37,16 +36,12 @@ const IntegrationsPage = () => {
       </Card>
       
       <Tabs defaultValue="google-ads" className="w-full">
-        <TabsList className="grid grid-cols-3 mb-8">
+        <TabsList className="grid grid-cols-2 mb-8">
           <TabsTrigger value="google-ads">Google Ads</TabsTrigger>
-          <TabsTrigger value="search-console">Search Console</TabsTrigger>
           <TabsTrigger value="meta-ads">Meta Ads</TabsTrigger>
         </TabsList>
         <TabsContent value="google-ads" className="mt-0">
           <GoogleAdsIntegration />
-        </TabsContent>
-        <TabsContent value="search-console" className="mt-0">
-          <GoogleSearchConsoleIntegration />
         </TabsContent>
         <TabsContent value="meta-ads" className="mt-0">
           <MetaAdsIntegration />
