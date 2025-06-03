@@ -30,6 +30,12 @@ serve(async (req) => {
       const contentType = req.headers.get('content-type') || '';
       console.log('Content-Type header:', contentType);
       
+      // Check if the request has a body
+      if (!req.body) {
+        console.error('No request body provided');
+        throw new Error('No request body provided');
+      }
+      
       const bodyText = await req.text();
       console.log('Raw request body length:', bodyText.length);
       console.log('Raw request body (first 200 chars):', bodyText.substring(0, 200));
@@ -42,11 +48,11 @@ serve(async (req) => {
       requestBody = JSON.parse(bodyText);
       console.log('Successfully parsed request body with', Object.keys(requestBody).length, 'keys');
       console.log('URLs array length:', requestBody.urls?.length || 0);
-    } catch (error) {
-      console.error('Error parsing request body:', error);
+    } catch (parseError) {
+      console.error('Error parsing request body:', parseError);
       return new Response(JSON.stringify({
         success: false,
-        error: `Request parsing failed: ${error.message}`,
+        error: `Request parsing failed: ${parseError.message}`,
         metaData: []
       } as ScrapeResponse), {
         headers: { ...corsHeaders, 'Content-Type': 'application/json' },
@@ -65,6 +71,17 @@ serve(async (req) => {
       } as ScrapeResponse), {
         headers: { ...corsHeaders, 'Content-Type': 'application/json' },
         status: 400,
+      });
+    }
+
+    if (urls.length === 0) {
+      console.log('Empty URLs array provided');
+      return new Response(JSON.stringify({
+        success: true,
+        metaData: []
+      } as ScrapeResponse), {
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+        status: 200,
       });
     }
 
