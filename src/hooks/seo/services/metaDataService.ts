@@ -14,9 +14,15 @@ export const metaDataService = {
 
       console.log('Calling scrape-meta-data function...');
       
-      // Use supabase.functions.invoke with the correct syntax
+      // Make sure we're sending the data correctly
+      const requestBody = { urls };
+      console.log('Sending request body:', requestBody);
+      
       const { data, error } = await supabase.functions.invoke('scrape-meta-data', {
-        body: { urls },
+        body: requestBody,
+        headers: {
+          'Content-Type': 'application/json',
+        }
       });
 
       console.log('Meta data response:', { data, error });
