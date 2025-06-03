@@ -9,6 +9,7 @@ const corsHeaders = {
 };
 
 const LINKPREVIEW_API_KEY = Deno.env.get('LINKPREVIEW_API_KEY');
+const SCRAPERAPI_KEY = Deno.env.get('SCRAPERAPI_KEY');
 
 serve(async (req) => {
   console.log(`Request method: ${req.method}`);
@@ -49,7 +50,7 @@ serve(async (req) => {
       throw new Error('Authentication failed');
     }
 
-    // Parse request body with improved handling
+    // Parse request body
     let requestBody;
     try {
       const contentType = req.headers.get('content-type') || '';
@@ -95,10 +96,104 @@ serve(async (req) => {
 
     console.log(`Scraping meta data and images for ${urls.length} URLs`);
 
-    // Enhanced scraping function that includes image extraction
+    // Enhanced scraping function using ScraperAPI
+    const scrapeWithScraperAPI = async (url: string) => {
+      try {
+        console.log(`ScraperAPI scraping for: ${url}`);
+        
+        if (!SCRAPERAPI_KEY) {
+          throw new Error('ScraperAPI key not configured');
+        }
+
+        const scraperApiUrl = `http://api.scraperapi.com?api_key=${SCRAPERAPI_KEY}&url=${encodeURIComponent(url)}&render=true`;
+        
+        const controller = new AbortController();
+        const timeoutId = setTimeout(() => controller.abort(), 15000);
+        
+        const response = await fetch(scraperApiUrl, {
+          signal: controller.signal,
+          headers: {
+            'User-Agent': 'Mozilla/5.0 (compatible; SEOBot/1.0)',
+          }
+        });
+        
+        clearTimeout(timeoutId);
+        
+        if (!response.ok) {
+          throw new Error(`ScraperAPI HTTP ${response.status}`);
+        }
+        
+        const html = await response.text();
+        
+        // Extract meta data using regex
+        const titleMatch = html.match(/<title[^>]*>([^<]*)<\/title>/i);
+        const descMatch = html.match(/<meta[^>]*name=["\']description["\'][^>]*content=["\']([^"\']*)["\'][^>]*>/i) ||
+                         html.match(/<meta[^>]*content=["\']([^"\']*)["\'][^>]*name=["\']description["\'][^>]*>/i);
+        
+        // Extract all images with alt text
+        const imageRegex = /<img[^>]*>/gi;
+        const images = [];
+        let imageMatch;
+        
+        while ((imageMatch = imageRegex.exec(html)) !== null) {
+          const imgTag = imageMatch[0];
+          
+          // Extract src
+          const srcMatch = imgTag.match(/src=["\']([^"\']*)["\'][^>]*/i);
+          const src = srcMatch ? srcMatch[1] : null;
+          
+          // Extract alt text
+          const altMatch = imgTag.match(/alt=["\']([^"\']*)["\'][^>]*/i);
+          const alt = altMatch ? altMatch[1] : '';
+          
+          if (src) {
+            // Convert relative URLs to absolute
+            let absoluteSrc = src;
+            if (src.startsWith('/')) {
+              const urlObj = new URL(url);
+              absoluteSrc = `${urlObj.protocol}//${urlObj.host}${src}`;
+            } else if (!src.startsWith('http')) {
+              const urlObj = new URL(url);
+              absoluteSrc = `${urlObj.protocol}//${urlObj.host}/${src}`;
+            }
+            
+            images.push({
+              src: absoluteSrc,
+              alt: alt || 'No alt text',
+              hasAltText: alt.length > 0
+            });
+          }
+        }
+        
+        return {
+          url: url,
+          metaTitle: titleMatch ? titleMatch[1].trim() : 'No title found',
+          metaDescription: descMatch ? descMatch[1].trim() : 'No description found',
+          image: null,
+          siteName: null,
+          domain: new URL(url).hostname,
+          images: images,
+          imageCount: images.length,
+          imagesWithoutAlt: images.filter(img => !img.hasAltText).length
+        };
+      } catch (error) {
+        console.error(`ScraperAPI failed for ${url}:`, error);
+        return {
+          url: url,
+          metaTitle: 'Error fetching',
+          metaDescription: 'Error fetching',
+          error: error.message,
+          images: [],
+          imageCount: 0,
+          imagesWithoutAlt: 0
+        };
+      }
+    };
+
+    // Fallback native scraping function
     const scrapeWithNativeFetch = async (url: string) => {
       try {
-        console.log(`Native scraping for: ${url}`);
+        console.log(`Native scraping fallback for: ${url}`);
         
         const controller = new AbortController();
         const timeoutId = setTimeout(() => controller.abort(), 8000);
@@ -185,7 +280,7 @@ serve(async (req) => {
     };
 
     const metaDataResults = [];
-    const batchSize = 3; // Reduced batch size for better reliability
+    const batchSize = 3;
     const totalUrls = Math.min(urls.length, 500);
     
     for (let i = 0; i < totalUrls; i += batchSize) {
@@ -196,52 +291,16 @@ serve(async (req) => {
         try {
           let result;
           
-          // Try LinkPreview API first if available
-          if (LINKPREVIEW_API_KEY) {
+          // Try ScraperAPI first if available
+          if (SCRAPERAPI_KEY) {
             try {
-              console.log(`Using LinkPreview API for: ${url}`);
-              
-              const controller = new AbortController();
-              const timeoutId = setTimeout(() => controller.abort(), 10000);
-              
-              const linkPreviewResponse = await fetch(
-                `https://api.linkpreview.net/?key=${LINKPREVIEW_API_KEY}&q=${encodeURIComponent(url)}`,
-                { 
-                  signal: controller.signal,
-                  headers: {
-                    'User-Agent': 'Mozilla/5.0 (compatible; LinkPreview/1.0)'
-                  }
-                }
-              );
-              
-              clearTimeout(timeoutId);
-              
-              if (!linkPreviewResponse.ok) {
-                throw new Error(`LinkPreview API error: ${linkPreviewResponse.status}`);
-              }
-
-              const linkPreviewData = await linkPreviewResponse.json();
-              
-              // Still need to scrape images separately
-              const imageData = await scrapeWithNativeFetch(url);
-              
-              result = {
-                url: url,
-                metaTitle: linkPreviewData.title || 'No title found',
-                metaDescription: linkPreviewData.description || 'No description found',
-                image: linkPreviewData.image || null,
-                siteName: linkPreviewData.siteName || null,
-                domain: linkPreviewData.domain || new URL(url).hostname,
-                images: imageData.images || [],
-                imageCount: imageData.imageCount || 0,
-                imagesWithoutAlt: imageData.imagesWithoutAlt || 0
-              };
-            } catch (linkPreviewError) {
-              console.log(`LinkPreview failed for ${url}, trying native scraping:`, linkPreviewError);
+              result = await scrapeWithScraperAPI(url);
+            } catch (scraperApiError) {
+              console.log(`ScraperAPI failed for ${url}, trying native scraping:`, scraperApiError);
               result = await scrapeWithNativeFetch(url);
             }
           } else {
-            console.log('No LinkPreview API key, using native scraping');
+            console.log('No ScraperAPI key, using native scraping');
             result = await scrapeWithNativeFetch(url);
           }
           
@@ -271,7 +330,7 @@ serve(async (req) => {
       }
     }
 
-    console.log(`Successfully processed meta data and images for ${metaDataResults.length} URLs`);
+    console.log(`Successfully processed meta data and images for ${metaDataResults.length} URLs using ${SCRAPERAPI_KEY ? 'ScraperAPI' : 'native scraping'}`);
 
     return new Response(JSON.stringify({
       success: true,
