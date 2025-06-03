@@ -49,31 +49,17 @@ serve(async (req) => {
       throw new Error('Authentication failed');
     }
 
-    // Parse request body with better error handling
+    // Parse request body
     let requestBody;
     try {
-      const contentType = req.headers.get('content-type');
-      console.log('Content-Type:', contentType);
+      const bodyText = await req.text();
+      console.log('Raw request body:', bodyText);
       
-      if (contentType && contentType.includes('application/json')) {
-        requestBody = await req.json();
-      } else {
-        // Try to read as text first
-        const bodyText = await req.text();
-        console.log('Raw body text:', bodyText);
-        
-        if (bodyText) {
-          try {
-            requestBody = JSON.parse(bodyText);
-          } catch (parseError) {
-            console.error('Failed to parse body as JSON:', parseError);
-            throw new Error('Invalid JSON format');
-          }
-        } else {
-          throw new Error('Empty request body');
-        }
+      if (!bodyText || bodyText.trim() === '') {
+        throw new Error('Empty request body');
       }
       
+      requestBody = JSON.parse(bodyText);
       console.log('Parsed request body:', requestBody);
     } catch (error) {
       console.error('Error parsing request body:', error);
@@ -153,7 +139,7 @@ serve(async (req) => {
 
     const metaDataResults = [];
     const batchSize = 5;
-    const totalUrls = Math.min(urls.length, 500); // Increased from 50 to 500
+    const totalUrls = Math.min(urls.length, 500); // Process up to 500 URLs
     
     for (let i = 0; i < totalUrls; i += batchSize) {
       const batch = urls.slice(i, i + batchSize);
