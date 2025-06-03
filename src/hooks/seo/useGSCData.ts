@@ -15,9 +15,9 @@ export const useGSCData = () => {
     try {
       const result = await gscApiService.fetchData(websiteUrl, user, startDate, endDate);
       
-      // If we have pages data, fetch meta data for top 500 pages instead of 200
+      // If we have pages data, fetch meta data for top 200 pages instead of 50
       if (result && result.pages && result.pages.length > 0) {
-        const topPageUrls = result.pages.slice(0, 500).map(page => page.url);
+        const topPageUrls = result.pages.slice(0, 200).map(page => page.url);
         const metaData = await fetchMetaDataForUrls(topPageUrls);
         
         // Merge meta data with existing URL meta data
