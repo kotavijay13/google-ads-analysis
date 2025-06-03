@@ -4,8 +4,8 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import KeywordTable from './KeywordTable';
 import SortableTable from './SortableTable';
 import DownloadButton from './DownloadButton';
+import ImageAnalysisTab from './ImageAnalysisTab';
 import { Badge } from '@/components/ui/badge';
-import { cn } from '@/lib/utils';
 
 interface SEOTabsContentProps {
   activeTab: string;
@@ -106,28 +106,39 @@ const SEOTabsContent = ({
       ),
     },
     {
-      key: 'indexStatus',
-      label: 'Index Status',
+      key: 'imageCount',
+      label: 'Images',
       sortable: true,
       className: 'text-center',
-      render: (value: string) => (
-        <Badge variant={value === 'PASS' ? 'default' : 'destructive'}>
-          {value}
-        </Badge>
+      render: (value: number) => (
+        <span className="font-medium">{value || 0}</span>
       ),
     },
     {
-      key: 'crawlStatus',
-      label: 'Crawl Status',
+      key: 'imagesWithoutAlt',
+      label: 'Missing Alt Text',
       sortable: true,
       className: 'text-center',
-      render: (value: string) => (
-        <Badge variant={value === 'GOOGLEBOT' ? 'default' : 'secondary'}>
-          {value}
+      render: (value: number) => (
+        <Badge variant={value > 0 ? 'destructive' : 'default'}>
+          {value || 0}
         </Badge>
       ),
     },
   ];
+
+  // Calculate site performance metrics with actual data
+  const totalPagesScraped = urlMetaData.length;
+  const totalImagesFound = urlMetaData.reduce((acc, page) => acc + (page.imageCount || 0), 0);
+  const imagesWithoutAlt = urlMetaData.reduce((acc, page) => acc + (page.imagesWithoutAlt || 0), 0);
+
+  const enhancedSitePerformance = {
+    ...sitePerformance,
+    totalPagesScraped,
+    totalImagesFound,
+    imagesWithoutAlt,
+    altTextCoverage: totalImagesFound > 0 ? ((totalImagesFound - imagesWithoutAlt) / totalImagesFound * 100).toFixed(1) : '0'
+  };
 
   return (
     <Tabs defaultValue="keywords" className="mt-6" onValueChange={onTabChange} value={activeTab}>
@@ -135,6 +146,7 @@ const SEOTabsContent = ({
         <TabsTrigger value="keywords">Keywords ({serpKeywords.length})</TabsTrigger>
         <TabsTrigger value="pages">Pages ({pages.length})</TabsTrigger>
         <TabsTrigger value="urlData">URL Meta Data ({urlMetaData.length})</TabsTrigger>
+        <TabsTrigger value="imageAnalysis">Image Analysis</TabsTrigger>
         <TabsTrigger value="sitePerformance">Site Performance</TabsTrigger>
       </TabsList>
 
@@ -176,7 +188,7 @@ const SEOTabsContent = ({
             <div className="flex justify-between items-center mb-4">
               <div>
                 <h3 className="text-lg font-semibold">URL Meta Data Analysis</h3>
-                <p className="text-muted-foreground">Meta titles, descriptions and indexing status for {selectedWebsite}</p>
+                <p className="text-muted-foreground">Meta titles, descriptions and image analysis for {selectedWebsite}</p>
               </div>
               <DownloadButton 
                 data={urlMetaData}
@@ -195,15 +207,22 @@ const SEOTabsContent = ({
               <div className="p-6 border rounded-lg bg-muted/20">
                 <h4 className="font-semibold mb-2">Loading URL Meta Data...</h4>
                 <p className="text-sm text-muted-foreground mb-4">
-                  Meta data is being scraped from the top performing pages using the LinkPreview API.
+                  Meta data is being scraped from the top performing pages using enhanced scraping.
                 </p>
                 <p className="text-sm text-muted-foreground">
-                  This includes actual meta titles and descriptions from the web pages.
+                  This includes actual meta titles, descriptions, and image analysis from the web pages.
                 </p>
               </div>
             )}
           </CardContent>
         </Card>
+      </TabsContent>
+
+      <TabsContent value="imageAnalysis">
+        <ImageAnalysisTab 
+          urlMetaData={urlMetaData}
+          selectedWebsite={selectedWebsite}
+        />
       </TabsContent>
       
       <TabsContent value="sitePerformance">
@@ -212,58 +231,46 @@ const SEOTabsContent = ({
             <div className="flex justify-between items-center mb-4">
               <div>
                 <h3 className="text-lg font-semibold">Site Performance Metrics</h3>
-                <p className="text-muted-foreground">Page speed and core web vitals for {selectedWebsite}</p>
+                <p className="text-muted-foreground">Comprehensive performance analysis for {selectedWebsite}</p>
               </div>
               <DownloadButton 
-                data={Object.keys(sitePerformance).length > 0 ? [sitePerformance] : []}
+                data={Object.keys(enhancedSitePerformance).length > 0 ? [enhancedSitePerformance] : []}
                 filename={`site-performance-${selectedWebsite}`}
                 title={`Site Performance Report - ${selectedWebsite}`}
               />
             </div>
             
-            {Object.keys(sitePerformance).length > 0 ? (
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                <div className="p-4 border rounded-lg">
-                  <h4 className="font-semibold text-sm text-muted-foreground">Total Pages</h4>
-                  <p className="text-2xl font-bold">{sitePerformance.totalPages}</p>
-                </div>
-                
-                <div className="p-4 border rounded-lg">
-                  <h4 className="font-semibold text-sm text-muted-foreground">Indexed Pages</h4>
-                  <p className="text-2xl font-bold text-green-600">{sitePerformance.indexedPages}</p>
-                </div>
-                
-                <div className="p-4 border rounded-lg">
-                  <h4 className="font-semibold text-sm text-muted-foreground">Crawl Errors</h4>
-                  <p className="text-2xl font-bold text-red-600">{sitePerformance.crawlErrors}</p>
-                </div>
-                
-                <div className="p-4 border rounded-lg">
-                  <h4 className="font-semibold text-sm text-muted-foreground">Avg Load Time</h4>
-                  <p className="text-2xl font-bold">{sitePerformance.avgLoadTime}</p>
-                </div>
-                
-                <div className="p-4 border rounded-lg">
-                  <h4 className="font-semibold text-sm text-muted-foreground">Mobile Usability</h4>
-                  <p className="text-2xl font-bold text-green-600">{sitePerformance.mobileUsability}</p>
-                </div>
-                
-                {sitePerformance.coreWebVitals && (
-                  <div className="p-4 border rounded-lg">
-                    <h4 className="font-semibold text-sm text-muted-foreground">Core Web Vitals</h4>
-                    <div className="space-y-1">
-                      <p className="text-sm">LCP: {sitePerformance.coreWebVitals.lcp}</p>
-                      <p className="text-sm">FID: {sitePerformance.coreWebVitals.fid}</p>
-                      <p className="text-sm">CLS: {sitePerformance.coreWebVitals.cls}</p>
-                    </div>
-                  </div>
-                )}
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+              <div className="p-4 border rounded-lg">
+                <h4 className="font-semibold text-sm text-muted-foreground">Total Pages</h4>
+                <p className="text-2xl font-bold">{enhancedSitePerformance.totalPages || 0}</p>
               </div>
-            ) : (
-              <div className="p-6 border rounded-lg bg-muted/20">
-                <p>Performance metrics will be integrated with Google Search Console data when available</p>
+              
+              <div className="p-4 border rounded-lg">
+                <h4 className="font-semibold text-sm text-muted-foreground">Pages Analyzed</h4>
+                <p className="text-2xl font-bold text-blue-600">{enhancedSitePerformance.totalPagesScraped || 0}</p>
               </div>
-            )}
+              
+              <div className="p-4 border rounded-lg">
+                <h4 className="font-semibold text-sm text-muted-foreground">Total Images Found</h4>
+                <p className="text-2xl font-bold text-green-600">{enhancedSitePerformance.totalImagesFound || 0}</p>
+              </div>
+              
+              <div className="p-4 border rounded-lg">
+                <h4 className="font-semibold text-sm text-muted-foreground">Images Missing Alt Text</h4>
+                <p className="text-2xl font-bold text-red-600">{enhancedSitePerformance.imagesWithoutAlt || 0}</p>
+              </div>
+              
+              <div className="p-4 border rounded-lg">
+                <h4 className="font-semibold text-sm text-muted-foreground">Alt Text Coverage</h4>
+                <p className="text-2xl font-bold text-green-600">{enhancedSitePerformance.altTextCoverage || 0}%</p>
+              </div>
+              
+              <div className="p-4 border rounded-lg">
+                <h4 className="font-semibold text-sm text-muted-foreground">Mobile Usability</h4>
+                <p className="text-2xl font-bold text-green-600">{enhancedSitePerformance.mobileUsability || 'Good'}</p>
+              </div>
+            </div>
           </CardContent>
         </Card>
       </TabsContent>

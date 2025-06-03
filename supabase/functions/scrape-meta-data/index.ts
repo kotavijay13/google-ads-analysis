@@ -93,15 +93,15 @@ serve(async (req) => {
       });
     }
 
-    console.log(`Scraping meta data for ${urls.length} URLs`);
+    console.log(`Scraping meta data and images for ${urls.length} URLs`);
 
-    // Native scraping function
+    // Enhanced scraping function that includes image extraction
     const scrapeWithNativeFetch = async (url: string) => {
       try {
         console.log(`Native scraping for: ${url}`);
         
         const controller = new AbortController();
-        const timeoutId = setTimeout(() => controller.abort(), 5000);
+        const timeoutId = setTimeout(() => controller.abort(), 8000);
         
         const response = await fetch(url, {
           signal: controller.signal,
@@ -124,13 +124,51 @@ serve(async (req) => {
         const descMatch = html.match(/<meta[^>]*name=["\']description["\'][^>]*content=["\']([^"\']*)["\'][^>]*>/i) ||
                          html.match(/<meta[^>]*content=["\']([^"\']*)["\'][^>]*name=["\']description["\'][^>]*>/i);
         
+        // Extract all images with alt text
+        const imageRegex = /<img[^>]*>/gi;
+        const images = [];
+        let imageMatch;
+        
+        while ((imageMatch = imageRegex.exec(html)) !== null) {
+          const imgTag = imageMatch[0];
+          
+          // Extract src
+          const srcMatch = imgTag.match(/src=["\']([^"\']*)["\'][^>]*/i);
+          const src = srcMatch ? srcMatch[1] : null;
+          
+          // Extract alt text
+          const altMatch = imgTag.match(/alt=["\']([^"\']*)["\'][^>]*/i);
+          const alt = altMatch ? altMatch[1] : '';
+          
+          if (src) {
+            // Convert relative URLs to absolute
+            let absoluteSrc = src;
+            if (src.startsWith('/')) {
+              const urlObj = new URL(url);
+              absoluteSrc = `${urlObj.protocol}//${urlObj.host}${src}`;
+            } else if (!src.startsWith('http')) {
+              const urlObj = new URL(url);
+              absoluteSrc = `${urlObj.protocol}//${urlObj.host}/${src}`;
+            }
+            
+            images.push({
+              src: absoluteSrc,
+              alt: alt || 'No alt text',
+              hasAltText: alt.length > 0
+            });
+          }
+        }
+        
         return {
           url: url,
           metaTitle: titleMatch ? titleMatch[1].trim() : 'No title found',
           metaDescription: descMatch ? descMatch[1].trim() : 'No description found',
           image: null,
           siteName: null,
-          domain: new URL(url).hostname
+          domain: new URL(url).hostname,
+          images: images,
+          imageCount: images.length,
+          imagesWithoutAlt: images.filter(img => !img.hasAltText).length
         };
       } catch (error) {
         console.error(`Native scraping failed for ${url}:`, error);
@@ -138,20 +176,23 @@ serve(async (req) => {
           url: url,
           metaTitle: 'Error fetching',
           metaDescription: 'Error fetching',
-          error: error.message
+          error: error.message,
+          images: [],
+          imageCount: 0,
+          imagesWithoutAlt: 0
         };
       }
     };
 
     const metaDataResults = [];
-    const batchSize = 5;
-    const totalUrls = Math.min(urls.length, 500); // Process up to 500 URLs
+    const batchSize = 3; // Reduced batch size for better reliability
+    const totalUrls = Math.min(urls.length, 500);
     
     for (let i = 0; i < totalUrls; i += batchSize) {
       const batch = urls.slice(i, i + batchSize);
       console.log(`Processing batch ${i / batchSize + 1} of ${Math.ceil(totalUrls / batchSize)} (${batch.length} URLs)`);
       
-      for (const url of batch) {
+      const batchPromises = batch.map(async (url) => {
         try {
           let result;
           
@@ -161,7 +202,7 @@ serve(async (req) => {
               console.log(`Using LinkPreview API for: ${url}`);
               
               const controller = new AbortController();
-              const timeoutId = setTimeout(() => controller.abort(), 8000);
+              const timeoutId = setTimeout(() => controller.abort(), 10000);
               
               const linkPreviewResponse = await fetch(
                 `https://api.linkpreview.net/?key=${LINKPREVIEW_API_KEY}&q=${encodeURIComponent(url)}`,
@@ -181,13 +222,19 @@ serve(async (req) => {
 
               const linkPreviewData = await linkPreviewResponse.json();
               
+              // Still need to scrape images separately
+              const imageData = await scrapeWithNativeFetch(url);
+              
               result = {
                 url: url,
                 metaTitle: linkPreviewData.title || 'No title found',
                 metaDescription: linkPreviewData.description || 'No description found',
                 image: linkPreviewData.image || null,
                 siteName: linkPreviewData.siteName || null,
-                domain: linkPreviewData.domain || null
+                domain: linkPreviewData.domain || new URL(url).hostname,
+                images: imageData.images || [],
+                imageCount: imageData.imageCount || 0,
+                imagesWithoutAlt: imageData.imagesWithoutAlt || 0
               };
             } catch (linkPreviewError) {
               console.log(`LinkPreview failed for ${url}, trying native scraping:`, linkPreviewError);
@@ -198,30 +245,33 @@ serve(async (req) => {
             result = await scrapeWithNativeFetch(url);
           }
           
-          metaDataResults.push(result);
-          
-          // Add delay between requests
-          await new Promise(resolve => setTimeout(resolve, 300));
+          return result;
           
         } catch (error) {
           console.error(`Error processing ${url}:`, error);
-          metaDataResults.push({
+          return {
             url: url,
             metaTitle: 'Error fetching',
             metaDescription: 'Error fetching',
-            error: error.message
-          });
+            error: error.message,
+            images: [],
+            imageCount: 0,
+            imagesWithoutAlt: 0
+          };
         }
-      }
+      });
       
-      // Add longer delay between batches
+      const batchResults = await Promise.all(batchPromises);
+      metaDataResults.push(...batchResults);
+      
+      // Add delay between batches
       if (i + batchSize < totalUrls) {
         console.log('Waiting between batches...');
-        await new Promise(resolve => setTimeout(resolve, 1000));
+        await new Promise(resolve => setTimeout(resolve, 2000));
       }
     }
 
-    console.log(`Successfully processed meta data for ${metaDataResults.length} URLs`);
+    console.log(`Successfully processed meta data and images for ${metaDataResults.length} URLs`);
 
     return new Response(JSON.stringify({
       success: true,
