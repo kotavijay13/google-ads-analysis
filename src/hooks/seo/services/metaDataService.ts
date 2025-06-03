@@ -14,28 +14,25 @@ export const metaDataService = {
 
       console.log('Calling scrape-meta-data function...');
       
-      const response = await supabase.functions.invoke('scrape-meta-data', {
-        body: { urls }, // Don't stringify - Supabase handles this
-        headers: {
-          'Authorization': `Bearer ${session.session.access_token}`,
-          'Content-Type': 'application/json',
-        }
+      // Use supabase.functions.invoke with the correct syntax
+      const { data, error } = await supabase.functions.invoke('scrape-meta-data', {
+        body: { urls },
       });
 
-      console.log('Meta data response:', response);
+      console.log('Meta data response:', { data, error });
 
-      if (response.error) {
-        console.error('Supabase function error:', response.error);
-        throw new Error(response.error.message || 'Failed to fetch meta data');
+      if (error) {
+        console.error('Supabase function error:', error);
+        throw new Error(error.message || 'Failed to fetch meta data');
       }
 
       // Handle both success and error responses
-      if (response.data) {
-        if (response.data.success) {
-          return response.data;
+      if (data) {
+        if (data.success) {
+          return data;
         } else {
-          console.error('Function returned error:', response.data.error);
-          throw new Error(response.data.error || 'Failed to fetch meta data');
+          console.error('Function returned error:', data.error);
+          throw new Error(data.error || 'Failed to fetch meta data');
         }
       }
 
