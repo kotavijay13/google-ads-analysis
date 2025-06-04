@@ -1,9 +1,11 @@
+
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { AuthProvider } from '@/context/AuthContext';
 import { Toaster } from '@/components/ui/sonner';
 import ProtectedRoute from '@/components/ProtectedRoute';
 import SecurityHeaders from '@/components/SecurityHeaders';
+import Sidebar from '@/components/Sidebar';
 import './App.css';
 
 // Import page components
@@ -37,52 +39,102 @@ function App() {
               <Route path="/meta-callback" element={<MetaCallback />} />
               <Route path="/" element={
                 <ProtectedRoute>
-                  <Index />
+                  <div className="flex w-full">
+                    <Sidebar />
+                    <div className="flex-1">
+                      <Index />
+                    </div>
+                  </div>
                 </ProtectedRoute>
               } />
               <Route path="/google-ads" element={
                 <ProtectedRoute>
-                  <GoogleAdsPage />
+                  <div className="flex w-full">
+                    <Sidebar />
+                    <div className="flex-1">
+                      <GoogleAdsPage />
+                    </div>
+                  </div>
                 </ProtectedRoute>
               } />
               <Route path="/meta-ads" element={
                 <ProtectedRoute>
-                  <MetaAdsPage />
+                  <div className="flex w-full">
+                    <Sidebar />
+                    <div className="flex-1">
+                      <MetaAdsPage />
+                    </div>
+                  </div>
                 </ProtectedRoute>
               } />
               <Route path="/seo" element={
                 <ProtectedRoute>
-                  <SEOPage />
+                  <div className="flex w-full">
+                    <Sidebar />
+                    <div className="flex-1">
+                      <SEOPage />
+                    </div>
+                  </div>
                 </ProtectedRoute>
               } />
               <Route path="/integrations" element={
                 <ProtectedRoute>
-                  <IntegrationsPage />
+                  <div className="flex w-full">
+                    <Sidebar />
+                    <div className="flex-1">
+                      <IntegrationsPage />
+                    </div>
+                  </div>
                 </ProtectedRoute>
               } />
               <Route path="/admin" element={
                 <ProtectedRoute>
-                  <AdminPage />
+                  <div className="flex w-full">
+                    <Sidebar />
+                    <div className="flex-1">
+                      <AdminPage />
+                    </div>
+                  </div>
                 </ProtectedRoute>
               } />
               <Route path="/competition" element={
                 <ProtectedRoute>
-                  <CompetitionAnalysis />
+                  <div className="flex w-full">
+                    <Sidebar />
+                    <div className="flex-1">
+                      <CompetitionAnalysis />
+                    </div>
+                  </div>
                 </ProtectedRoute>
               } />
               <Route path="/forms" element={
                 <ProtectedRoute>
-                  <FormsPage />
+                  <div className="flex w-full">
+                    <Sidebar />
+                    <div className="flex-1">
+                      <FormsPage />
+                    </div>
+                  </div>
                 </ProtectedRoute>
               } />
               <Route path="/leads" element={
                 <ProtectedRoute>
-                  <LeadsPage />
+                  <div className="flex w-full">
+                    <Sidebar />
+                    <div className="flex-1">
+                      <LeadsPage />
+                    </div>
+                  </div>
                 </ProtectedRoute>
               } />
               <Route path="/whatsapp" element={
                 <ProtectedRoute>
-                  <WhatsAppPage />
+                  <div className="flex w-full">
+                    <Sidebar />
+                    <div className="flex-1">
+                      <WhatsAppPage />
+                    </div>
+                  </div>
                 </ProtectedRoute>
               } />
               <Route path="*" element={<NotFound />} />
