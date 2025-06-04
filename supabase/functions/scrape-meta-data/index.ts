@@ -2,12 +2,8 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import { corsHeaders } from './utils.ts';
 import { authenticateUser } from './auth.ts';
-import { processBatch } from './batchProcessor.ts';
-import { ScrapeRequest, ScrapeResponse } from './types.ts';
 
-const SCRAPERAPI_KEY = Deno.env.get('SCRAPERAPI_KEY');
-
-serve(async (req) => {
+const handleRequest = async (req: Request) => {
   console.log(`Request method: ${req.method}`);
 
   // Handle CORS preflight requests
@@ -25,7 +21,7 @@ serve(async (req) => {
     await authenticateUser(authHeader);
 
     // Parse request body with improved error handling
-    let requestBody: ScrapeRequest;
+    let requestBody: { urls: string[] };
     try {
       console.log('Request headers:', Object.fromEntries(req.headers.entries()));
       
@@ -39,10 +35,9 @@ serve(async (req) => {
       if (!bodyText || bodyText.trim() === '') {
         console.error('Empty request body received');
         return new Response(JSON.stringify({
-          success: false,
           error: 'Empty request body - no URLs provided',
-          metaData: []
-        } as ScrapeResponse), {
+          results: []
+        }), {
           headers: { ...corsHeaders, 'Content-Type': 'application/json' },
           status: 400,
         });
@@ -60,10 +55,9 @@ serve(async (req) => {
     } catch (parseError) {
       console.error('Error parsing request body:', parseError);
       return new Response(JSON.stringify({
-        success: false,
         error: `Request parsing failed: ${parseError.message}`,
-        metaData: []
-      } as ScrapeResponse), {
+        results: []
+      }), {
         headers: { ...corsHeaders, 'Content-Type': 'application/json' },
         status: 400,
       });
@@ -74,10 +68,9 @@ serve(async (req) => {
     if (!urls || !Array.isArray(urls)) {
       console.error('Invalid urls parameter:', urls);
       return new Response(JSON.stringify({
-        success: false,
         error: 'URLs array is required and must be an array',
-        metaData: []
-      } as ScrapeResponse), {
+        results: []
+      }), {
         headers: { ...corsHeaders, 'Content-Type': 'application/json' },
         status: 400,
       });
@@ -86,9 +79,8 @@ serve(async (req) => {
     if (urls.length === 0) {
       console.log('Empty URLs array provided');
       return new Response(JSON.stringify({
-        success: true,
-        metaData: []
-      } as ScrapeResponse), {
+        results: []
+      }), {
         headers: { ...corsHeaders, 'Content-Type': 'application/json' },
         status: 200,
       });
@@ -96,15 +88,78 @@ serve(async (req) => {
 
     console.log(`Scraping meta data for ${urls.length} URLs`);
 
-    // Process URLs in batches
-    const metaDataResults = await processBatch(urls, SCRAPERAPI_KEY);
+    // Process URLs in parallel with rate limiting
+    const results = await Promise.all(urls.map(async (url) => {
+      try {
+        console.log(`Processing URL: ${url}`);
+        
+        // Validate URL
+        try {
+          new URL(url);
+        } catch {
+          throw new Error('Invalid URL format');
+        }
 
-    console.log(`Successfully processed meta data for ${metaDataResults.length} URLs`);
+        const controller = new AbortController();
+        const timeout = setTimeout(() => controller.abort(), 8000); // 8s timeout
+        
+        const response = await fetch(url, {
+          signal: controller.signal,
+          headers: {
+            'User-Agent': 'Mozilla/5.0 (compatible; MetaScraper/1.0; +https://yourapp.com/bot)',
+            'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8',
+          }
+        });
+        
+        clearTimeout(timeout);
+        
+        if (!response.ok) {
+          throw new Error(`HTTP ${response.status} - ${response.statusText}`);
+        }
+        
+        const html = await response.text();
+        const meta = extractMetaFromHtml(html, url);
+        const images = extractImagesFromHtml(html, url);
+        
+        return {
+          url,
+          metaTitle: meta.title,
+          metaDescription: meta.description,
+          siteName: null,
+          domain: new URL(url).hostname,
+          images: images,
+          imageCount: images.length,
+          imagesWithoutAlt: images.filter(img => !img.hasAltText).length,
+          status: 'success'
+        };
+      } catch (error) {
+        console.error(`Error processing ${url}:`, error);
+        return {
+          url,
+          metaTitle: 'Error fetching',
+          metaDescription: 'Error fetching',
+          error: error.message,
+          images: [],
+          imageCount: 0,
+          imagesWithoutAlt: 0,
+          domain: (() => {
+            try {
+              return new URL(url).hostname;
+            } catch {
+              return 'Invalid URL';
+            }
+          })(),
+          status: 'failed'
+        };
+      }
+    }));
+
+    console.log(`Successfully processed meta data for ${results.length} URLs`);
 
     return new Response(JSON.stringify({
       success: true,
-      metaData: metaDataResults
-    } as ScrapeResponse), {
+      metaData: results
+    }), {
       headers: { ...corsHeaders, 'Content-Type': 'application/json' },
       status: 200,
     });
@@ -116,9 +171,62 @@ serve(async (req) => {
       success: false,
       error: error instanceof Error ? error.message : 'Unknown error occurred',
       metaData: []
-    } as ScrapeResponse), {
+    }), {
       headers: { ...corsHeaders, 'Content-Type': 'application/json' },
       status: 500,
     });
   }
-});
+};
+
+// Helper functions
+function extractMetaFromHtml(html: string, url: string) {
+  // Extract meta data using regex
+  const titleMatch = html.match(/<title[^>]*>([^<]*)<\/title>/i);
+  const descMatch = html.match(/<meta[^>]*name=["\']description["\'][^>]*content=["\']([^"\']*)["\'][^>]*>/i) ||
+                   html.match(/<meta[^>]*content=["\']([^"\']*)["\'][^>]*name=["\']description["\'][^>]*>/i);
+
+  return {
+    title: titleMatch ? titleMatch[1].trim() : 'No title found',
+    description: descMatch ? descMatch[1].trim() : 'No description found'
+  };
+}
+
+function extractImagesFromHtml(html: string, url: string) {
+  const imageRegex = /<img[^>]*>/gi;
+  const images = [];
+  let imageMatch;
+
+  while ((imageMatch = imageRegex.exec(html)) !== null) {
+    const imgTag = imageMatch[0];
+    
+    // Extract src
+    const srcMatch = imgTag.match(/src=["\']([^"\']*)["\'][^>]*/i);
+    const src = srcMatch ? srcMatch[1] : null;
+    
+    // Extract alt text
+    const altMatch = imgTag.match(/alt=["\']([^"\']*)["\'][^>]*/i);
+    const alt = altMatch ? altMatch[1] : '';
+    
+    if (src) {
+      // Convert relative URLs to absolute
+      let absoluteSrc = src;
+      if (src.startsWith('/')) {
+        const urlObj = new URL(url);
+        absoluteSrc = `${urlObj.protocol}//${urlObj.host}${src}`;
+      } else if (!src.startsWith('http')) {
+        const urlObj = new URL(url);
+        absoluteSrc = `${urlObj.protocol}//${urlObj.host}/${src}`;
+      }
+      
+      images.push({
+        src: absoluteSrc,
+        alt: alt || 'No alt text',
+        hasAltText: alt.length > 0
+      });
+    }
+  }
+
+  return images;
+}
+
+serve(handleRequest);

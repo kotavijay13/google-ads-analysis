@@ -35,7 +35,7 @@ export default function Sidebar() {
 
   return (
     <div className={cn(
-      "bg-white shadow-lg transition-all duration-300 ease-in-out flex flex-col",
+      "bg-white shadow-lg transition-all duration-300 ease-in-out flex flex-col fixed left-0 top-0 h-screen z-10",
       isCollapsed ? "w-16" : "w-64"
     )}>
       <div className="flex items-center justify-between p-4 border-b">
@@ -52,7 +52,7 @@ export default function Sidebar() {
         </Button>
       </div>
       
-      <nav className="mt-5 flex-1 px-2 space-y-1">
+      <nav className="mt-5 flex-1 px-2 space-y-1 overflow-y-auto">
         {navigation.map((item) => {
           const isActive = location.pathname === item.href;
           return (

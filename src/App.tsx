@@ -41,7 +41,7 @@ function App() {
                 <ProtectedRoute>
                   <div className="flex w-full">
                     <Sidebar />
-                    <div className="flex-1">
+                    <div className="flex-1 ml-64">
                       <Index />
                     </div>
                   </div>
@@ -51,7 +51,7 @@ function App() {
                 <ProtectedRoute>
                   <div className="flex w-full">
                     <Sidebar />
-                    <div className="flex-1">
+                    <div className="flex-1 ml-64">
                       <GoogleAdsPage />
                     </div>
                   </div>
@@ -61,7 +61,7 @@ function App() {
                 <ProtectedRoute>
                   <div className="flex w-full">
                     <Sidebar />
-                    <div className="flex-1">
+                    <div className="flex-1 ml-64">
                       <MetaAdsPage />
                     </div>
                   </div>
@@ -71,7 +71,7 @@ function App() {
                 <ProtectedRoute>
                   <div className="flex w-full">
                     <Sidebar />
-                    <div className="flex-1">
+                    <div className="flex-1 ml-64">
                       <SEOPage />
                     </div>
                   </div>
@@ -81,7 +81,7 @@ function App() {
                 <ProtectedRoute>
                   <div className="flex w-full">
                     <Sidebar />
-                    <div className="flex-1">
+                    <div className="flex-1 ml-64">
                       <IntegrationsPage />
                     </div>
                   </div>
@@ -91,7 +91,7 @@ function App() {
                 <ProtectedRoute>
                   <div className="flex w-full">
                     <Sidebar />
-                    <div className="flex-1">
+                    <div className="flex-1 ml-64">
                       <AdminPage />
                     </div>
                   </div>
@@ -101,7 +101,7 @@ function App() {
                 <ProtectedRoute>
                   <div className="flex w-full">
                     <Sidebar />
-                    <div className="flex-1">
+                    <div className="flex-1 ml-64">
                       <CompetitionAnalysis />
                     </div>
                   </div>
@@ -111,7 +111,7 @@ function App() {
                 <ProtectedRoute>
                   <div className="flex w-full">
                     <Sidebar />
-                    <div className="flex-1">
+                    <div className="flex-1 ml-64">
                       <FormsPage />
                     </div>
                   </div>
@@ -121,7 +121,7 @@ function App() {
                 <ProtectedRoute>
                   <div className="flex w-full">
                     <Sidebar />
-                    <div className="flex-1">
+                    <div className="flex-1 ml-64">
                       <LeadsPage />
                     </div>
                   </div>
@@ -131,7 +131,7 @@ function App() {
                 <ProtectedRoute>
                   <div className="flex w-full">
                     <Sidebar />
-                    <div className="flex-1">
+                    <div className="flex-1 ml-64">
                       <WhatsAppPage />
                     </div>
                   </div>

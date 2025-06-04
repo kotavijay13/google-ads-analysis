@@ -44,47 +44,49 @@ const SEOPage = () => {
   };
 
   return (
-    <div className="container mx-auto py-6 px-4 max-w-7xl">
-      <SEOHeader />
+    <div className="w-full px-4 py-6">
+      <div className="max-w-none">
+        <SEOHeader />
 
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-6">
-        {/* Website Selection */}
-        <div className="lg:col-span-1">
-          <WebsiteSelector
-            selectedWebsite={selectedWebsite}
-            availableWebsites={availableWebsites}
-            connected={connected}
-            gscLoading={gscLoading}
-            isRefreshing={isRefreshing}
-            onWebsiteChange={handleWebsiteChange}
-            onConnect={handleConnect}
-            onRefresh={handleRefreshSerpData}
-          />
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-6">
+          {/* Website Selection */}
+          <div className="lg:col-span-1">
+            <WebsiteSelector
+              selectedWebsite={selectedWebsite}
+              availableWebsites={availableWebsites}
+              connected={connected}
+              gscLoading={gscLoading}
+              isRefreshing={isRefreshing}
+              onWebsiteChange={handleWebsiteChange}
+              onConnect={handleConnect}
+              onRefresh={handleRefreshSerpData}
+            />
+          </div>
+
+          {/* SEO Overview Stats */}
+          <div className="lg:col-span-2">
+            <SEOStatsCards serpStats={serpStats} />
+          </div>
         </div>
 
-        {/* SEO Overview Stats */}
-        <div className="lg:col-span-2">
-          <SEOStatsCards serpStats={serpStats} />
+        {/* Date Range Picker */}
+        <div className="mb-6">
+          <div className="flex items-center gap-4">
+            <h3 className="text-lg font-semibold">Date Range</h3>
+            <DateRangePicker onDateChange={handleDateChange} />
+          </div>
         </div>
+
+        <SEOTabsContent
+          activeTab={activeTab}
+          onTabChange={setActiveTab}
+          serpKeywords={serpKeywords}
+          pages={pages}
+          urlMetaData={urlMetaData}
+          sitePerformance={sitePerformance}
+          selectedWebsite={selectedWebsite}
+        />
       </div>
-
-      {/* Date Range Picker */}
-      <div className="mb-6">
-        <div className="flex items-center gap-4">
-          <h3 className="text-lg font-semibold">Date Range</h3>
-          <DateRangePicker onDateChange={handleDateChange} />
-        </div>
-      </div>
-
-      <SEOTabsContent
-        activeTab={activeTab}
-        onTabChange={setActiveTab}
-        serpKeywords={serpKeywords}
-        pages={pages}
-        urlMetaData={urlMetaData}
-        sitePerformance={sitePerformance}
-        selectedWebsite={selectedWebsite}
-      />
     </div>
   );
 };
