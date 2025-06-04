@@ -14,10 +14,25 @@ export const metaDataService = {
 
       console.log('Calling scrape-meta-data function...');
       
-      // Ensure we're sending the data correctly - use a simple object structure
-      const payload = { urls: urls };
-      console.log('Sending request payload:', payload);
-      console.log('First few URLs:', urls.slice(0, 3));
+      // Sanitize URLs to prevent injection attacks
+      const sanitizedUrls = urls
+        .filter(url => typeof url === 'string')
+        .map(url => url.trim())
+        .filter(url => {
+          try {
+            new URL(url);
+            return true;
+          } catch {
+            return false;
+          }
+        });
+      
+      if (sanitizedUrls.length === 0) {
+        throw new Error('No valid URLs provided');
+      }
+      
+      const payload = { urls: sanitizedUrls };
+      console.log('Sending request payload with sanitized URLs:', sanitizedUrls.slice(0, 3));
       
       const { data, error } = await supabase.functions.invoke('scrape-meta-data', {
         body: payload
@@ -30,7 +45,6 @@ export const metaDataService = {
         throw new Error(`Function invocation failed: ${error.message || error}`);
       }
 
-      // Handle both success and error responses
       if (data) {
         if (data.success) {
           console.log(`Successfully received ${data.metaData?.length || 0} meta data items`);
