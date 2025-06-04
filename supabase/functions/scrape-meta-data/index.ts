@@ -24,30 +24,39 @@ serve(async (req) => {
     const authHeader = req.headers.get('Authorization');
     await authenticateUser(authHeader);
 
-    // Parse request body
+    // Parse request body with improved error handling
     let requestBody: ScrapeRequest;
     try {
-      const contentType = req.headers.get('content-type') || '';
-      console.log('Content-Type header:', contentType);
-      
-      // Check if the request has a body
-      if (!req.body) {
-        console.error('No request body provided');
-        throw new Error('No request body provided');
-      }
+      console.log('Request headers:', Object.fromEntries(req.headers.entries()));
       
       const bodyText = await req.text();
       console.log('Raw request body length:', bodyText.length);
-      console.log('Raw request body (first 200 chars):', bodyText.substring(0, 200));
+      
+      if (bodyText.length > 0) {
+        console.log('Raw request body (first 500 chars):', bodyText.substring(0, 500));
+      }
       
       if (!bodyText || bodyText.trim() === '') {
         console.error('Empty request body received');
-        throw new Error('Empty request body');
+        return new Response(JSON.stringify({
+          success: false,
+          error: 'Empty request body - no URLs provided',
+          metaData: []
+        } as ScrapeResponse), {
+          headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+          status: 400,
+        });
       }
       
       requestBody = JSON.parse(bodyText);
-      console.log('Successfully parsed request body with', Object.keys(requestBody).length, 'keys');
+      console.log('Successfully parsed request body');
+      console.log('Request body keys:', Object.keys(requestBody));
       console.log('URLs array length:', requestBody.urls?.length || 0);
+      
+      if (requestBody.urls && requestBody.urls.length > 0) {
+        console.log('First 3 URLs:', requestBody.urls.slice(0, 3));
+      }
+      
     } catch (parseError) {
       console.error('Error parsing request body:', parseError);
       return new Response(JSON.stringify({
@@ -66,7 +75,7 @@ serve(async (req) => {
       console.error('Invalid urls parameter:', urls);
       return new Response(JSON.stringify({
         success: false,
-        error: 'URLs array is required',
+        error: 'URLs array is required and must be an array',
         metaData: []
       } as ScrapeResponse), {
         headers: { ...corsHeaders, 'Content-Type': 'application/json' },
@@ -85,12 +94,12 @@ serve(async (req) => {
       });
     }
 
-    console.log(`Scraping meta data and images for ${urls.length} URLs`);
+    console.log(`Scraping meta data for ${urls.length} URLs`);
 
     // Process URLs in batches
     const metaDataResults = await processBatch(urls, SCRAPERAPI_KEY);
 
-    console.log(`Successfully processed meta data and images for ${metaDataResults.length} URLs using ${SCRAPERAPI_KEY ? 'ScraperAPI' : 'native scraping'}`);
+    console.log(`Successfully processed meta data for ${metaDataResults.length} URLs`);
 
     return new Response(JSON.stringify({
       success: true,

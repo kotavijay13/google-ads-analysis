@@ -14,27 +14,26 @@ export const metaDataService = {
 
       console.log('Calling scrape-meta-data function...');
       
-      // Ensure we're sending the data correctly with proper structure
-      const requestBody = { urls };
-      console.log('Sending request body:', requestBody);
+      // Ensure we're sending the data correctly - use a simple object structure
+      const payload = { urls: urls };
+      console.log('Sending request payload:', payload);
+      console.log('First few URLs:', urls.slice(0, 3));
       
       const { data, error } = await supabase.functions.invoke('scrape-meta-data', {
-        body: requestBody,
-        headers: {
-          'Content-Type': 'application/json',
-        }
+        body: payload
       });
 
       console.log('Meta data response:', { data, error });
 
       if (error) {
         console.error('Supabase function error:', error);
-        throw new Error(error.message || 'Failed to fetch meta data');
+        throw new Error(`Function invocation failed: ${error.message || error}`);
       }
 
       // Handle both success and error responses
       if (data) {
         if (data.success) {
+          console.log(`Successfully received ${data.metaData?.length || 0} meta data items`);
           return data;
         } else {
           console.error('Function returned error:', data.error);
