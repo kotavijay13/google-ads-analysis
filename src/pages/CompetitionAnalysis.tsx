@@ -1,3 +1,4 @@
+
 import { useState, useCallback, useEffect } from 'react';
 import Header from '@/components/Header';
 import { Card, CardContent, CardHeader, CardTitle, CardFooter } from '@/components/ui/card';
@@ -67,18 +68,6 @@ const CompetitionAnalysis = () => {
     { id: 'competitor3', url: '', data: null, loading: false }
   ]);
 
-  const [isLoading, setIsLoading] = useState(false);
-  const [websiteUrl, setWebsiteUrl] = useState('');
-  const [hasAnalyzed, setHasAnalyzed] = useState(false);
-  const [competitorKeywords, setCompetitorKeywords] = useState<KeywordData[]>([]);
-  const [displayedKeywords, setDisplayedKeywords] = useState<KeywordData[]>([]);
-  const [overviewStats, setOverviewStats] = useState<OverviewStats>({
-    totalKeywords: 0,
-    top10Keywords: 0,
-    avgPosition: '0.0',
-    estTraffic: 0
-  });
-  const [error, setError] = useState<string | null>(null);
   const [sortState, setSortState] = useState<SortState>({ column: '', direction: null });
   const [itemsToShow, setItemsToShow] = useState(10);
   
@@ -124,10 +113,17 @@ const CompetitionAnalysis = () => {
     if (sortState.column !== column) return null;
     return sortState.direction === 'asc' ? <ChevronUp className="ml-1 h-4 w-4" /> : <ChevronDown className="ml-1 h-4 w-4" />;
   };
+
+  const getDifficultyColor = (difficulty: number) => {
+    if (difficulty >= 70) return "text-red-600 bg-red-50";
+    if (difficulty >= 40) return "text-amber-600 bg-amber-50";
+    return "text-green-600 bg-green-50";
+  };
   
   const handleRefresh = () => {
-    if (websiteUrl) {
-      analyzeCompetitor();
+    const currentCompetitor = competitors.find(c => c.id === activeTab);
+    if (currentCompetitor?.url) {
+      analyzeCompetitor(activeTab);
     } else {
       toast.error("Please enter a competitor website URL");
     }
@@ -151,43 +147,6 @@ const CompetitionAnalysis = () => {
       return newFilters;
     });
   };
-  
-  // Apply sorting and filtering
-  useEffect(() => {
-    let result = [...competitorKeywords];
-    
-    // Apply filters
-    Object.entries(filters).forEach(([column, value]) => {
-      if (value) {
-        const columnKey = column as keyof KeywordData;
-        result = result.filter(item => {
-          const itemValue = String(item[columnKey]).toLowerCase();
-          return itemValue.includes(value.toLowerCase());
-        });
-      }
-    });
-    
-    // Apply sorting
-    if (sortState.column && sortState.direction) {
-      const column = sortState.column;
-      const direction = sortState.direction;
-      
-      result.sort((a, b) => {
-        if (typeof a[column] === 'string' && typeof b[column] === 'string') {
-          return direction === 'asc' 
-            ? (a[column] as string).localeCompare(b[column] as string)
-            : (b[column] as string).localeCompare(a[column] as string);
-        }
-        
-        // For numeric values
-        return direction === 'asc' 
-          ? (a[column] as number) - (b[column] as number)
-          : (b[column] as number) - (a[column] as number);
-      });
-    }
-    
-    setDisplayedKeywords(result);
-  }, [competitorKeywords, sortState, filters]);
 
   const analyzeCompetitor = async (competitorId: string) => {
     const competitor = competitors.find(c => c.id === competitorId);
@@ -259,9 +218,10 @@ const CompetitionAnalysis = () => {
     ));
   };
 
+  // Get current competitor data
   const currentCompetitor = competitors.find(c => c.id === activeTab);
-  const competitorKeywords = currentCompetitor?.data?.keywords || [];
-  const overviewStats = currentCompetitor?.data?.stats || {
+  const currentKeywords = currentCompetitor?.data?.keywords || [];
+  const currentStats = currentCompetitor?.data?.stats || {
     totalKeywords: 0,
     top10Keywords: 0,
     avgPosition: '0.0',
@@ -373,7 +333,7 @@ const CompetitionAnalysis = () => {
                       <CardTitle className="text-sm font-medium">Total Keywords</CardTitle>
                     </CardHeader>
                     <CardContent>
-                      <div className="text-2xl font-bold">{overviewStats.totalKeywords}</div>
+                      <div className="text-2xl font-bold">{currentStats.totalKeywords}</div>
                       <p className="text-xs text-muted-foreground">Up to 1000 keywords</p>
                     </CardContent>
                   </Card>
@@ -383,7 +343,7 @@ const CompetitionAnalysis = () => {
                       <CardTitle className="text-sm font-medium">Top 10 Keywords</CardTitle>
                     </CardHeader>
                     <CardContent>
-                      <div className="text-2xl font-bold">{overviewStats.top10Keywords}</div>
+                      <div className="text-2xl font-bold">{currentStats.top10Keywords}</div>
                       <p className="text-xs text-muted-foreground">High visibility terms</p>
                     </CardContent>
                   </Card>
@@ -393,7 +353,7 @@ const CompetitionAnalysis = () => {
                       <CardTitle className="text-sm font-medium">Avg. Position</CardTitle>
                     </CardHeader>
                     <CardContent>
-                      <div className="text-2xl font-bold">{overviewStats.avgPosition}</div>
+                      <div className="text-2xl font-bold">{currentStats.avgPosition}</div>
                       <p className="text-xs text-muted-foreground">Across all keywords</p>
                     </CardContent>
                   </Card>
@@ -403,7 +363,7 @@ const CompetitionAnalysis = () => {
                       <CardTitle className="text-sm font-medium">Est. Traffic</CardTitle>
                     </CardHeader>
                     <CardContent>
-                      <div className="text-2xl font-bold">{overviewStats.estTraffic.toLocaleString()}</div>
+                      <div className="text-2xl font-bold">{currentStats.estTraffic.toLocaleString()}</div>
                       <p className="text-xs text-muted-foreground">Monthly organic visits</p>
                     </CardContent>
                   </Card>
@@ -419,7 +379,7 @@ const CompetitionAnalysis = () => {
                     </div>
                   </CardHeader>
                   <CardContent>
-                    {competitorKeywords.length > 0 ? (
+                    {currentKeywords.length > 0 ? (
                       <div className="overflow-x-auto">
                         <Table>
                           <TableHeader>
@@ -434,7 +394,7 @@ const CompetitionAnalysis = () => {
                             </TableRow>
                           </TableHeader>
                           <TableBody>
-                            {competitorKeywords.slice(0, 50).map((keyword, index) => (
+                            {currentKeywords.slice(0, 50).map((keyword, index) => (
                               <TableRow key={`${keyword.keyword}-${index}`}>
                                 <TableCell className="font-medium text-left">{keyword.keyword}</TableCell>
                                 <TableCell className="text-right">{keyword.position}</TableCell>
@@ -485,10 +445,10 @@ const CompetitionAnalysis = () => {
                       </div>
                     )}
                   </CardContent>
-                  {competitorKeywords.length > 50 && (
+                  {currentKeywords.length > 50 && (
                     <CardFooter className="flex justify-center border-t p-4">
                       <p className="text-sm text-muted-foreground">
-                        Showing first 50 of {competitorKeywords.length} keywords
+                        Showing first 50 of {currentKeywords.length} keywords
                       </p>
                     </CardFooter>
                   )}

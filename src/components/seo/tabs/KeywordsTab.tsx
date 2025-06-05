@@ -19,7 +19,7 @@ const KeywordsTab = ({ serpKeywords, selectedWebsite }: KeywordsTabProps) => {
         />
       </div>
       {serpKeywords.length > 0 ? (
-        <KeywordTable keywords={serpKeywords} />
+        <KeywordTable keywords={serpKeywords} selectedWebsite={selectedWebsite} />
       ) : (
         <div className="p-6 border rounded-lg bg-muted/20">
           <h4 className="font-semibold mb-2">No Keywords Found</h4>
