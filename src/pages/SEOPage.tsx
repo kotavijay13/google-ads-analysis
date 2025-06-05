@@ -1,46 +1,57 @@
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import WebsiteSelector from '@/components/seo/WebsiteSelector';
 import SEOStatsCards from '@/components/seo/SEOStatsCards';
 import SEOHeader from '@/components/seo/SEOHeader';
 import SEOTabsContent from '@/components/seo/SEOTabsContent';
 import DateRangePicker from '@/components/DateRangePicker';
 import { useSEOData } from '@/hooks/useSEOData';
+import { useSEOContext } from '@/context/SEOContext';
 
 const SEOPage = () => {
   const [activeTab, setActiveTab] = useState('keywords');
   const [dateRange, setDateRange] = useState({
-    from: new Date(Date.now() - 28 * 24 * 60 * 60 * 1000), // Last 28 days
+    from: new Date(Date.now() - 28 * 24 * 60 * 60 * 1000),
     to: new Date()
   });
 
+  const { seoState, updateSEOState } = useSEOContext();
+  
   const {
     isRefreshing,
-    selectedWebsite,
     availableWebsites,
-    serpKeywords,
-    pages,
-    urlMetaData,
-    sitePerformance,
-    serpStats,
     googleAdsConnected,
     handleRefreshSerpData,
     handleWebsiteChange,
     handleDateRangeChange,
   } = useSEOData();
 
+  // Load data from context on mount
+  useEffect(() => {
+    if (seoState.isDataLoaded) {
+      console.log('Loading persisted SEO data from context');
+    }
+  }, [seoState]);
+
   const handleDateChange = (range: { from: Date; to: Date }) => {
     setDateRange(range);
     handleDateRangeChange(range);
   };
 
-  // Simple connection check based on available websites
   const connected = availableWebsites.length > 0;
   const gscLoading = false;
 
   const handleConnect = () => {
-    // Redirect to integrations page for connection setup
     window.location.href = '/integrations';
+  };
+
+  const handleWebsiteSelection = async (website: string) => {
+    updateSEOState({ selectedWebsite: website });
+    await handleWebsiteChange(website);
+  };
+
+  const handleRefresh = async () => {
+    await handleRefreshSerpData();
   };
 
   return (
@@ -49,27 +60,24 @@ const SEOPage = () => {
         <SEOHeader />
 
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-6">
-          {/* Website Selection */}
           <div className="lg:col-span-1">
             <WebsiteSelector
-              selectedWebsite={selectedWebsite}
+              selectedWebsite={seoState.selectedWebsite}
               availableWebsites={availableWebsites}
               connected={connected}
               gscLoading={gscLoading}
               isRefreshing={isRefreshing}
-              onWebsiteChange={handleWebsiteChange}
+              onWebsiteChange={handleWebsiteSelection}
               onConnect={handleConnect}
-              onRefresh={handleRefreshSerpData}
+              onRefresh={handleRefresh}
             />
           </div>
 
-          {/* SEO Overview Stats */}
           <div className="lg:col-span-2">
-            <SEOStatsCards serpStats={serpStats} />
+            <SEOStatsCards serpStats={seoState.serpStats} />
           </div>
         </div>
 
-        {/* Date Range Picker */}
         <div className="mb-6">
           <div className="flex items-center gap-4">
             <h3 className="text-lg font-semibold">Date Range</h3>
@@ -80,11 +88,11 @@ const SEOPage = () => {
         <SEOTabsContent
           activeTab={activeTab}
           onTabChange={setActiveTab}
-          serpKeywords={serpKeywords}
-          pages={pages}
-          urlMetaData={urlMetaData}
-          sitePerformance={sitePerformance}
-          selectedWebsite={selectedWebsite}
+          serpKeywords={seoState.serpKeywords}
+          pages={seoState.pages}
+          urlMetaData={seoState.urlMetaData}
+          sitePerformance={seoState.sitePerformance}
+          selectedWebsite={seoState.selectedWebsite}
         />
       </div>
     </div>

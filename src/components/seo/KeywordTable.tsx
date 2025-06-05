@@ -1,195 +1,79 @@
 
-import { useState } from 'react';
-import { cn } from '@/lib/utils';
-import { ArrowUpDown, ArrowUp, ArrowDown } from 'lucide-react';
-import { Button } from '@/components/ui/button';
-import { ScrollArea } from '@/components/ui/scroll-area';
-
-interface Keyword {
-  keyword: string;
-  landingUrl?: string;
-  impressions?: number;
-  clicks?: number;
-  ctr?: number;
-  position: number;
-  change: string;
-  searchVolume?: number;
-  estimatedVisits?: number;
-  difficulty?: number;
-  difficultyLevel?: string;
-}
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
+import { Badge } from '@/components/ui/badge';
+import { ArrowUp, ArrowDown, ExternalLink } from 'lucide-react';
 
 interface KeywordTableProps {
-  keywords: Keyword[];
+  keywords: any[];
+  selectedWebsite: string;
 }
 
-type SortField = 'keyword' | 'position' | 'change' | 'searchVolume' | 'impressions';
-type SortDirection = 'asc' | 'desc' | null;
-
-const KeywordTable = ({ keywords }: KeywordTableProps) => {
-  const [sortField, setSortField] = useState<SortField | null>(null);
-  const [sortDirection, setSortDirection] = useState<SortDirection>(null);
-
-  const handleSort = (field: SortField) => {
-    if (sortField === field) {
-      // Cycle through: asc -> desc -> null
-      if (sortDirection === 'asc') {
-        setSortDirection('desc');
-      } else if (sortDirection === 'desc') {
-        setSortDirection(null);
-        setSortField(null);
-      } else {
-        setSortDirection('asc');
-      }
-    } else {
-      setSortField(field);
-      setSortDirection('asc');
-    }
+const KeywordTable = ({ keywords, selectedWebsite }: KeywordTableProps) => {
+  const getDifficultyColor = (difficulty: number) => {
+    if (difficulty >= 70) return "text-red-600 bg-red-50";
+    if (difficulty >= 40) return "text-amber-600 bg-amber-50";
+    return "text-green-600 bg-green-50";
   };
-
-  const getSortedKeywords = () => {
-    if (!sortField || !sortDirection) {
-      return keywords;
-    }
-
-    return [...keywords].sort((a, b) => {
-      let aValue: any;
-      let bValue: any;
-
-      switch (sortField) {
-        case 'keyword':
-          aValue = a.keyword.toLowerCase();
-          bValue = b.keyword.toLowerCase();
-          break;
-        case 'position':
-          aValue = a.position;
-          bValue = b.position;
-          break;
-        case 'change':
-          // Parse change values like "+1", "-2", "+5"
-          aValue = parseFloat(a.change.replace(/[^-\d.]/g, '')) || 0;
-          bValue = parseFloat(b.change.replace(/[^-\d.]/g, '')) || 0;
-          break;
-        case 'searchVolume':
-          aValue = a.searchVolume || 0;
-          bValue = b.searchVolume || 0;
-          break;
-        case 'impressions':
-          aValue = a.impressions || 0;
-          bValue = b.impressions || 0;
-          break;
-        default:
-          return 0;
-      }
-
-      // Handle null/undefined values
-      if (aValue == null && bValue == null) return 0;
-      if (aValue == null) return sortDirection === 'asc' ? 1 : -1;
-      if (bValue == null) return sortDirection === 'asc' ? -1 : 1;
-
-      if (aValue < bValue) {
-        return sortDirection === 'asc' ? -1 : 1;
-      }
-      if (aValue > bValue) {
-        return sortDirection === 'asc' ? 1 : -1;
-      }
-      return 0;
-    });
-  };
-
-  const SortButton = ({ field, children }: { field: SortField; children: React.ReactNode }) => {
-    const isActive = sortField === field;
-    const direction = isActive ? sortDirection : null;
-
-    return (
-      <Button
-        variant="ghost"
-        size="sm"
-        className="h-auto p-0 font-medium hover:bg-transparent"
-        onClick={() => handleSort(field)}
-      >
-        <span className="flex items-center gap-1">
-          {children}
-          {direction === 'asc' ? (
-            <ArrowUp className="h-3 w-3" />
-          ) : direction === 'desc' ? (
-            <ArrowDown className="h-3 w-3" />
-          ) : (
-            <ArrowUpDown className="h-3 w-3 opacity-50" />
-          )}
-        </span>
-      </Button>
-    );
-  };
-
-  const sortedKeywords = getSortedKeywords();
 
   return (
-    <div className="bg-white rounded-lg shadow">
-      <div className="p-4 border-b">
-        <h3 className="text-lg font-semibold">Top Ranking Keywords</h3>
-        <p className="text-sm text-muted-foreground">Data from SERP API analysis</p>
-      </div>
-      <div className="relative">
-        <ScrollArea className="h-[600px]">
-          <table className="w-full">
-            <thead className="sticky top-0 z-10 bg-white border-b">
-              <tr className="bg-muted/50">
-                <th className="text-left py-3 px-4 bg-white">
-                  <SortButton field="keyword">Keyword</SortButton>
-                </th>
-                <th className="text-left py-3 px-4 bg-white">Landing URL</th>
-                <th className="text-center py-3 px-4 bg-white">
-                  <SortButton field="position">Position</SortButton>
-                </th>
-                <th className="text-center py-3 px-4 bg-white">
-                  <SortButton field="change">Change</SortButton>
-                </th>
-                <th className="text-center py-3 px-4 bg-white">
-                  <SortButton field="searchVolume">Search Volume</SortButton>
-                </th>
-                <th className="text-right py-3 px-4 bg-white">Difficulty</th>
-              </tr>
-            </thead>
-            <tbody>
-              {sortedKeywords.map((keyword, index) => (
-                <tr key={index} className="border-b hover:bg-muted/20">
-                  <td className="py-3 px-4">{keyword.keyword}</td>
-                  <td className="py-3 px-4">
-                    <a 
-                      href={keyword.landingUrl} 
-                      target="_blank" 
-                      rel="noopener noreferrer"
-                      className="text-blue-600 hover:text-blue-800 truncate block max-w-xs"
-                      title={keyword.landingUrl}
-                    >
-                      {keyword.landingUrl ? keyword.landingUrl.replace(/^https?:\/\//, '') : 'N/A'}
-                    </a>
-                  </td>
-                  <td className="py-3 px-4 text-center">{keyword.position}</td>
-                  <td className="py-3 px-4 text-center">
-                    <span className={cn(
-                      "font-medium",
-                      keyword.change.startsWith("+") ? "text-green-500" : "text-red-500"
-                    )}>
-                      {keyword.change}
-                    </span>
-                  </td>
-                  <td className="py-3 px-4 text-center">{keyword.searchVolume?.toLocaleString()}</td>
-                  <td className="py-3 px-4 text-right">
-                    <span className={cn(
-                      "px-2 py-1 rounded text-xs font-medium",
-                      keyword.position <= 3 ? "bg-red-100 text-red-700" : "bg-yellow-100 text-yellow-700"
-                    )}>
-                      {keyword.position <= 3 ? "High" : "Medium"}
-                    </span>
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </ScrollArea>
-      </div>
+    <div className="overflow-x-auto">
+      <Table>
+        <TableHeader>
+          <TableRow>
+            <TableHead className="text-left">Keyword</TableHead>
+            <TableHead className="text-left">Landing URL</TableHead>
+            <TableHead className="text-right">Position</TableHead>
+            <TableHead className="text-right">Change</TableHead>
+            <TableHead className="text-right">Search Volume</TableHead>
+            <TableHead className="text-right">Est. Visits</TableHead>
+            <TableHead className="text-right">Difficulty</TableHead>
+          </TableRow>
+        </TableHeader>
+        <TableBody>
+          {keywords.map((keyword, index) => (
+            <TableRow key={`${keyword.keyword}-${index}`}>
+              <TableCell className="font-medium text-left">{keyword.keyword}</TableCell>
+              <TableCell className="text-left">
+                <a 
+                  href={keyword.landingUrl?.startsWith('http') ? keyword.landingUrl : `https://${keyword.landingUrl || selectedWebsite}`}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="flex items-center text-blue-600 hover:text-blue-800 hover:underline max-w-xs"
+                >
+                  <span className="truncate">{keyword.landingUrl || selectedWebsite}</span>
+                  <ExternalLink size={14} className="ml-2 flex-shrink-0" />
+                </a>
+              </TableCell>
+              <TableCell className="text-right">{keyword.position}</TableCell>
+              <TableCell className="text-right">
+                {keyword.change > 0 ? (
+                  <div className="flex items-center justify-end text-green-600">
+                    <ArrowUp size={16} className="mr-1" />
+                    {keyword.change}
+                  </div>
+                ) : keyword.change < 0 ? (
+                  <div className="flex items-center justify-end text-red-600">
+                    <ArrowDown size={16} className="mr-1" />
+                    {Math.abs(keyword.change)}
+                  </div>
+                ) : (
+                  <div className="flex items-center justify-end text-gray-500">
+                    <span className="mr-1">—</span>
+                    0
+                  </div>
+                )}
+              </TableCell>
+              <TableCell className="text-right">{keyword.searchVolume?.toLocaleString() || 0}</TableCell>
+              <TableCell className="text-right">{keyword.estimatedVisits?.toLocaleString() || 0}</TableCell>
+              <TableCell className="text-right">
+                <Badge className={`px-2 py-1 text-xs ${getDifficultyColor(keyword.difficulty || 0)}`}>
+                  {keyword.difficulty || 0}/100
+                </Badge>
+              </TableCell>
+            </TableRow>
+          ))}
+        </TableBody>
+      </Table>
     </div>
   );
 };

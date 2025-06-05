@@ -1,7 +1,7 @@
-
 import { useState, useCallback, useEffect } from 'react';
 import Header from '@/components/Header';
 import { Card, CardContent, CardHeader, CardTitle, CardFooter } from '@/components/ui/card';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { 
   Table, 
   TableBody, 
@@ -22,22 +22,11 @@ import {
   ChevronDown, 
   ChevronUp, 
   Loader,
-  Info
+  Info,
+  X
 } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import ColumnSelector from '@/components/ColumnSelector';
-import { 
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
-import {
-  Tooltip,
-  TooltipContent,
-  TooltipProvider,
-  TooltipTrigger,
-} from "@/components/ui/tooltip";
 
 // Define the keyword data type
 interface KeywordData {
@@ -71,6 +60,13 @@ interface SortState {
 }
 
 const CompetitionAnalysis = () => {
+  const [activeTab, setActiveTab] = useState('competitor1');
+  const [competitors, setCompetitors] = useState([
+    { id: 'competitor1', url: '', data: null, loading: false },
+    { id: 'competitor2', url: '', data: null, loading: false },
+    { id: 'competitor3', url: '', data: null, loading: false }
+  ]);
+
   const [isLoading, setIsLoading] = useState(false);
   const [websiteUrl, setWebsiteUrl] = useState('');
   const [hasAnalyzed, setHasAnalyzed] = useState(false);
@@ -193,333 +189,315 @@ const CompetitionAnalysis = () => {
     setDisplayedKeywords(result);
   }, [competitorKeywords, sortState, filters]);
 
-  const analyzeCompetitor = async () => {
-    if (!websiteUrl) return;
+  const analyzeCompetitor = async (competitorId: string) => {
+    const competitor = competitors.find(c => c.id === competitorId);
+    if (!competitor?.url) {
+      toast.error("Please enter a competitor website URL");
+      return;
+    }
     
-    setIsLoading(true);
-    setError(null);
-    toast.info(`Analyzing competitor website: ${websiteUrl}`);
+    setCompetitors(prev => prev.map(c => 
+      c.id === competitorId ? { ...c, loading: true } : c
+    ));
+    
+    toast.info(`Analyzing competitor website: ${competitor.url}`);
     
     try {
       const { data, error: supabaseError } = await supabase.functions.invoke('serp-api', {
-        body: { websiteUrl }
+        body: { websiteUrl: competitor.url }
       });
       
       if (supabaseError) {
         console.error('Supabase function error:', supabaseError);
-        setError(`Error: ${supabaseError.message || 'Failed to analyze competitor'}`);
         toast.error(`Error: ${supabaseError.message || 'Failed to analyze competitor'}`);
-        setHasAnalyzed(false);
         return;
       }
       
       if (data.error) {
         console.error('SERP API error:', data.error);
-        setError(data.error);
         toast.error(data.error);
-        setHasAnalyzed(false);
         return;
       }
       
-      // Update state with the API response data
-      setCompetitorKeywords(data.keywords || []);
-      setOverviewStats(data.stats || {
-        totalKeywords: 0,
-        top10Keywords: 0,
-        avgPosition: '0.0',
-        estTraffic: 0
-      });
-      setHasAnalyzed(true);
-      setItemsToShow(10); // Reset to show first 10 items
-      toast.success("Competitor analysis complete!");
+      // Limit to 1000 keywords as requested
+      const limitedKeywords = (data.keywords || []).slice(0, 1000);
+      
+      setCompetitors(prev => prev.map(c => 
+        c.id === competitorId ? {
+          ...c,
+          data: {
+            keywords: limitedKeywords,
+            stats: {
+              ...data.stats,
+              totalKeywords: limitedKeywords.length
+            }
+          },
+          loading: false
+        } : c
+      ));
+      
+      toast.success(`Analysis complete! Found ${limitedKeywords.length} keywords`);
       
     } catch (error: any) {
       console.error('Exception during analysis:', error);
-      setError(`Failed to analyze competitor: ${error.message || 'Unknown error'}`);
       toast.error("Failed to analyze competitor. Please try again later.");
-      setHasAnalyzed(false);
-    } finally {
-      setIsLoading(false);
+      setCompetitors(prev => prev.map(c => 
+        c.id === competitorId ? { ...c, loading: false } : c
+      ));
     }
   };
 
-  // Function to get difficulty color
-  const getDifficultyColor = (difficulty: number) => {
-    if (difficulty >= 70) return "text-red-600 bg-red-50";
-    if (difficulty >= 40) return "text-amber-600 bg-amber-50";
-    return "text-green-600 bg-green-50";
+  const updateCompetitorUrl = (competitorId: string, url: string) => {
+    setCompetitors(prev => prev.map(c => 
+      c.id === competitorId ? { ...c, url } : c
+    ));
   };
 
-  // Render filter dropdown for a column
-  const renderFilterDropdown = (column: keyof KeywordData, label: string) => {
-    return (
-      <DropdownMenu>
-        <DropdownMenuTrigger asChild>
-          <Button variant="ghost" size="icon" className="h-8 w-8 ml-1 p-0">
-            <Filter className="h-3 w-3" />
-          </Button>
-        </DropdownMenuTrigger>
-        <DropdownMenuContent align={column === 'keyword' || column === 'competitorUrl' ? "start" : "end"} className="w-60">
-          <div className="p-2">
-            <Input 
-              placeholder={`Filter by ${label.toLowerCase()}...`} 
-              value={filters[column] || ''}
-              onChange={(e) => applyFilter(column, e.target.value)}
-              className="mb-2"
-            />
-            <div className="flex justify-between">
-              <Button 
-                variant="outline" 
-                size="sm"
-                onClick={() => resetFilter(column)}
-              >
-                Clear
-              </Button>
-            </div>
-          </div>
-        </DropdownMenuContent>
-      </DropdownMenu>
-    );
+  const clearCompetitor = (competitorId: string) => {
+    setCompetitors(prev => prev.map(c => 
+      c.id === competitorId ? { ...c, url: '', data: null } : c
+    ));
+  };
+
+  const currentCompetitor = competitors.find(c => c.id === activeTab);
+  const competitorKeywords = currentCompetitor?.data?.keywords || [];
+  const overviewStats = currentCompetitor?.data?.stats || {
+    totalKeywords: 0,
+    top10Keywords: 0,
+    avgPosition: '0.0',
+    estTraffic: 0
   };
 
   return (
     <div className="container mx-auto py-6 px-4 max-w-7xl">
-      <Header onRefresh={handleRefresh} title="Competition Analysis" />
+      <Header onRefresh={() => {}} title="Competition Analysis" />
       
       <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-6 gap-4">
         <h2 className="text-lg font-medium">Competitor Website Analysis</h2>
       </div>
 
-      <Card className="mb-6">
-        <CardHeader>
-          <CardTitle>Analyze Competitor</CardTitle>
-        </CardHeader>
-        <CardContent>
-          <div className="flex flex-col md:flex-row gap-4">
-            <div className="flex-1">
-              <Input 
-                placeholder="Enter competitor website URL (e.g., example.com)" 
-                value={websiteUrl}
-                onChange={(e) => setWebsiteUrl(e.target.value)}
-                className="w-full"
-              />
-            </div>
-            <Button 
-              onClick={analyzeCompetitor} 
-              disabled={!websiteUrl || isLoading}
-              className="gap-2"
-            >
-              {isLoading ? (
-                <>
-                  <Loader className="h-4 w-4 animate-spin" />
-                  Analyzing...
-                </>
-              ) : (
-                <>
-                  Analyze
-                  <Search className="h-4 w-4" />
-                </>
-              )}
-            </Button>
-          </div>
-        </CardContent>
-      </Card>
-
-      {isLoading && !hasAnalyzed && (
-        <div className="flex justify-center items-center py-20">
-          <Loader className="h-10 w-10 animate-spin text-muted-foreground" />
-          <p className="ml-4 text-lg text-muted-foreground">Analyzing competitor data...</p>
-        </div>
-      )}
-      
-      {error && (
-        <Card className="mb-6 border-red-200">
-          <CardHeader className="pb-2 text-red-600">
-            <CardTitle className="flex items-center gap-2">
-              <Info className="h-5 w-5" />
-              Analysis Error
-            </CardTitle>
-          </CardHeader>
-          <CardContent>
-            <p>{error}</p>
-            <p className="text-sm mt-2 text-muted-foreground">
-              Please check that your SERP API key is correctly configured and try again.
-            </p>
-          </CardContent>
-        </Card>
-      )}
-
-      {hasAnalyzed && (
-        <>
-          <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
-            <Card>
-              <CardHeader className="pb-2">
-                <CardTitle className="text-sm font-medium">Total Keywords</CardTitle>
-              </CardHeader>
-              <CardContent>
-                <div className="text-2xl font-bold">{overviewStats.totalKeywords}</div>
-                <p className="text-xs text-muted-foreground">Ranking in top 100</p>
-              </CardContent>
-            </Card>
-            
-            <Card>
-              <CardHeader className="pb-2">
-                <CardTitle className="text-sm font-medium">Top 10 Keywords</CardTitle>
-              </CardHeader>
-              <CardContent>
-                <div className="text-2xl font-bold">{overviewStats.top10Keywords}</div>
-                <p className="text-xs text-muted-foreground">High visibility terms</p>
-              </CardContent>
-            </Card>
-            
-            <Card>
-              <CardHeader className="pb-2">
-                <CardTitle className="text-sm font-medium">Avg. Position</CardTitle>
-              </CardHeader>
-              <CardContent>
-                <div className="text-2xl font-bold">{overviewStats.avgPosition}</div>
-                <p className="text-xs text-muted-foreground">Across all keywords</p>
-              </CardContent>
-            </Card>
-            
-            <Card>
-              <CardHeader className="pb-2">
-                <CardTitle className="text-sm font-medium">Est. Traffic</CardTitle>
-              </CardHeader>
-              <CardContent>
-                <div className="text-2xl font-bold">{overviewStats.estTraffic.toLocaleString()}</div>
-                <p className="text-xs text-muted-foreground">Monthly organic visits</p>
-              </CardContent>
-            </Card>
-          </div>
-          
-          <Card>
-            <CardHeader className="flex flex-row items-center justify-between">
-              <CardTitle>Competitor Keyword Rankings</CardTitle>
-              <div className="flex items-center gap-2">
-                <div className="bg-muted px-3 py-1 rounded-md text-sm">
-                  Domain: {websiteUrl}
-                </div>
-                <ColumnSelector 
-                  columns={allColumns}
-                  visibleColumns={visibleColumns}
-                  onColumnToggle={toggleColumnVisibility}
-                />
-              </div>
-            </CardHeader>
-            <CardContent>
-              {displayedKeywords.length > 0 ? (
-                <div className="overflow-x-auto">
-                  <Table>
-                    <TableHeader>
-                      <TableRow>
-                        {allColumns.map(column => {
-                          if (!visibleColumns.includes(column.key)) return null;
-                          
-                          const columnKey = column.key as keyof KeywordData;
-                          return (
-                            <TableHead key={column.key} className={columnKey === 'keyword' || columnKey === 'competitorUrl' ? "" : "text-right"}>
-                              <div className={`flex items-center ${columnKey === 'keyword' || columnKey === 'competitorUrl' ? "" : "justify-end"} cursor-pointer`} onClick={() => handleSortChange(columnKey)}>
-                                {column.label}
-                                {getSortIcon(columnKey)}
-                                {renderFilterDropdown(columnKey, column.label)}
-                              </div>
-                            </TableHead>
-                          );
-                        })}
-                      </TableRow>
-                    </TableHeader>
-                    <TableBody>
-                      {displayedKeywords.slice(0, itemsToShow).map((keyword, index) => (
-                        <TableRow key={`${keyword.keyword}-${index}`}>
-                          {visibleColumns.includes('keyword') && (
-                            <TableCell className="font-medium">{keyword.keyword}</TableCell>
-                          )}
-                          
-                          {visibleColumns.includes('position') && (
-                            <TableCell className="text-right">{keyword.position}</TableCell>
-                          )}
-                          
-                          {visibleColumns.includes('change') && (
-                            <TableCell className="text-right">
-                              {keyword.change > 0 ? (
-                                <div className="flex items-center justify-end text-green-600">
-                                  <ArrowUp size={16} className="mr-1" />
-                                  {keyword.change}
-                                </div>
-                              ) : keyword.change < 0 ? (
-                                <div className="flex items-center justify-end text-red-600">
-                                  <ArrowDown size={16} className="mr-1" />
-                                  {Math.abs(keyword.change)}
-                                </div>
-                              ) : (
-                                <div className="flex items-center justify-end text-gray-500">
-                                  <span className="mr-1">—</span>
-                                  0
-                                </div>
-                              )}
-                            </TableCell>
-                          )}
-                          
-                          {visibleColumns.includes('searchVolume') && (
-                            <TableCell className="text-right">{keyword.searchVolume.toLocaleString()}</TableCell>
-                          )}
-                          
-                          {visibleColumns.includes('estimatedVisits') && (
-                            <TableCell className="text-right">{keyword.estimatedVisits.toLocaleString()}</TableCell>
-                          )}
-                          
-                          {visibleColumns.includes('difficulty') && (
-                            <TableCell className="text-right">
-                              <TooltipProvider>
-                                <Tooltip>
-                                  <TooltipTrigger asChild>
-                                    <span className={`px-2 py-1 rounded text-xs ${getDifficultyColor(keyword.difficulty)}`}>
-                                      {keyword.difficulty}/100
-                                    </span>
-                                  </TooltipTrigger>
-                                  <TooltipContent side="top">
-                                    <p>Difficulty: {keyword.difficultyLevel}</p>
-                                  </TooltipContent>
-                                </Tooltip>
-                              </TooltipProvider>
-                            </TableCell>
-                          )}
-                          
-                          {visibleColumns.includes('competitorUrl') && (
-                            <TableCell>
-                              <a 
-                                href={keyword.competitorUrl.startsWith('http') ? keyword.competitorUrl : `https://${keyword.competitorUrl}`}
-                                target="_blank"
-                                rel="noopener noreferrer"
-                                className="flex items-center text-blue-600 hover:text-blue-800 hover:underline"
-                              >
-                                <span className="truncate max-w-[200px]">{keyword.competitorUrl}</span>
-                                <ExternalLink size={14} className="ml-2" />
-                              </a>
-                            </TableCell>
-                          )}
-                        </TableRow>
-                      ))}
-                    </TableBody>
-                  </Table>
-                </div>
-              ) : (
-                <div className="text-center py-10 text-muted-foreground">
-                  No keyword data available for this domain
-                </div>
-              )}
-            </CardContent>
-            {displayedKeywords.length > 0 && itemsToShow < displayedKeywords.length && (
-              <CardFooter className="flex justify-center border-t p-4">
-                <Button variant="outline" onClick={loadMore}>
-                  Load more keywords ({itemsToShow} of {displayedKeywords.length})
-                </Button>
-              </CardFooter>
+      <Tabs defaultValue="competitor1" className="space-y-6" onValueChange={setActiveTab}>
+        <TabsList className="grid w-full grid-cols-3">
+          <TabsTrigger value="competitor1" className="relative">
+            Competitor 1
+            {competitors[0].url && (
+              <Button
+                variant="ghost"
+                size="sm"
+                className="absolute -top-1 -right-1 h-4 w-4 p-0"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  clearCompetitor('competitor1');
+                }}
+              >
+                <X className="h-3 w-3" />
+              </Button>
             )}
-          </Card>
-        </>
-      )}
+          </TabsTrigger>
+          <TabsTrigger value="competitor2" className="relative">
+            Competitor 2
+            {competitors[1].url && (
+              <Button
+                variant="ghost"
+                size="sm"
+                className="absolute -top-1 -right-1 h-4 w-4 p-0"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  clearCompetitor('competitor2');
+                }}
+              >
+                <X className="h-3 w-3" />
+              </Button>
+            )}
+          </TabsTrigger>
+          <TabsTrigger value="competitor3" className="relative">
+            Competitor 3
+            {competitors[2].url && (
+              <Button
+                variant="ghost"
+                size="sm"
+                className="absolute -top-1 -right-1 h-4 w-4 p-0"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  clearCompetitor('competitor3');
+                }}
+              >
+                <X className="h-3 w-3" />
+              </Button>
+            )}
+          </TabsTrigger>
+        </TabsList>
+
+        {competitors.map((competitor) => (
+          <TabsContent key={competitor.id} value={competitor.id} className="space-y-6">
+            <Card>
+              <CardHeader>
+                <CardTitle>Analyze {competitor.id === 'competitor1' ? 'First' : competitor.id === 'competitor2' ? 'Second' : 'Third'} Competitor</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="flex flex-col md:flex-row gap-4">
+                  <div className="flex-1">
+                    <Input 
+                      placeholder="Enter competitor website URL (e.g., example.com)" 
+                      value={competitor.url}
+                      onChange={(e) => updateCompetitorUrl(competitor.id, e.target.value)}
+                      className="w-full"
+                    />
+                  </div>
+                  <Button 
+                    onClick={() => analyzeCompetitor(competitor.id)} 
+                    disabled={!competitor.url || competitor.loading}
+                    className="gap-2"
+                  >
+                    {competitor.loading ? (
+                      <>
+                        <Loader className="h-4 w-4 animate-spin" />
+                        Analyzing...
+                      </>
+                    ) : (
+                      <>
+                        Analyze
+                        <Search className="h-4 w-4" />
+                      </>
+                    )}
+                  </Button>
+                </div>
+              </CardContent>
+            </Card>
+
+            {competitor.data && (
+              <>
+                <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
+                  <Card>
+                    <CardHeader className="pb-2">
+                      <CardTitle className="text-sm font-medium">Total Keywords</CardTitle>
+                    </CardHeader>
+                    <CardContent>
+                      <div className="text-2xl font-bold">{overviewStats.totalKeywords}</div>
+                      <p className="text-xs text-muted-foreground">Up to 1000 keywords</p>
+                    </CardContent>
+                  </Card>
+                  
+                  <Card>
+                    <CardHeader className="pb-2">
+                      <CardTitle className="text-sm font-medium">Top 10 Keywords</CardTitle>
+                    </CardHeader>
+                    <CardContent>
+                      <div className="text-2xl font-bold">{overviewStats.top10Keywords}</div>
+                      <p className="text-xs text-muted-foreground">High visibility terms</p>
+                    </CardContent>
+                  </Card>
+                  
+                  <Card>
+                    <CardHeader className="pb-2">
+                      <CardTitle className="text-sm font-medium">Avg. Position</CardTitle>
+                    </CardHeader>
+                    <CardContent>
+                      <div className="text-2xl font-bold">{overviewStats.avgPosition}</div>
+                      <p className="text-xs text-muted-foreground">Across all keywords</p>
+                    </CardContent>
+                  </Card>
+                  
+                  <Card>
+                    <CardHeader className="pb-2">
+                      <CardTitle className="text-sm font-medium">Est. Traffic</CardTitle>
+                    </CardHeader>
+                    <CardContent>
+                      <div className="text-2xl font-bold">{overviewStats.estTraffic.toLocaleString()}</div>
+                      <p className="text-xs text-muted-foreground">Monthly organic visits</p>
+                    </CardContent>
+                  </Card>
+                </div>
+                
+                <Card>
+                  <CardHeader className="flex flex-row items-center justify-between">
+                    <CardTitle>Competitor Keyword Rankings</CardTitle>
+                    <div className="flex items-center gap-2">
+                      <div className="bg-muted px-3 py-1 rounded-md text-sm">
+                        Domain: {competitor.url}
+                      </div>
+                    </div>
+                  </CardHeader>
+                  <CardContent>
+                    {competitorKeywords.length > 0 ? (
+                      <div className="overflow-x-auto">
+                        <Table>
+                          <TableHeader>
+                            <TableRow>
+                              <TableHead className="text-left">Keyword</TableHead>
+                              <TableHead className="text-right">Position</TableHead>
+                              <TableHead className="text-right">Change</TableHead>
+                              <TableHead className="text-right">Search Volume</TableHead>
+                              <TableHead className="text-right">Est. Visits</TableHead>
+                              <TableHead className="text-right">SEO Difficulty</TableHead>
+                              <TableHead className="text-left">URL</TableHead>
+                            </TableRow>
+                          </TableHeader>
+                          <TableBody>
+                            {competitorKeywords.slice(0, 50).map((keyword, index) => (
+                              <TableRow key={`${keyword.keyword}-${index}`}>
+                                <TableCell className="font-medium text-left">{keyword.keyword}</TableCell>
+                                <TableCell className="text-right">{keyword.position}</TableCell>
+                                <TableCell className="text-right">
+                                  {keyword.change > 0 ? (
+                                    <div className="flex items-center justify-end text-green-600">
+                                      <ArrowUp size={16} className="mr-1" />
+                                      {keyword.change}
+                                    </div>
+                                  ) : keyword.change < 0 ? (
+                                    <div className="flex items-center justify-end text-red-600">
+                                      <ArrowDown size={16} className="mr-1" />
+                                      {Math.abs(keyword.change)}
+                                    </div>
+                                  ) : (
+                                    <div className="flex items-center justify-end text-gray-500">
+                                      <span className="mr-1">—</span>
+                                      0
+                                    </div>
+                                  )}
+                                </TableCell>
+                                <TableCell className="text-right">{keyword.searchVolume?.toLocaleString() || 0}</TableCell>
+                                <TableCell className="text-right">{keyword.estimatedVisits?.toLocaleString() || 0}</TableCell>
+                                <TableCell className="text-right">
+                                  <span className={`px-2 py-1 rounded text-xs ${getDifficultyColor(keyword.difficulty || 0)}`}>
+                                    {keyword.difficulty || 0}/100
+                                  </span>
+                                </TableCell>
+                                <TableCell className="text-left">
+                                  <a 
+                                    href={keyword.competitorUrl?.startsWith('http') ? keyword.competitorUrl : `https://${keyword.competitorUrl}`}
+                                    target="_blank"
+                                    rel="noopener noreferrer"
+                                    className="flex items-center text-blue-600 hover:text-blue-800 hover:underline max-w-xs"
+                                  >
+                                    <span className="truncate">{keyword.competitorUrl}</span>
+                                    <ExternalLink size={14} className="ml-2 flex-shrink-0" />
+                                  </a>
+                                </TableCell>
+                              </TableRow>
+                            ))}
+                          </TableBody>
+                        </Table>
+                      </div>
+                    ) : (
+                      <div className="text-center py-10 text-muted-foreground">
+                        No keyword data available for this domain
+                      </div>
+                    )}
+                  </CardContent>
+                  {competitorKeywords.length > 50 && (
+                    <CardFooter className="flex justify-center border-t p-4">
+                      <p className="text-sm text-muted-foreground">
+                        Showing first 50 of {competitorKeywords.length} keywords
+                      </p>
+                    </CardFooter>
+                  )}
+                </Card>
+              </>
+            )}
+          </TabsContent>
+        ))}
+      </Tabs>
     </div>
   );
 };
