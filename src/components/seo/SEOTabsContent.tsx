@@ -27,51 +27,55 @@ const SEOTabsContent = ({
 }: SEOTabsContentProps) => {
   
   return (
-    <Tabs defaultValue="keywords" className="mt-6" onValueChange={onTabChange} value={activeTab}>
-      <TabsList className="mb-6">
-        <TabsTrigger value="keywords">Keywords ({serpKeywords.length})</TabsTrigger>
-        <TabsTrigger value="pages">Pages ({pages.length})</TabsTrigger>
-        <TabsTrigger value="urlData">URL Meta Data ({urlMetaData.length})</TabsTrigger>
-        <TabsTrigger value="imageAnalysis">Image Analysis</TabsTrigger>
-        <TabsTrigger value="sitePerformance">Site Performance</TabsTrigger>
-      </TabsList>
+    <div className="mt-6">
+      <Tabs defaultValue="keywords" onValueChange={onTabChange} value={activeTab}>
+        <div className="sticky top-0 z-20 bg-white border-b mb-6 pb-4">
+          <TabsList className="w-full justify-start">
+            <TabsTrigger value="keywords">Keywords ({serpKeywords.length})</TabsTrigger>
+            <TabsTrigger value="pages">Pages ({pages.length})</TabsTrigger>
+            <TabsTrigger value="urlData">URL Meta Data ({urlMetaData.length})</TabsTrigger>
+            <TabsTrigger value="imageAnalysis">Image Analysis</TabsTrigger>
+            <TabsTrigger value="sitePerformance">Site Performance</TabsTrigger>
+          </TabsList>
+        </div>
 
-      <TabsContent value="keywords" className="space-y-4">
-        <KeywordsTab 
-          serpKeywords={serpKeywords}
-          selectedWebsite={selectedWebsite}
-        />
-      </TabsContent>
+        <TabsContent value="keywords" className="space-y-4">
+          <KeywordsTab 
+            serpKeywords={serpKeywords}
+            selectedWebsite={selectedWebsite}
+          />
+        </TabsContent>
 
-      <TabsContent value="pages">
-        <PagesTab 
-          pages={pages}
-          selectedWebsite={selectedWebsite}
-        />
-      </TabsContent>
-      
-      <TabsContent value="urlData">
-        <URLMetaDataTab 
-          urlMetaData={urlMetaData}
-          selectedWebsite={selectedWebsite}
-        />
-      </TabsContent>
+        <TabsContent value="pages">
+          <PagesTab 
+            pages={pages}
+            selectedWebsite={selectedWebsite}
+          />
+        </TabsContent>
+        
+        <TabsContent value="urlData">
+          <URLMetaDataTab 
+            urlMetaData={urlMetaData}
+            selectedWebsite={selectedWebsite}
+          />
+        </TabsContent>
 
-      <TabsContent value="imageAnalysis">
-        <ImageAnalysisTab 
-          urlMetaData={urlMetaData}
-          selectedWebsite={selectedWebsite}
-        />
-      </TabsContent>
-      
-      <TabsContent value="sitePerformance">
-        <SitePerformanceTab 
-          urlMetaData={urlMetaData}
-          sitePerformance={sitePerformance}
-          selectedWebsite={selectedWebsite}
-        />
-      </TabsContent>
-    </Tabs>
+        <TabsContent value="imageAnalysis">
+          <ImageAnalysisTab 
+            urlMetaData={urlMetaData}
+            selectedWebsite={selectedWebsite}
+          />
+        </TabsContent>
+        
+        <TabsContent value="sitePerformance">
+          <SitePerformanceTab 
+            urlMetaData={urlMetaData}
+            sitePerformance={sitePerformance}
+            selectedWebsite={selectedWebsite}
+          />
+        </TabsContent>
+      </Tabs>
+    </div>
   );
 };
 
