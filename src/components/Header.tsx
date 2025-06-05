@@ -1,3 +1,4 @@
+
 import { useState } from 'react';
 import { Button } from "@/components/ui/button";
 import { LineChart, Settings, User } from "lucide-react";
@@ -16,6 +17,7 @@ import {
 } from "@/components/ui/popover";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { useGoogleAccounts, GoogleAccount } from "@/hooks/use-google-accounts";
+import { useAuth } from "@/context/AuthContext";
 import { toast } from "@/hooks/use-toast";
 
 interface HeaderProps {
@@ -27,6 +29,7 @@ interface HeaderProps {
 const Header = ({ onRefresh, title, isLoading }: HeaderProps) => {
   const [lastUpdated, setLastUpdated] = useState<Date>(new Date());
   const { accounts, currentAccount, switchAccount } = useGoogleAccounts();
+  const { signOut, user } = useAuth();
 
   const handleRefresh = () => {
     setLastUpdated(new Date());
@@ -38,6 +41,23 @@ const Header = ({ onRefresh, title, isLoading }: HeaderProps) => {
       toast({
         title: "Account switched",
         description: `Now using ${account.name}`,
+      });
+    }
+  };
+
+  const handleSignOut = async () => {
+    try {
+      await signOut();
+      toast({
+        title: "Signed out successfully",
+        description: "You have been logged out of your account",
+      });
+    } catch (error) {
+      console.error('Sign out error:', error);
+      toast({
+        title: "Sign out failed",
+        description: "There was an error signing out. Please try again.",
+        variant: "destructive",
       });
     }
   };
@@ -74,7 +94,9 @@ const Header = ({ onRefresh, title, isLoading }: HeaderProps) => {
             <DropdownMenuLabel>
               <div className="flex flex-col">
                 <span>Marketing Account</span>
-                <span className="text-xs text-muted-foreground">marketing@example.com</span>
+                <span className="text-xs text-muted-foreground">
+                  {user?.email || 'marketing@example.com'}
+                </span>
               </div>
             </DropdownMenuLabel>
             <DropdownMenuSeparator />
@@ -108,7 +130,10 @@ const Header = ({ onRefresh, title, isLoading }: HeaderProps) => {
               <span>Preferences</span>
             </DropdownMenuItem>
             <DropdownMenuSeparator />
-            <DropdownMenuItem className="text-red-500">
+            <DropdownMenuItem 
+              className="text-red-500 cursor-pointer"
+              onClick={handleSignOut}
+            >
               Sign out
             </DropdownMenuItem>
           </DropdownMenuContent>
