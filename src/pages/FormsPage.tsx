@@ -6,33 +6,13 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { Textarea } from '@/components/ui/textarea';
 import { toast } from '@/components/ui/sonner';
+import WebsiteFormConnector from '@/components/WebsiteFormConnector';
 
 const FormsPage = () => {
   const [activeTab, setActiveTab] = useState('website-forms');
-  const [websiteUrl, setWebsiteUrl] = useState('');
   const [facebookPageId, setFacebookPageId] = useState('');
   const [isConnecting, setIsConnecting] = useState(false);
-
-  const handleWebsiteConnect = async () => {
-    if (!websiteUrl.trim()) {
-      toast.error('Please enter a website URL');
-      return;
-    }
-    
-    setIsConnecting(true);
-    try {
-      // Simulate connection process
-      await new Promise(resolve => setTimeout(resolve, 2000));
-      toast.success(`Successfully connected to ${websiteUrl}`);
-      setWebsiteUrl('');
-    } catch (error) {
-      toast.error('Failed to connect to website');
-    } finally {
-      setIsConnecting(false);
-    }
-  };
 
   const handleFacebookConnect = async () => {
     if (!facebookPageId.trim()) {
@@ -67,66 +47,7 @@ const FormsPage = () => {
         </TabsList>
 
         <TabsContent value="website-forms" className="space-y-6">
-          <Card>
-            <CardHeader>
-              <CardTitle>Connect Website Forms</CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-4">
-              <div className="space-y-2">
-                <Label htmlFor="website-url">Website URL</Label>
-                <Input
-                  id="website-url"
-                  placeholder="Enter your website URL (e.g., example.com)"
-                  value={websiteUrl}
-                  onChange={(e) => setWebsiteUrl(e.target.value)}
-                />
-              </div>
-              
-              <div className="space-y-2">
-                <Label htmlFor="form-type">Form Type</Label>
-                <Select defaultValue="contact-form">
-                  <SelectTrigger>
-                    <SelectValue placeholder="Select form type" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="contact-form">Contact Form</SelectItem>
-                    <SelectItem value="lead-form">Lead Generation Form</SelectItem>
-                    <SelectItem value="newsletter">Newsletter Signup</SelectItem>
-                    <SelectItem value="custom">Custom Form</SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
-
-              <div className="space-y-2">
-                <Label htmlFor="form-description">Description (Optional)</Label>
-                <Textarea
-                  id="form-description"
-                  placeholder="Describe what this form is used for..."
-                  rows={3}
-                />
-              </div>
-
-              <Button 
-                onClick={handleWebsiteConnect}
-                disabled={isConnecting}
-                className="w-full"
-              >
-                {isConnecting ? 'Connecting...' : 'Connect Website Form'}
-              </Button>
-            </CardContent>
-          </Card>
-
-          <Card>
-            <CardHeader>
-              <CardTitle>Connected Website Forms</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="text-center py-8 text-muted-foreground">
-                <p>No website forms connected yet.</p>
-                <p className="text-sm">Connect your first website form above to get started.</p>
-              </div>
-            </CardContent>
-          </Card>
+          <WebsiteFormConnector />
         </TabsContent>
 
         <TabsContent value="facebook-forms" className="space-y-6">
