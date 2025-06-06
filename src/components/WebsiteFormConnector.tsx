@@ -88,7 +88,7 @@ const WebsiteFormConnector = () => {
     setSelectedForm(form);
     // Auto-suggest field mappings based on field names
     const autoMappings: FieldMapping[] = form.fields.map(field => {
-      let suggestedMapping = '';
+      let suggestedMapping = 'none';
       
       if (field.name.toLowerCase().includes('name') && !field.name.toLowerCase().includes('first') && !field.name.toLowerCase().includes('last')) {
         suggestedMapping = 'name';
@@ -128,7 +128,7 @@ const WebsiteFormConnector = () => {
   const connectForm = () => {
     if (!selectedForm) return;
     
-    const mappedFields = fieldMappings.filter(mapping => mapping.leadField);
+    const mappedFields = fieldMappings.filter(mapping => mapping.leadField && mapping.leadField !== 'none');
     
     if (mappedFields.length === 0) {
       toast.error("Please map at least one field");
@@ -249,14 +249,14 @@ const WebsiteFormConnector = () => {
                     <div className="text-muted-foreground">→</div>
                     <div className="flex-1">
                       <Select
-                        value={mapping?.leadField || ''}
+                        value={mapping?.leadField || 'none'}
                         onValueChange={(value) => updateFieldMapping(field.name, value)}
                       >
                         <SelectTrigger>
                           <SelectValue placeholder="Select lead field" />
                         </SelectTrigger>
                         <SelectContent>
-                          <SelectItem value="">Don't map</SelectItem>
+                          <SelectItem value="none">Don't map</SelectItem>
                           {leadFormFields.map((leadField) => (
                             <SelectItem key={leadField} value={leadField}>
                               {leadField}
