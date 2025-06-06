@@ -1,5 +1,8 @@
 
-import { Card, CardContent } from '@/components/ui/card';
+import KeywordRankingBreakdown from './KeywordRankingBreakdown';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Badge } from '@/components/ui/badge';
+import { TrendingUp, TrendingDown, Eye, MousePointer } from 'lucide-react';
 
 interface SEOStatsCardsProps {
   serpStats: {
@@ -7,70 +10,82 @@ interface SEOStatsCardsProps {
     top10Keywords: number;
     avgPosition: string;
     estTraffic: number;
-    totalClicks?: number;
-    totalImpressions?: number;
-    avgCTR?: number;
+    totalPages: number;
+    topPerformingPages: any[];
+    totalClicks: number;
+    totalImpressions: number;
+    avgCTR: number;
   };
+  serpKeywords?: any[];
 }
 
-const SEOStatsCards = ({ serpStats }: SEOStatsCardsProps) => {
-  const formatNumber = (value: number | undefined) => {
-    if (typeof value !== 'number' || isNaN(value)) return '0';
-    return new Intl.NumberFormat('en-US').format(value);
-  };
-
-  const formatPercent = (value: number | undefined) => {
-    if (typeof value !== 'number' || isNaN(value)) return '0.0%';
-    return `${value.toFixed(1)}%`;
+const SEOStatsCards = ({ serpStats, serpKeywords = [] }: SEOStatsCardsProps) => {
+  const formatNumber = (num: number) => {
+    if (num >= 1000000) {
+      return (num / 1000000).toFixed(1) + 'M';
+    } else if (num >= 1000) {
+      return (num / 1000).toFixed(1) + 'K';
+    }
+    return num.toString();
   };
 
   return (
-    <div>
-      <div className="mb-4">
-        <h2 className="text-xl font-semibold">SEO Overview</h2>
+    <div className="space-y-6">
+      {/* Main Stats Grid */}
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+        <Card>
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+            <CardTitle className="text-sm font-medium">Total Clicks</CardTitle>
+            <MousePointer className="h-4 w-4 text-muted-foreground" />
+          </CardHeader>
+          <CardContent>
+            <div className="text-2xl font-bold">{formatNumber(serpStats.totalClicks)}</div>
+            <p className="text-xs text-muted-foreground">From GSC data</p>
+          </CardContent>
+        </Card>
+
+        <Card>
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+            <CardTitle className="text-sm font-medium">Keywords Ranked</CardTitle>
+            <TrendingUp className="h-4 w-4 text-muted-foreground" />
+          </CardHeader>
+          <CardContent>
+            <div className="text-2xl font-bold">{formatNumber(serpStats.totalKeywords)}</div>
+            <p className="text-xs text-green-600">
+              +{serpStats.top10Keywords} in top 10
+            </p>
+          </CardContent>
+        </Card>
+
+        <Card>
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+            <CardTitle className="text-sm font-medium">Average Position</CardTitle>
+            <Badge variant="outline" className="text-xs">From GSC data</Badge>
+          </CardHeader>
+          <CardContent>
+            <div className="text-2xl font-bold">{serpStats.avgPosition}</div>
+            <p className="text-xs text-muted-foreground">Overall ranking</p>
+          </CardContent>
+        </Card>
+
+        <Card>
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+            <CardTitle className="text-sm font-medium">Total Impressions</CardTitle>
+            <Eye className="h-4 w-4 text-muted-foreground" />
+          </CardHeader>
+          <CardContent>
+            <div className="text-2xl font-bold">{formatNumber(serpStats.totalImpressions)}</div>
+            <p className="text-xs text-muted-foreground">
+              CTR: {serpStats.avgCTR.toFixed(1)}%
+            </p>
+          </CardContent>
+        </Card>
       </div>
-      
-      <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-        <Card>
-          <CardContent className="pt-6">
-            <div className="space-y-2">
-              <p className="text-sm font-medium text-muted-foreground">Total Clicks</p>
-              <p className="text-3xl font-bold">{formatNumber(serpStats.totalClicks)}</p>
-              <p className="text-sm text-green-500">From GSC data</p>
-            </div>
-          </CardContent>
-        </Card>
-        
-        <Card>
-          <CardContent className="pt-6">
-            <div className="space-y-2">
-              <p className="text-sm font-medium text-muted-foreground">Keywords Ranked</p>
-              <p className="text-3xl font-bold">{formatNumber(serpStats.totalKeywords)}</p>
-              <p className="text-sm text-green-500">+{formatNumber(serpStats.top10Keywords)} in top 10</p>
-            </div>
-          </CardContent>
-        </Card>
-        
-        <Card>
-          <CardContent className="pt-6">
-            <div className="space-y-2">
-              <p className="text-sm font-medium text-muted-foreground">Average Position</p>
-              <p className="text-3xl font-bold">{serpStats.avgPosition || '0.0'}</p>
-              <p className="text-sm text-green-500">From GSC data</p>
-            </div>
-          </CardContent>
-        </Card>
-        
-        <Card>
-          <CardContent className="pt-6">
-            <div className="space-y-2">
-              <p className="text-sm font-medium text-muted-foreground">Total Impressions</p>
-              <p className="text-3xl font-bold">{formatNumber(serpStats.totalImpressions)}</p>
-              <p className="text-sm text-green-500">CTR: {formatPercent(serpStats.avgCTR)}</p>
-            </div>
-          </CardContent>
-        </Card>
-      </div>
+
+      {/* Keyword Ranking Breakdown */}
+      {serpKeywords.length > 0 && (
+        <KeywordRankingBreakdown keywords={serpKeywords} />
+      )}
     </div>
   );
 };

@@ -74,7 +74,10 @@ const SEOPage = () => {
           </div>
 
           <div className="lg:col-span-2">
-            <SEOStatsCards serpStats={seoState.serpStats} />
+            <SEOStatsCards 
+              serpStats={seoState.serpStats} 
+              serpKeywords={seoState.serpKeywords}
+            />
           </div>
         </div>
 
