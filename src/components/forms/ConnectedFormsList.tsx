@@ -14,7 +14,8 @@ interface ConnectedFormsListProps {
 
 const ConnectedFormsList = ({ connectedForms, isLoading, onDisconnect }: ConnectedFormsListProps) => {
   const copyWebhookUrl = () => {
-    const webhookUrl = `${window.location.origin}/functions/v1/form-webhook`;
+    // Use the correct Supabase function URL
+    const webhookUrl = `https://omgbcuomikauxthmslpi.supabase.co/functions/v1/form-webhook`;
     navigator.clipboard.writeText(webhookUrl);
     toast.success('Webhook URL copied to clipboard');
   };
@@ -25,7 +26,7 @@ const ConnectedFormsList = ({ connectedForms, isLoading, onDisconnect }: Connect
 const formData = new FormData(form);
 const data = Object.fromEntries(formData.entries());
 
-fetch('${window.location.origin}/functions/v1/form-webhook', {
+fetch('https://omgbcuomikauxthmslpi.supabase.co/functions/v1/form-webhook', {
   method: 'POST',
   headers: {
     'Content-Type': 'application/json',

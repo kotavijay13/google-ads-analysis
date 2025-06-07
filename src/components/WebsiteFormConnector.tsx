@@ -77,8 +77,8 @@ const WebsiteFormConnector = () => {
       await saveConnectedForm(selectedForm, fieldMappings, websiteUrl);
       toast.success(`Connected ${selectedForm.name} successfully!`);
       
-      // Show webhook URL to user
-      const webhookUrl = `${window.location.origin}/functions/v1/form-webhook`;
+      // Show webhook URL to user with correct Supabase URL
+      const webhookUrl = `https://omgbcuomikauxthmslpi.supabase.co/functions/v1/form-webhook`;
       toast.success(`Webhook URL: ${webhookUrl}`, {
         duration: 10000,
         description: 'Add this URL to your form submission handler'

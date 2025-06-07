@@ -22,15 +22,21 @@ const WebsiteScanner = ({ onFormsDetected }: WebsiteScannerProps) => {
       return;
     }
 
+    // Validate URL format
+    let validUrl = websiteUrl;
+    if (!websiteUrl.startsWith('http://') && !websiteUrl.startsWith('https://')) {
+      validUrl = 'https://' + websiteUrl;
+    }
+
     setIsScanning(true);
     
-    // Simulate form detection (in real implementation, this would scan the website)
+    // Simulate form detection with real URLs from the input website
     setTimeout(() => {
       const mockForms: WebsiteForm[] = [
         {
           id: 'contact-form',
           name: 'Contact Form',
-          url: `${websiteUrl}/contact`,
+          url: validUrl + '/contact',
           fields: [
             { name: 'full_name', type: 'text', required: true },
             { name: 'email_address', type: 'email', required: true },
@@ -41,7 +47,7 @@ const WebsiteScanner = ({ onFormsDetected }: WebsiteScannerProps) => {
         {
           id: 'newsletter-form',
           name: 'Newsletter Signup',
-          url: `${websiteUrl}/newsletter`,
+          url: validUrl + '/newsletter',
           fields: [
             { name: 'email', type: 'email', required: true },
             { name: 'first_name', type: 'text', required: false }
@@ -49,7 +55,7 @@ const WebsiteScanner = ({ onFormsDetected }: WebsiteScannerProps) => {
         }
       ];
       
-      onFormsDetected(mockForms, websiteUrl);
+      onFormsDetected(mockForms, validUrl);
       setIsScanning(false);
       toast.success(`Found ${mockForms.length} forms on the website`);
     }, 2000);
@@ -69,7 +75,7 @@ const WebsiteScanner = ({ onFormsDetected }: WebsiteScannerProps) => {
             <Label htmlFor="websiteUrl">Website URL</Label>
             <Input
               id="websiteUrl"
-              placeholder="https://yourwebsite.com"
+              placeholder="yourwebsite.com or https://yourwebsite.com"
               value={websiteUrl}
               onChange={(e) => setWebsiteUrl(e.target.value)}
             />
