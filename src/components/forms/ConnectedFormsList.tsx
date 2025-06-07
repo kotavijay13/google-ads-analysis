@@ -1,4 +1,3 @@
-
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -35,7 +34,18 @@ document.addEventListener('DOMContentLoaded', function() {
       const formData = new FormData(form);
       const data = Object.fromEntries(formData.entries());
       
-      console.log('Submitting form data:', data);
+      console.log('=== FORM SUBMISSION DEBUG ===');
+      console.log('Form ID being sent:', '${formId}');
+      console.log('Form data being sent:', data);
+      console.log('Website URL:', window.location.href);
+      
+      const payload = {
+        formId: '${formId}',
+        formData: data,
+        websiteUrl: window.location.href
+      };
+      
+      console.log('Full payload:', JSON.stringify(payload, null, 2));
       
       try {
         const response = await fetch('https://omgbcuomikauxthmslpi.supabase.co/functions/v1/form-webhook', {
@@ -43,18 +53,17 @@ document.addEventListener('DOMContentLoaded', function() {
           headers: {
             'Content-Type': 'application/json',
           },
-          body: JSON.stringify({
-            formId: '${formId}',
-            formData: data,
-            websiteUrl: window.location.href
-          })
+          body: JSON.stringify(payload)
         });
+        
+        console.log('Response status:', response.status);
+        console.log('Response headers:', Object.fromEntries(response.headers.entries()));
         
         const result = await response.json();
         console.log('Webhook response:', result);
         
         if (response.ok) {
-          alert('Form submitted successfully!');
+          alert('Form submitted successfully! Lead ID: ' + (result.leadId || 'Unknown'));
           form.reset(); // Clear the form
         } else {
           console.error('Webhook error:', result);
@@ -62,14 +71,16 @@ document.addEventListener('DOMContentLoaded', function() {
         }
       } catch (error) {
         console.error('Network error:', error);
-        alert('Network error submitting form');
+        alert('Network error submitting form: ' + error.message);
       }
     });
+  } else {
+    console.error('No form found on the page. Make sure you have a <form> element.');
   }
 });`;
     
     navigator.clipboard.writeText(code);
-    toast.success('Form submission code copied to clipboard');
+    toast.success('Enhanced form submission code copied to clipboard');
   };
 
   if (isLoading) {
@@ -136,14 +147,29 @@ document.addEventListener('DOMContentLoaded', function() {
                       </div>
                     </div>
 
+                    <div className="mb-3 p-3 bg-blue-50 border border-blue-200 rounded text-sm">
+                      <p className="font-medium text-blue-800 mb-2">Debug Information:</p>
+                      <p className="text-blue-700 text-xs mb-1">
+                        <strong>Form ID:</strong> {form.form_id}
+                      </p>
+                      <p className="text-blue-700 text-xs mb-1">
+                        <strong>Webhook URL:</strong> https://omgbcuomikauxthmslpi.supabase.co/functions/v1/form-webhook
+                      </p>
+                      <p className="text-blue-700 text-xs">
+                        <strong>User ID:</strong> {form.user_id}
+                      </p>
+                    </div>
+
                     <div className="mb-3 p-2 bg-yellow-50 border border-yellow-200 rounded text-sm">
                       <p className="font-medium text-yellow-800">Integration Instructions:</p>
                       <p className="text-yellow-700 text-xs mt-1">
-                        1. Copy the integration code below
+                        1. Copy the enhanced integration code below (includes debugging)
                         <br />
                         2. Add it to your website before the closing &lt;/body&gt; tag
                         <br />
-                        3. Test your form to ensure leads are captured
+                        3. Test your form and check browser console for debug info
+                        <br />
+                        4. Contact support if you see any errors in the console
                       </p>
                     </div>
 
@@ -154,7 +180,7 @@ document.addEventListener('DOMContentLoaded', function() {
                         onClick={() => copyFormSubmissionCode(form.form_id)}
                       >
                         <Copy className="mr-2 h-4 w-4" />
-                        Copy Integration Code
+                        Copy Enhanced Integration Code
                       </Button>
                       <Button
                         variant="outline"
