@@ -38,7 +38,9 @@ export const useConnectedForms = () => {
       // Transform the data to match our interface
       const transformedData = (data || []).map(item => ({
         ...item,
-        field_mappings: Array.isArray(item.field_mappings) ? item.field_mappings as FieldMapping[] : []
+        field_mappings: Array.isArray(item.field_mappings) 
+          ? (item.field_mappings as unknown as FieldMapping[])
+          : []
       }));
 
       setConnectedForms(transformedData);
@@ -61,7 +63,7 @@ export const useConnectedForms = () => {
           form_name: form.name,
           form_url: form.url,
           website_url: websiteUrl,
-          field_mappings: fieldMappings as any // Cast to any to handle Json type
+          field_mappings: fieldMappings as unknown as any
         })
         .select()
         .single();
