@@ -126,15 +126,7 @@ serve(async (req) => {
     console.log('=== FOUND CONNECTED FORM ===')
     console.log('Connected form:', JSON.stringify(connectedForm, null, 2))
 
-    // Map form data according to field mappings
-    const fieldMappings = connectedForm.field_mappings as Array<{
-      websiteField: string;
-      leadField: string;
-    }>
-    
-    console.log('=== FIELD MAPPINGS ===')
-    console.log('Field mappings:', JSON.stringify(fieldMappings, null, 2))
-    
+    // Create base lead data
     const leadData: any = {
       user_id: connectedForm.user_id,
       form_id: formId,
@@ -143,12 +135,59 @@ serve(async (req) => {
       status: 'New'
     }
 
-    console.log('=== APPLYING FIELD MAPPINGS ===')
-    // Apply field mappings
+    console.log('=== PROCESSING FORM DATA ===')
+    console.log('Available form fields:', Object.keys(formData))
+
+    // Smart field mapping - try to map common field variations
+    if (formData.firstName || formData.first_name || formData.fname) {
+      leadData.first_name = formData.firstName || formData.first_name || formData.fname
+      console.log('Mapped first_name:', leadData.first_name)
+    }
+
+    if (formData.lastName || formData.last_name || formData.lname) {
+      leadData.last_name = formData.lastName || formData.last_name || formData.lname
+      console.log('Mapped last_name:', leadData.last_name)
+    }
+
+    // Create full name if we have first and last name
+    if (leadData.first_name || leadData.last_name) {
+      leadData.name = `${leadData.first_name || ''} ${leadData.last_name || ''}`.trim()
+      console.log('Created full name:', leadData.name)
+    }
+
+    if (formData.email || formData.email_address || formData.emailAddress) {
+      leadData.email = formData.email || formData.email_address || formData.emailAddress
+      console.log('Mapped email:', leadData.email)
+    }
+
+    if (formData.phone || formData.phone_number || formData.phoneNumber || formData.tel || formData.telephone) {
+      leadData.phone = formData.phone || formData.phone_number || formData.phoneNumber || formData.tel || formData.telephone
+      console.log('Mapped phone:', leadData.phone)
+    }
+
+    if (formData.company || formData.organization || formData.business) {
+      leadData.company = formData.company || formData.organization || formData.business
+      console.log('Mapped company:', leadData.company)
+    }
+
+    if (formData.message || formData.comments || formData.note || formData.description) {
+      leadData.message = formData.message || formData.comments || formData.note || formData.description
+      console.log('Mapped message:', leadData.message)
+    }
+
+    // Also apply the configured field mappings if they exist
+    const fieldMappings = connectedForm.field_mappings as Array<{
+      websiteField: string;
+      leadField: string;
+    }>
+    
+    console.log('=== APPLYING CONFIGURED FIELD MAPPINGS ===')
+    console.log('Field mappings:', JSON.stringify(fieldMappings, null, 2))
+    
     fieldMappings.forEach(mapping => {
       if (mapping.leadField && mapping.leadField !== 'none' && formData[mapping.websiteField]) {
         leadData[mapping.leadField] = formData[mapping.websiteField]
-        console.log(`Mapped ${mapping.websiteField} -> ${mapping.leadField}: ${formData[mapping.websiteField]}`)
+        console.log(`Applied mapping ${mapping.websiteField} -> ${mapping.leadField}: ${formData[mapping.websiteField]}`)
       }
     })
 
