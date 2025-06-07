@@ -9,7 +9,7 @@ import { Globe } from 'lucide-react';
 import { WebsiteForm } from './types';
 
 interface WebsiteScannerProps {
-  onFormsDetected: (forms: WebsiteForm[]) => void;
+  onFormsDetected: (forms: WebsiteForm[], websiteUrl: string) => void;
 }
 
 const WebsiteScanner = ({ onFormsDetected }: WebsiteScannerProps) => {
@@ -49,7 +49,7 @@ const WebsiteScanner = ({ onFormsDetected }: WebsiteScannerProps) => {
         }
       ];
       
-      onFormsDetected(mockForms);
+      onFormsDetected(mockForms, websiteUrl);
       setIsScanning(false);
       toast.success(`Found ${mockForms.length} forms on the website`);
     }, 2000);

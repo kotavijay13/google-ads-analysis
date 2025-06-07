@@ -4,7 +4,6 @@ import Header from '@/components/Header';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Badge } from '@/components/ui/badge';
-import { Button } from '@/components/ui/button';
 import DateRangePicker from '@/components/DateRangePicker';
 import { 
   Table, 
@@ -14,27 +13,58 @@ import {
   TableHeader, 
   TableRow 
 } from "@/components/ui/table";
+import { supabase } from '@/integrations/supabase/client';
+import { useAuth } from '@/context/AuthContext';
+
+interface Lead {
+  id: string;
+  name: string;
+  first_name: string;
+  last_name: string;
+  email: string;
+  phone: string;
+  company: string;
+  message: string;
+  source: string;
+  campaign: string;
+  status: string;
+  created_at: string;
+}
 
 const LeadsPage = () => {
+  const { user } = useAuth();
   const [dateRange, setDateRange] = useState({
     from: new Date(Date.now() - 30 * 24 * 60 * 60 * 1000),
     to: new Date()
   });
 
-  const [leads, setLeads] = useState([]);
+  const [leads, setLeads] = useState<Lead[]>([]);
   const [isLoading, setIsLoading] = useState(false);
 
   useEffect(() => {
     console.log('Initial Leads data fetch with date range:', { from: dateRange.from, to: dateRange.to });
     fetchLeadsData();
-  }, [dateRange]);
+  }, [dateRange, user]);
 
   const fetchLeadsData = async () => {
+    if (!user) return;
+    
     setIsLoading(true);
     try {
-      // TODO: Implement actual leads data fetching from Supabase
-      // For now, we'll show empty state
-      setLeads([]);
+      const { data, error } = await supabase
+        .from('leads')
+        .select('*')
+        .eq('user_id', user.id)
+        .gte('created_at', dateRange.from.toISOString())
+        .lte('created_at', dateRange.to.toISOString())
+        .order('created_at', { ascending: false });
+
+      if (error) {
+        console.error('Error fetching leads:', error);
+        return;
+      }
+
+      setLeads(data || []);
     } catch (error) {
       console.error('Error fetching leads:', error);
     } finally {
@@ -52,9 +82,19 @@ const LeadsPage = () => {
 
   // Calculate stats from actual data
   const totalLeads = leads.length;
-  const conversionRate = 0;
-  const costPerLead = 0;
-  const averageValue = 0;
+  const conversionRate = 0; // This would be calculated based on traffic data
+  const costPerLead = 0; // This would be calculated based on campaign spend
+  const averageValue = 0; // This would be calculated based on deal values
+
+  if (!user) {
+    return (
+      <div className="container mx-auto py-6 px-4 max-w-7xl">
+        <div className="text-center py-8">
+          <p className="text-muted-foreground">Please log in to view your leads.</p>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="container mx-auto py-6 px-4 max-w-7xl">
@@ -122,7 +162,11 @@ const LeadsPage = () => {
               <CardTitle>Recent Leads</CardTitle>
             </CardHeader>
             <CardContent>
-              {leads.length > 0 ? (
+              {isLoading ? (
+                <div className="text-center py-10">
+                  <p className="text-muted-foreground">Loading leads...</p>
+                </div>
+              ) : leads.length > 0 ? (
                 <Table>
                   <TableHeader>
                     <TableRow>
@@ -136,14 +180,16 @@ const LeadsPage = () => {
                     </TableRow>
                   </TableHeader>
                   <TableBody>
-                    {leads.map((lead: any, index) => (
-                      <TableRow key={index}>
-                        <TableCell className="font-medium">{lead.name}</TableCell>
-                        <TableCell>{lead.email}</TableCell>
-                        <TableCell>{lead.phone}</TableCell>
-                        <TableCell>{lead.source}</TableCell>
-                        <TableCell>{lead.campaign}</TableCell>
-                        <TableCell>{lead.date}</TableCell>
+                    {leads.map((lead) => (
+                      <TableRow key={lead.id}>
+                        <TableCell className="font-medium">
+                          {lead.name || `${lead.first_name || ''} ${lead.last_name || ''}`.trim() || '-'}
+                        </TableCell>
+                        <TableCell>{lead.email || '-'}</TableCell>
+                        <TableCell>{lead.phone || '-'}</TableCell>
+                        <TableCell>{lead.source || '-'}</TableCell>
+                        <TableCell>{lead.campaign || '-'}</TableCell>
+                        <TableCell>{new Date(lead.created_at).toLocaleDateString()}</TableCell>
                         <TableCell>
                           <Badge variant={
                             lead.status === 'New' ? 'default' :

@@ -72,6 +72,99 @@ export type Database = {
         }
         Relationships: []
       }
+      connected_forms: {
+        Row: {
+          created_at: string
+          field_mappings: Json
+          form_id: string
+          form_name: string
+          form_url: string
+          id: string
+          updated_at: string
+          user_id: string
+          website_url: string
+        }
+        Insert: {
+          created_at?: string
+          field_mappings: Json
+          form_id: string
+          form_name: string
+          form_url: string
+          id?: string
+          updated_at?: string
+          user_id: string
+          website_url: string
+        }
+        Update: {
+          created_at?: string
+          field_mappings?: Json
+          form_id?: string
+          form_name?: string
+          form_url?: string
+          id?: string
+          updated_at?: string
+          user_id?: string
+          website_url?: string
+        }
+        Relationships: []
+      }
+      leads: {
+        Row: {
+          campaign: string | null
+          company: string | null
+          created_at: string
+          email: string | null
+          first_name: string | null
+          form_id: string
+          id: string
+          last_name: string | null
+          message: string | null
+          name: string | null
+          phone: string | null
+          raw_data: Json | null
+          source: string | null
+          status: string | null
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          campaign?: string | null
+          company?: string | null
+          created_at?: string
+          email?: string | null
+          first_name?: string | null
+          form_id: string
+          id?: string
+          last_name?: string | null
+          message?: string | null
+          name?: string | null
+          phone?: string | null
+          raw_data?: Json | null
+          source?: string | null
+          status?: string | null
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          campaign?: string | null
+          company?: string | null
+          created_at?: string
+          email?: string | null
+          first_name?: string | null
+          form_id?: string
+          id?: string
+          last_name?: string | null
+          message?: string | null
+          name?: string | null
+          phone?: string | null
+          raw_data?: Json | null
+          source?: string | null
+          status?: string | null
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       profiles: {
         Row: {
           created_at: string | null
