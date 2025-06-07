@@ -23,19 +23,49 @@ const ConnectedFormsList = ({ connectedForms, isLoading, onDisconnect }: Connect
   const copyFormSubmissionCode = (formId: string) => {
     const code = `
 // Add this to your form submission handler
-const formData = new FormData(form);
-const data = Object.fromEntries(formData.entries());
+// Make sure to prevent the default form submission and use this instead
 
-fetch('https://omgbcuomikauxthmslpi.supabase.co/functions/v1/form-webhook', {
-  method: 'POST',
-  headers: {
-    'Content-Type': 'application/json',
-  },
-  body: JSON.stringify({
-    formId: '${formId}',
-    formData: data,
-    websiteUrl: window.location.href
-  })
+document.addEventListener('DOMContentLoaded', function() {
+  const form = document.querySelector('form'); // Adjust selector as needed
+  
+  if (form) {
+    form.addEventListener('submit', async function(e) {
+      e.preventDefault(); // Prevent default form submission
+      
+      const formData = new FormData(form);
+      const data = Object.fromEntries(formData.entries());
+      
+      console.log('Submitting form data:', data);
+      
+      try {
+        const response = await fetch('https://omgbcuomikauxthmslpi.supabase.co/functions/v1/form-webhook', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            formId: '${formId}',
+            formData: data,
+            websiteUrl: window.location.href
+          })
+        });
+        
+        const result = await response.json();
+        console.log('Webhook response:', result);
+        
+        if (response.ok) {
+          alert('Form submitted successfully!');
+          form.reset(); // Clear the form
+        } else {
+          console.error('Webhook error:', result);
+          alert('Error submitting form: ' + (result.error || 'Unknown error'));
+        }
+      } catch (error) {
+        console.error('Network error:', error);
+        alert('Network error submitting form');
+      }
+    });
+  }
 });`;
     
     navigator.clipboard.writeText(code);
@@ -104,6 +134,17 @@ fetch('https://omgbcuomikauxthmslpi.supabase.co/functions/v1/form-webhook', {
                             </Badge>
                           ))}
                       </div>
+                    </div>
+
+                    <div className="mb-3 p-2 bg-yellow-50 border border-yellow-200 rounded text-sm">
+                      <p className="font-medium text-yellow-800">Integration Instructions:</p>
+                      <p className="text-yellow-700 text-xs mt-1">
+                        1. Copy the integration code below
+                        <br />
+                        2. Add it to your website before the closing &lt;/body&gt; tag
+                        <br />
+                        3. Test your form to ensure leads are captured
+                      </p>
                     </div>
 
                     <div className="flex gap-2">
