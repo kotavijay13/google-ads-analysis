@@ -35,7 +35,13 @@ export const useConnectedForms = () => {
         return;
       }
 
-      setConnectedForms(data || []);
+      // Transform the data to match our interface
+      const transformedData = (data || []).map(item => ({
+        ...item,
+        field_mappings: Array.isArray(item.field_mappings) ? item.field_mappings as FieldMapping[] : []
+      }));
+
+      setConnectedForms(transformedData);
     } catch (error) {
       console.error('Error in fetchConnectedForms:', error);
     } finally {
@@ -55,7 +61,7 @@ export const useConnectedForms = () => {
           form_name: form.name,
           form_url: form.url,
           website_url: websiteUrl,
-          field_mappings: fieldMappings
+          field_mappings: fieldMappings as any // Cast to any to handle Json type
         })
         .select()
         .single();
