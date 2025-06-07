@@ -34,7 +34,13 @@ serve(async (req) => {
       )
     }
 
-    const supabase = createClient(supabaseUrl, supabaseKey)
+    // Use service role key for admin access to bypass RLS
+    const supabase = createClient(supabaseUrl, supabaseKey, {
+      auth: {
+        autoRefreshToken: false,
+        persistSession: false
+      }
+    })
 
     console.log('=== PROCESSING REQUEST BODY ===')
     
@@ -149,7 +155,7 @@ serve(async (req) => {
     console.log('=== FINAL LEAD DATA ===')
     console.log('Lead data to insert:', JSON.stringify(leadData, null, 2))
 
-    // Insert the lead
+    // Insert the lead using service role to bypass RLS
     console.log('=== INSERTING LEAD ===')
     const { data: lead, error: leadError } = await supabase
       .from('leads')
