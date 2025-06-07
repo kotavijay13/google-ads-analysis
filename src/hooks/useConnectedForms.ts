@@ -6,6 +6,7 @@ import { WebsiteForm, FieldMapping } from '@/components/forms/types';
 
 export interface ConnectedForm {
   id: string;
+  user_id: string;
   form_id: string;
   form_name: string;
   form_url: string;
