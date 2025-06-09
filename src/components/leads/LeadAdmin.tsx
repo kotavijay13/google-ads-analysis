@@ -7,17 +7,19 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from '@/components/ui/dialog';
-import { Switch } from '@/components/ui/switch';
 import { Badge } from '@/components/ui/badge';
 import { toast } from '@/components/ui/sonner';
 import { UserPlus, Edit, Trash2, Users } from 'lucide-react';
+
+type UserRole = 'Manager' | 'Sales Rep' | 'Junior Rep';
+type UserStatus = 'active' | 'inactive';
 
 interface SalesUser {
   id: string;
   name: string;
   email: string;
-  role: 'Manager' | 'Sales Rep' | 'Junior Rep';
-  status: 'active' | 'inactive';
+  role: UserRole;
+  status: UserStatus;
   leadsAssigned: number;
 }
 
@@ -38,8 +40,8 @@ const LeadAdmin = () => {
   const [newUser, setNewUser] = useState({
     name: '',
     email: '',
-    role: 'Sales Rep' as const,
-    status: 'active' as const
+    role: 'Sales Rep' as UserRole,
+    status: 'active' as UserStatus
   });
 
   const handleAddUser = () => {
@@ -174,7 +176,7 @@ const LeadAdmin = () => {
               <Label htmlFor="role">Role</Label>
               <Select 
                 value={newUser.role} 
-                onValueChange={(value: 'Manager' | 'Sales Rep' | 'Junior Rep') => setNewUser({...newUser, role: value})}
+                onValueChange={(value: UserRole) => setNewUser({...newUser, role: value})}
               >
                 <SelectTrigger>
                   <SelectValue placeholder="Select a role" />
@@ -226,7 +228,7 @@ const LeadAdmin = () => {
                 <Label htmlFor="edit-role">Role</Label>
                 <Select 
                   value={currentUser.role} 
-                  onValueChange={(value: 'Manager' | 'Sales Rep' | 'Junior Rep') => setCurrentUser({...currentUser, role: value})}
+                  onValueChange={(value: UserRole) => setCurrentUser({...currentUser, role: value})}
                 >
                   <SelectTrigger>
                     <SelectValue />
@@ -242,7 +244,7 @@ const LeadAdmin = () => {
                 <Label htmlFor="edit-status">Status</Label>
                 <Select 
                   value={currentUser.status} 
-                  onValueChange={(value: 'active' | 'inactive') => setCurrentUser({...currentUser, status: value})}
+                  onValueChange={(value: UserStatus) => setCurrentUser({...currentUser, status: value})}
                 >
                   <SelectTrigger>
                     <SelectValue />
