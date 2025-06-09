@@ -27,7 +27,7 @@ const LeadAssignedToSelector = ({ assignedTo, leadId, onAssignedToChange }: Lead
       </SelectTrigger>
       <SelectContent>
         {salesPersons.map((person) => (
-          <SelectItem key={person} value={person === 'Unassigned' ? '' : person}>
+          <SelectItem key={person} value={person}>
             {person}
           </SelectItem>
         ))}
