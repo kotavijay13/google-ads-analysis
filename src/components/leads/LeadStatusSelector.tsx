@@ -1,6 +1,5 @@
 
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Badge } from '@/components/ui/badge';
 
 interface LeadStatusSelectorProps {
   status: string;
@@ -9,13 +8,13 @@ interface LeadStatusSelectorProps {
 }
 
 const statusOptions = [
-  { value: 'New', label: 'New', variant: 'secondary' as const },
-  { value: 'Contacted', label: 'Contacted', variant: 'default' as const },
-  { value: 'Qualified', label: 'Qualified', variant: 'default' as const },
-  { value: 'Follow-up', label: 'Follow-up', variant: 'secondary' as const },
-  { value: 'Not Reachable', label: 'Not Reachable', variant: 'destructive' as const },
-  { value: 'Converted', label: 'Converted', variant: 'default' as const },
-  { value: 'Lost', label: 'Lost', variant: 'destructive' as const }
+  { value: 'New', label: 'New' },
+  { value: 'Contacted', label: 'Contacted' },
+  { value: 'Qualified', label: 'Qualified' },
+  { value: 'Follow-up', label: 'Follow-up' },
+  { value: 'Not Reachable', label: 'Not Reachable' },
+  { value: 'Converted', label: 'Converted' },
+  { value: 'Lost', label: 'Lost' }
 ];
 
 const LeadStatusSelector = ({ status, leadId, onStatusChange }: LeadStatusSelectorProps) => {
@@ -25,17 +24,17 @@ const LeadStatusSelector = ({ status, leadId, onStatusChange }: LeadStatusSelect
     <Select value={status} onValueChange={(newStatus) => onStatusChange(leadId, newStatus)}>
       <SelectTrigger className="w-36 h-8 text-sm">
         <SelectValue>
-          <Badge variant={currentStatus.variant} className="text-xs">
+          <span className="text-sm text-gray-700">
             {currentStatus.label}
-          </Badge>
+          </span>
         </SelectValue>
       </SelectTrigger>
       <SelectContent className="z-50">
         {statusOptions.map((option) => (
           <SelectItem key={option.value} value={option.value} className="text-sm">
-            <Badge variant={option.variant} className="text-xs">
+            <span className="text-sm text-gray-700">
               {option.label}
-            </Badge>
+            </span>
           </SelectItem>
         ))}
       </SelectContent>
