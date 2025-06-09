@@ -9,12 +9,13 @@ interface LeadStatusSelectorProps {
 }
 
 const statusOptions = [
-  { value: 'New', label: 'New', variant: 'default' as const },
-  { value: 'Contacted', label: 'Contacted', variant: 'secondary' as const },
+  { value: 'New', label: 'New', variant: 'secondary' as const },
+  { value: 'Contacted', label: 'Contacted', variant: 'default' as const },
   { value: 'Qualified', label: 'Qualified', variant: 'default' as const },
   { value: 'Follow-up', label: 'Follow-up', variant: 'secondary' as const },
+  { value: 'Not Reachable', label: 'Not Reachable', variant: 'destructive' as const },
   { value: 'Converted', label: 'Converted', variant: 'default' as const },
-  { value: 'Closed', label: 'Closed', variant: 'secondary' as const }
+  { value: 'Lost', label: 'Lost', variant: 'destructive' as const }
 ];
 
 const LeadStatusSelector = ({ status, leadId, onStatusChange }: LeadStatusSelectorProps) => {
@@ -22,17 +23,17 @@ const LeadStatusSelector = ({ status, leadId, onStatusChange }: LeadStatusSelect
 
   return (
     <Select value={status} onValueChange={(newStatus) => onStatusChange(leadId, newStatus)}>
-      <SelectTrigger className="w-32">
+      <SelectTrigger className="w-36 h-8 text-sm">
         <SelectValue>
-          <Badge variant={currentStatus.variant}>
+          <Badge variant={currentStatus.variant} className="text-xs">
             {currentStatus.label}
           </Badge>
         </SelectValue>
       </SelectTrigger>
-      <SelectContent>
+      <SelectContent className="z-50">
         {statusOptions.map((option) => (
-          <SelectItem key={option.value} value={option.value}>
-            <Badge variant={option.variant}>
+          <SelectItem key={option.value} value={option.value} className="text-sm">
+            <Badge variant={option.variant} className="text-xs">
               {option.label}
             </Badge>
           </SelectItem>

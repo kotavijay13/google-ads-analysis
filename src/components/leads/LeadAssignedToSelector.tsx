@@ -22,12 +22,12 @@ const LeadAssignedToSelector = ({ assignedTo, leadId, onAssignedToChange }: Lead
       value={assignedTo || 'Unassigned'} 
       onValueChange={(value) => onAssignedToChange(leadId, value === 'Unassigned' ? '' : value)}
     >
-      <SelectTrigger className="w-36">
+      <SelectTrigger className="w-36 h-8 text-sm">
         <SelectValue placeholder="Assign to..." />
       </SelectTrigger>
-      <SelectContent>
+      <SelectContent className="z-50">
         {salesPersons.map((person) => (
-          <SelectItem key={person} value={person}>
+          <SelectItem key={person} value={person} className="text-sm">
             {person}
           </SelectItem>
         ))}

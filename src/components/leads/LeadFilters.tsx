@@ -35,7 +35,7 @@ const LeadFilters = ({ onDateRangeChange, onStatusFilter, onAssignedToFilter, on
     { label: 'Last 30 days', getValue: () => ({ from: subDays(today, 29), to: today }) }
   ];
 
-  const statusOptions = ['All', 'New', 'Contacted', 'Qualified', 'Follow-up', 'Converted', 'Closed'];
+  const statusOptions = ['All', 'New', 'Contacted', 'Qualified', 'Follow-up', 'Not Reachable', 'Converted', 'Lost'];
   const assignedToOptions = ['All', 'Unassigned', 'John Smith', 'Sarah Johnson', 'Mike Wilson', 'Emily Davis', 'David Brown'];
 
   const handleQuickDateFilter = (filter: typeof quickDateFilters[0]) => {
@@ -50,7 +50,7 @@ const LeadFilters = ({ onDateRangeChange, onStatusFilter, onAssignedToFilter, on
   };
 
   return (
-    <Card>
+    <Card className="bg-white shadow-sm">
       <CardContent className="p-4">
         <div className="flex flex-wrap gap-4 items-center">
           <div className="flex items-center gap-2">
@@ -66,6 +66,7 @@ const LeadFilters = ({ onDateRangeChange, onStatusFilter, onAssignedToFilter, on
                 variant="outline"
                 size="sm"
                 onClick={() => handleQuickDateFilter(filter)}
+                className="h-8 text-sm"
               >
                 {filter.label}
               </Button>
@@ -75,12 +76,12 @@ const LeadFilters = ({ onDateRangeChange, onStatusFilter, onAssignedToFilter, on
           {/* Custom Date Range */}
           <Popover>
             <PopoverTrigger asChild>
-              <Button variant="outline" size="sm">
+              <Button variant="outline" size="sm" className="h-8 text-sm">
                 <CalendarIcon className="w-4 h-4 mr-2" />
                 Custom Date
               </Button>
             </PopoverTrigger>
-            <PopoverContent className="w-auto p-0" align="start">
+            <PopoverContent className="w-auto p-0 z-50" align="start">
               <div className="p-3">
                 <div className="space-y-3">
                   <div>
@@ -110,12 +111,12 @@ const LeadFilters = ({ onDateRangeChange, onStatusFilter, onAssignedToFilter, on
 
           {/* Status Filter */}
           <Select onValueChange={onStatusFilter}>
-            <SelectTrigger className="w-36">
+            <SelectTrigger className="w-36 h-8 text-sm">
               <SelectValue placeholder="Filter by Status" />
             </SelectTrigger>
-            <SelectContent>
+            <SelectContent className="z-50">
               {statusOptions.map((status) => (
-                <SelectItem key={status} value={status}>
+                <SelectItem key={status} value={status} className="text-sm">
                   {status}
                 </SelectItem>
               ))}
@@ -124,12 +125,12 @@ const LeadFilters = ({ onDateRangeChange, onStatusFilter, onAssignedToFilter, on
 
           {/* Assigned To Filter */}
           <Select onValueChange={onAssignedToFilter}>
-            <SelectTrigger className="w-40">
+            <SelectTrigger className="w-40 h-8 text-sm">
               <SelectValue placeholder="Filter by Assigned" />
             </SelectTrigger>
-            <SelectContent>
+            <SelectContent className="z-50">
               {assignedToOptions.map((person) => (
-                <SelectItem key={person} value={person}>
+                <SelectItem key={person} value={person} className="text-sm">
                   {person}
                 </SelectItem>
               ))}
@@ -137,7 +138,7 @@ const LeadFilters = ({ onDateRangeChange, onStatusFilter, onAssignedToFilter, on
           </Select>
 
           {/* Reset Button */}
-          <Button variant="ghost" size="sm" onClick={onReset}>
+          <Button variant="ghost" size="sm" onClick={onReset} className="h-8 text-sm">
             Reset Filters
           </Button>
         </div>
