@@ -3,8 +3,11 @@ import { useState, useEffect } from 'react';
 import Header from '@/components/Header';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Badge } from '@/components/ui/badge';
 import DateRangePicker from '@/components/DateRangePicker';
+import DownloadButton from '@/components/seo/DownloadButton';
+import LeadFilters from '@/components/leads/LeadFilters';
+import LeadStatusSelector from '@/components/leads/LeadStatusSelector';
+import LeadAssignedToSelector from '@/components/leads/LeadAssignedToSelector';
 import { 
   Table, 
   TableBody, 
@@ -15,6 +18,7 @@ import {
 } from "@/components/ui/table";
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/context/AuthContext';
+import { toast } from '@/components/ui/sonner';
 
 interface Lead {
   id: string;
@@ -28,6 +32,7 @@ interface Lead {
   source: string;
   campaign: string;
   status: string;
+  assigned_to: string | null;
   created_at: string;
 }
 
@@ -39,12 +44,21 @@ const LeadsPage = () => {
   });
 
   const [leads, setLeads] = useState<Lead[]>([]);
+  const [filteredLeads, setFilteredLeads] = useState<Lead[]>([]);
   const [isLoading, setIsLoading] = useState(false);
+  const [filters, setFilters] = useState({
+    status: 'All',
+    assignedTo: 'All'
+  });
 
   useEffect(() => {
     console.log('Initial Leads data fetch with date range:', { from: dateRange.from, to: dateRange.to });
     fetchLeadsData();
   }, [dateRange, user]);
+
+  useEffect(() => {
+    applyFilters();
+  }, [leads, filters]);
 
   const fetchLeadsData = async () => {
     if (!user) return;
@@ -61,14 +75,86 @@ const LeadsPage = () => {
 
       if (error) {
         console.error('Error fetching leads:', error);
+        toast.error('Failed to fetch leads');
         return;
       }
 
       setLeads(data || []);
     } catch (error) {
       console.error('Error fetching leads:', error);
+      toast.error('Failed to fetch leads');
     } finally {
       setIsLoading(false);
+    }
+  };
+
+  const applyFilters = () => {
+    let filtered = [...leads];
+
+    if (filters.status !== 'All') {
+      filtered = filtered.filter(lead => lead.status === filters.status);
+    }
+
+    if (filters.assignedTo !== 'All') {
+      if (filters.assignedTo === 'Unassigned') {
+        filtered = filtered.filter(lead => !lead.assigned_to);
+      } else {
+        filtered = filtered.filter(lead => lead.assigned_to === filters.assignedTo);
+      }
+    }
+
+    setFilteredLeads(filtered);
+  };
+
+  const handleStatusChange = async (leadId: string, newStatus: string) => {
+    try {
+      const { error } = await supabase
+        .from('leads')
+        .update({ status: newStatus })
+        .eq('id', leadId)
+        .eq('user_id', user?.id);
+
+      if (error) {
+        console.error('Error updating lead status:', error);
+        toast.error('Failed to update lead status');
+        return;
+      }
+
+      // Update local state
+      setLeads(prev => prev.map(lead => 
+        lead.id === leadId ? { ...lead, status: newStatus } : lead
+      ));
+      
+      toast.success('Lead status updated successfully');
+    } catch (error) {
+      console.error('Error updating lead status:', error);
+      toast.error('Failed to update lead status');
+    }
+  };
+
+  const handleAssignedToChange = async (leadId: string, assignedTo: string) => {
+    try {
+      const { error } = await supabase
+        .from('leads')
+        .update({ assigned_to: assignedTo || null })
+        .eq('id', leadId)
+        .eq('user_id', user?.id);
+
+      if (error) {
+        console.error('Error updating lead assignment:', error);
+        toast.error('Failed to update lead assignment');
+        return;
+      }
+
+      // Update local state
+      setLeads(prev => prev.map(lead => 
+        lead.id === leadId ? { ...lead, assigned_to: assignedTo || null } : lead
+      ));
+      
+      toast.success('Lead assignment updated successfully');
+    } catch (error) {
+      console.error('Error updating lead assignment:', error);
+      toast.error('Failed to update lead assignment');
     }
   };
 
@@ -80,11 +166,48 @@ const LeadsPage = () => {
     setDateRange(range);
   };
 
-  // Calculate stats from actual data
-  const totalLeads = leads.length;
+  const handleDateRangeFilter = (range: { from: Date; to: Date }) => {
+    setDateRange(range);
+  };
+
+  const handleStatusFilter = (status: string) => {
+    setFilters(prev => ({ ...prev, status }));
+  };
+
+  const handleAssignedToFilter = (assignedTo: string) => {
+    setFilters(prev => ({ ...prev, assignedTo }));
+  };
+
+  const handleResetFilters = () => {
+    setFilters({
+      status: 'All',
+      assignedTo: 'All'
+    });
+    setDateRange({
+      from: new Date(Date.now() - 30 * 24 * 60 * 60 * 1000),
+      to: new Date()
+    });
+  };
+
+  // Calculate stats from filtered data
+  const totalLeads = filteredLeads.length;
   const conversionRate = 0; // This would be calculated based on traffic data
   const costPerLead = 0; // This would be calculated based on campaign spend
   const averageValue = 0; // This would be calculated based on deal values
+
+  // Prepare data for export
+  const exportData = filteredLeads.map(lead => ({
+    Name: lead.name || `${lead.first_name || ''} ${lead.last_name || ''}`.trim() || '-',
+    Email: lead.email || '-',
+    Phone: lead.phone || '-',
+    Company: lead.company || '-',
+    Source: lead.source || '-',
+    Campaign: lead.campaign || '-',
+    Status: lead.status,
+    'Assigned To': lead.assigned_to || 'Unassigned',
+    'Created Date': new Date(lead.created_at).toLocaleDateString(),
+    Message: lead.message || '-'
+  }));
 
   if (!user) {
     return (
@@ -102,7 +225,24 @@ const LeadsPage = () => {
       
       <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-6 gap-4">
         <h2 className="text-lg font-medium">Leads Overview</h2>
-        <DateRangePicker onDateChange={handleDateChange} />
+        <div className="flex gap-2">
+          <DateRangePicker onDateChange={handleDateChange} />
+          <DownloadButton 
+            data={exportData}
+            filename="leads-export"
+            title="Leads Report"
+            disabled={filteredLeads.length === 0}
+          />
+        </div>
+      </div>
+
+      <div className="mb-6">
+        <LeadFilters
+          onDateRangeChange={handleDateRangeFilter}
+          onStatusFilter={handleStatusFilter}
+          onAssignedToFilter={handleAssignedToFilter}
+          onReset={handleResetFilters}
+        />
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
@@ -159,14 +299,14 @@ const LeadsPage = () => {
         <TabsContent value="leads">
           <Card>
             <CardHeader>
-              <CardTitle>Recent Leads</CardTitle>
+              <CardTitle>Recent Leads ({filteredLeads.length})</CardTitle>
             </CardHeader>
             <CardContent>
               {isLoading ? (
                 <div className="text-center py-10">
                   <p className="text-muted-foreground">Loading leads...</p>
                 </div>
-              ) : leads.length > 0 ? (
+              ) : filteredLeads.length > 0 ? (
                 <Table>
                   <TableHeader>
                     <TableRow>
@@ -177,10 +317,11 @@ const LeadsPage = () => {
                       <TableHead>Campaign</TableHead>
                       <TableHead>Date</TableHead>
                       <TableHead>Status</TableHead>
+                      <TableHead>Assigned To</TableHead>
                     </TableRow>
                   </TableHeader>
                   <TableBody>
-                    {leads.map((lead) => (
+                    {filteredLeads.map((lead) => (
                       <TableRow key={lead.id}>
                         <TableCell className="font-medium">
                           {lead.name || `${lead.first_name || ''} ${lead.last_name || ''}`.trim() || '-'}
@@ -191,14 +332,18 @@ const LeadsPage = () => {
                         <TableCell>{lead.campaign || '-'}</TableCell>
                         <TableCell>{new Date(lead.created_at).toLocaleDateString()}</TableCell>
                         <TableCell>
-                          <Badge variant={
-                            lead.status === 'New' ? 'default' :
-                            lead.status === 'Contacted' ? 'secondary' :
-                            lead.status === 'Qualified' ? 'default' :
-                            'default'
-                          }>
-                            {lead.status}
-                          </Badge>
+                          <LeadStatusSelector
+                            status={lead.status}
+                            leadId={lead.id}
+                            onStatusChange={handleStatusChange}
+                          />
+                        </TableCell>
+                        <TableCell>
+                          <LeadAssignedToSelector
+                            assignedTo={lead.assigned_to}
+                            leadId={lead.id}
+                            onAssignedToChange={handleAssignedToChange}
+                          />
                         </TableCell>
                       </TableRow>
                     ))}

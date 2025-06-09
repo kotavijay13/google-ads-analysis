@@ -110,6 +110,7 @@ export type Database = {
       }
       leads: {
         Row: {
+          assigned_to: string | null
           campaign: string | null
           company: string | null
           created_at: string
@@ -128,6 +129,7 @@ export type Database = {
           user_id: string
         }
         Insert: {
+          assigned_to?: string | null
           campaign?: string | null
           company?: string | null
           created_at?: string
@@ -146,6 +148,7 @@ export type Database = {
           user_id: string
         }
         Update: {
+          assigned_to?: string | null
           campaign?: string | null
           company?: string | null
           created_at?: string
