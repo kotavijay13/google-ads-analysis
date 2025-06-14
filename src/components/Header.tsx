@@ -1,3 +1,4 @@
+
 import { useState } from 'react';
 import { Button } from "@/components/ui/button";
 import { LineChart, Settings, User } from "lucide-react";
@@ -29,6 +30,7 @@ const Header = ({ onRefresh, title, isLoading }: HeaderProps) => {
   const [lastUpdated, setLastUpdated] = useState<Date>(new Date());
   const { accounts, currentAccount, switchAccount } = useGoogleAccounts();
   const { signOut, user } = useAuth();
+  const { toast } = useToast();
 
   const handleRefresh = () => {
     setLastUpdated(new Date());
