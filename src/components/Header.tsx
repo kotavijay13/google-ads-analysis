@@ -1,4 +1,3 @@
-
 import { useState } from 'react';
 import { Button } from "@/components/ui/button";
 import { LineChart, Settings, User } from "lucide-react";
@@ -18,7 +17,7 @@ import {
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { useGoogleAccounts, GoogleAccount } from "@/hooks/use-google-accounts";
 import { useAuth } from "@/context/AuthContext";
-import { toast } from "@/hooks/use-toast";
+import { useToast } from "@/hooks/use-toast";
 
 interface HeaderProps {
   onRefresh: () => void;
@@ -65,8 +64,8 @@ const Header = ({ onRefresh, title, isLoading }: HeaderProps) => {
   return (
     <header className="flex flex-col md:flex-row justify-between items-center gap-4 mb-6">
       <div className="flex items-center gap-3">
-        <div className="bg-blue-100 p-2 rounded-lg">
-          <LineChart size={24} className="text-blue-600" />
+        <div className="bg-primary/10 p-2 rounded-lg">
+          <LineChart size={24} className="text-primary" />
         </div>
         <div>
           <h1 className="text-2xl font-bold flex items-center">
@@ -85,8 +84,8 @@ const Header = ({ onRefresh, title, isLoading }: HeaderProps) => {
           <DropdownMenuTrigger asChild>
             <Button variant="ghost" size="sm" className="w-9 h-9 p-0">
               <span className="sr-only">Marketing Account</span>
-              <div className="h-8 w-8 rounded-full bg-blue-100 flex items-center justify-center">
-                <User size={18} className="text-blue-600" />
+              <div className="h-8 w-8 rounded-full bg-primary/10 flex items-center justify-center">
+                <User size={18} className="text-primary" />
               </div>
             </Button>
           </DropdownMenuTrigger>
@@ -107,7 +106,7 @@ const Header = ({ onRefresh, title, isLoading }: HeaderProps) => {
                 <DropdownMenuItem key={account.id} onClick={() => handleAccountSwitch(account)} className="cursor-pointer mb-1">
                   <div className="flex items-center gap-2 w-full">
                     <Avatar className="h-6 w-6">
-                      <AvatarFallback className="text-xs bg-blue-100 text-blue-600">
+                      <AvatarFallback className="text-xs bg-primary/10 text-primary">
                         {account.name.substring(0, 2).toUpperCase()}
                       </AvatarFallback>
                     </Avatar>

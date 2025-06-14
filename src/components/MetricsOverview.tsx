@@ -138,7 +138,7 @@ const MetricsOverview = ({ metrics }: MetricsProps) => {
             <p className="text-xs text-muted-foreground">
               Avg. CPC: {formatCurrency(metrics.avgCPC)}
             </p>
-            <p className="text-xs text-blue-600 mt-1">Click to see breakdown</p>
+            <p className="text-xs text-primary mt-1">Click to see breakdown</p>
           </CardContent>
         </Card>
         
@@ -155,7 +155,7 @@ const MetricsOverview = ({ metrics }: MetricsProps) => {
             <p className="text-xs text-muted-foreground">
               CTR: {formatPercent(metrics.avgCTR)}
             </p>
-            <p className="text-xs text-blue-600 mt-1">Click to see breakdown</p>
+            <p className="text-xs text-primary mt-1">Click to see breakdown</p>
           </CardContent>
         </Card>
         
@@ -172,7 +172,7 @@ const MetricsOverview = ({ metrics }: MetricsProps) => {
             <p className="text-xs text-muted-foreground">
               Visibility metric
             </p>
-            <p className="text-xs text-blue-600 mt-1">Click to see breakdown</p>
+            <p className="text-xs text-primary mt-1">Click to see breakdown</p>
           </CardContent>
         </Card>
         
@@ -189,7 +189,7 @@ const MetricsOverview = ({ metrics }: MetricsProps) => {
             <p className="text-xs text-muted-foreground">
               Conv. Rate: {formatPercent(metrics.avgConvRate)}
             </p>
-            <p className="text-xs text-blue-600 mt-1">Click to see breakdown</p>
+            <p className="text-xs text-primary mt-1">Click to see breakdown</p>
           </CardContent>
         </Card>
       </div>

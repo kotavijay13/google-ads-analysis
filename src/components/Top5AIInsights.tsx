@@ -23,7 +23,7 @@ const Top5AIInsights = ({ onInsightCompleted }: Top5AIInsightsProps) => {
       <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-4">
         <div className="flex items-center space-x-2">
           <Brain className="h-5 w-5 text-primary" />
-          <CardTitle className="text-lg font-semibold">Top 5 AI Insights for Today</CardTitle>
+          <CardTitle className="text-xl font-semibold">Top 5 AI Insights for Today</CardTitle>
         </div>
         <Button 
           variant="outline" 

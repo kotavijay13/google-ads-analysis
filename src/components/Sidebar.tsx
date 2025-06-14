@@ -62,15 +62,15 @@ export default function Sidebar() {
               className={cn(
                 'group flex items-center px-2 py-2 text-sm font-medium rounded-md transition-colors',
                 isActive
-                  ? 'bg-gray-100 text-gray-900'
-                  : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900'
+                  ? 'bg-primary/10 text-primary font-semibold'
+                  : 'text-gray-600 hover:bg-gray-50 hover:text-primary'
               )}
               title={isCollapsed ? item.name : undefined}
             >
               <item.icon
                 className={cn(
                   'flex-shrink-0 h-5 w-5',
-                  isActive ? 'text-gray-500' : 'text-gray-400 group-hover:text-gray-500',
+                  isActive ? 'text-primary' : 'text-gray-400 group-hover:text-primary',
                   isCollapsed ? 'mx-auto' : 'mr-3'
                 )}
                 aria-hidden="true"
