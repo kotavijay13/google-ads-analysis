@@ -1,19 +1,14 @@
 
 import { useState } from 'react';
 import Header from '@/components/Header';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import DateRangePicker from '@/components/DateRangePicker';
-import DownloadButton from '@/components/seo/DownloadButton';
 import LeadFilters from '@/components/leads/LeadFilters';
-import LeadAdmin from '@/components/leads/LeadAdmin';
 import LeadsStatsCards from '@/components/leads/LeadsStatsCards';
-import LeadsTable from '@/components/leads/LeadsTable';
+import WebsiteFilterCard from '@/components/leads/WebsiteFilterCard';
+import LeadsPageHeader from '@/components/leads/LeadsPageHeader';
+import LeadsTabsContent from '@/components/leads/LeadsTabsContent';
 import { useLeadsData } from '@/components/leads/hooks/useLeadsData';
 import { useAuth } from '@/context/AuthContext';
 import { useConnectedForms } from '@/hooks/useConnectedForms';
-import { Globe } from 'lucide-react';
 
 const LeadsPage = () => {
   const { user } = useAuth();
@@ -113,48 +108,11 @@ const LeadsPage = () => {
     <div className="container mx-auto py-6 px-4 max-w-7xl">
       <Header onRefresh={handleRefresh} title="Leads Dashboard" />
       
-      {/* Website Selector Card */}
-      <Card className="mb-6 bg-white shadow-sm">
-        <CardHeader>
-          <CardTitle className="flex items-center gap-2 text-lg">
-            <Globe className="w-5 h-5" />
-            Website Filter
-          </CardTitle>
-        </CardHeader>
-        <CardContent>
-          <div className="flex items-center gap-4">
-            <label className="text-sm font-medium text-gray-700 min-w-fit">
-              Select Website:
-            </label>
-            <Select value={filters.website} onValueChange={handleWebsiteFilter}>
-              <SelectTrigger className="w-80">
-                <SelectValue placeholder="Choose a website to view leads" />
-              </SelectTrigger>
-              <SelectContent className="z-50">
-                <SelectItem value="All">
-                  <div className="flex items-center gap-2">
-                    <Globe className="h-4 w-4" />
-                    All Websites
-                  </div>
-                </SelectItem>
-                {availableWebsites.map((website) => (
-                  <SelectItem key={website} value={website}>
-                    <div className="flex items-center gap-2">
-                      <Globe className="h-4 w-4" />
-                      {website}
-                    </div>
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-            {filters.website !== 'All' && (
-              <div className="text-sm text-gray-600">
-                Showing leads from: <span className="font-semibold text-blue-600">{filters.website}</span>
-              </div>
-            )}
-          </div>
-        </CardContent>
-      </Card>
+      <WebsiteFilterCard
+        selectedWebsite={filters.website}
+        availableWebsites={availableWebsites}
+        onWebsiteChange={handleWebsiteFilter}
+      />
       
       <LeadsStatsCards
         totalLeads={totalLeads}
@@ -175,60 +133,19 @@ const LeadsPage = () => {
         />
       </div>
 
-      <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-6 gap-4">
-        <h2 className="text-lg font-medium text-gray-900">
-          Leads Overview
-          {filters.website !== 'All' && (
-            <span className="text-sm font-normal text-gray-600 ml-2">
-              ({filters.website})
-            </span>
-          )}
-        </h2>
-        <div className="flex gap-2">
-          <DateRangePicker onDateChange={handleDateChange} />
-          <DownloadButton 
-            data={exportData}
-            filename="leads-export"
-            title="Leads Report"
-            disabled={filteredLeads.length === 0}
-          />
-        </div>
-      </div>
+      <LeadsPageHeader
+        selectedWebsite={filters.website}
+        exportData={exportData}
+        onDateChange={handleDateChange}
+      />
 
-      <Tabs defaultValue="leads" className="space-y-6">
-        <TabsList>
-          <TabsTrigger value="leads">Leads</TabsTrigger>
-          <TabsTrigger value="admin">Lead Administration</TabsTrigger>
-          <TabsTrigger value="performance">Campaign Performance</TabsTrigger>
-        </TabsList>
-
-        <TabsContent value="leads">
-          <LeadsTable
-            leads={filteredLeads}
-            isLoading={isLoading}
-            onStatusChange={handleStatusChange}
-            onAssignedToChange={handleAssignedToChange}
-            onRemarksChange={handleRemarksChange}
-          />
-        </TabsContent>
-
-        <TabsContent value="admin">
-          <LeadAdmin />
-        </TabsContent>
-
-        <TabsContent value="performance">
-          <Card className="bg-white shadow-sm">
-            <CardHeader>
-              <CardTitle className="text-gray-900">Campaign Performance</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="text-center py-10">
-                <p className="text-gray-500">No campaign performance data available</p>
-              </div>
-            </CardContent>
-          </Card>
-        </TabsContent>
-      </Tabs>
+      <LeadsTabsContent
+        filteredLeads={filteredLeads}
+        isLoading={isLoading}
+        onStatusChange={handleStatusChange}
+        onAssignedToChange={handleAssignedToChange}
+        onRemarksChange={handleRemarksChange}
+      />
     </div>
   );
 };
