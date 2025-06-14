@@ -14,7 +14,22 @@ serve(async (req) => {
   }
 
   try {
-    const { code, redirectUri } = await req.json();
+    const payload = await req.json();
+    const { action, code, redirectUri } = payload;
+
+    if (action === 'get_client_id') {
+      const clientId = Deno.env.get('META_APP_ID');
+      if (!clientId) {
+        return new Response(
+          JSON.stringify({ error: 'Missing Meta App ID. Check META_APP_ID in Supabase secrets.' }),
+          { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+        );
+      }
+      return new Response(
+        JSON.stringify({ clientId }),
+        { status: 200, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      );
+    }
     
     // Get env variables
     const clientId = Deno.env.get('META_APP_ID');
