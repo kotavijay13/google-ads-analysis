@@ -1,4 +1,3 @@
-
 import { useState } from 'react';
 import Header from '@/components/Header';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -11,9 +10,11 @@ import LeadsStatsCards from '@/components/leads/LeadsStatsCards';
 import LeadsTable from '@/components/leads/LeadsTable';
 import { useLeadsData } from '@/components/leads/hooks/useLeadsData';
 import { useAuth } from '@/context/AuthContext';
+import { useGSCConnection } from '@/hooks/seo/useGSCConnection';
 
 const LeadsPage = () => {
   const { user } = useAuth();
+  const { availableWebsites } = useGSCConnection();
   const [dateRange, setDateRange] = useState({
     from: new Date(Date.now() - 30 * 24 * 60 * 60 * 1000),
     to: new Date()
@@ -21,7 +22,8 @@ const LeadsPage = () => {
 
   const [filters, setFilters] = useState({
     status: 'All',
-    assignedTo: 'All'
+    assignedTo: 'All',
+    website: 'All'
   });
 
   const {
@@ -54,10 +56,15 @@ const LeadsPage = () => {
     setFilters(prev => ({ ...prev, assignedTo }));
   };
 
+  const handleWebsiteFilter = (website: string) => {
+    setFilters(prev => ({ ...prev, website }));
+  };
+
   const handleResetFilters = () => {
     setFilters({
       status: 'All',
-      assignedTo: 'All'
+      assignedTo: 'All',
+      website: 'All'
     });
     setDateRange({
       from: new Date(Date.now() - 30 * 24 * 60 * 60 * 1000),
@@ -113,6 +120,8 @@ const LeadsPage = () => {
           onDateRangeChange={handleDateRangeFilter}
           onStatusFilter={handleStatusFilter}
           onAssignedToFilter={handleAssignedToFilter}
+          onWebsiteFilter={handleWebsiteFilter}
+          availableWebsites={['All', ...availableWebsites]}
           onReset={handleResetFilters}
         />
       </div>

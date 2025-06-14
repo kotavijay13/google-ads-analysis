@@ -1,5 +1,4 @@
-
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/context/AuthContext';
 import { toast } from '@/components/ui/sonner';
@@ -34,6 +33,7 @@ interface UseLeadsDataReturn {
 interface Filters {
   status: string;
   assignedTo: string;
+  website: string;
 }
 
 export const useLeadsData = (
@@ -45,18 +45,42 @@ export const useLeadsData = (
   const [filteredLeads, setFilteredLeads] = useState<Lead[]>([]);
   const [isLoading, setIsLoading] = useState(false);
 
-  const fetchLeadsData = async () => {
+  const fetchLeadsData = useCallback(async () => {
     if (!user) return;
     
     setIsLoading(true);
     try {
-      const { data, error } = await supabase
+      let query = supabase
         .from('leads')
         .select('*')
         .eq('user_id', user.id)
         .gte('created_at', dateRange.from.toISOString())
-        .lte('created_at', dateRange.to.toISOString())
-        .order('created_at', { ascending: false });
+        .lte('created_at', dateRange.to.toISOString());
+
+      if (filters.website && filters.website !== 'All') {
+        const { data: forms, error: formsError } = await supabase
+          .from('connected_forms')
+          .select('form_id')
+          .eq('user_id', user.id)
+          .eq('website_url', filters.website);
+        
+        if (formsError) {
+          console.error('Error fetching forms for website:', formsError);
+          toast.error('Failed to filter by website.');
+        }
+
+        const formIds = forms ? forms.map(f => f.form_id) : [];
+
+        if (formIds.length > 0) {
+          query = query.in('form_id', formIds);
+        } else {
+          setLeads([]);
+          setIsLoading(false);
+          return;
+        }
+      }
+
+      const { data, error } = await query.order('created_at', { ascending: false });
 
       if (error) {
         console.error('Error fetching leads:', error);
@@ -71,7 +95,7 @@ export const useLeadsData = (
     } finally {
       setIsLoading(false);
     }
-  };
+  }, [user, dateRange.from, dateRange.to, filters.website]);
 
   const applyFilters = () => {
     let filtered = [...leads];
@@ -168,7 +192,7 @@ export const useLeadsData = (
 
   useEffect(() => {
     fetchLeadsData();
-  }, [dateRange, user]);
+  }, [fetchLeadsData]);
 
   useEffect(() => {
     applyFilters();

@@ -1,4 +1,3 @@
-
 import { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
@@ -18,10 +17,12 @@ interface LeadFiltersProps {
   onDateRangeChange: (range: DateRange) => void;
   onStatusFilter: (status: string) => void;
   onAssignedToFilter: (assignedTo: string) => void;
+  onWebsiteFilter: (website: string) => void;
+  availableWebsites: string[];
   onReset: () => void;
 }
 
-const LeadFilters = ({ onDateRangeChange, onStatusFilter, onAssignedToFilter, onReset }: LeadFiltersProps) => {
+const LeadFilters = ({ onDateRangeChange, onStatusFilter, onAssignedToFilter, onWebsiteFilter, availableWebsites, onReset }: LeadFiltersProps) => {
   const [isOpen, setIsOpen] = useState(false);
   const [customDateRange, setCustomDateRange] = useState<{ from?: Date; to?: Date }>({});
 
@@ -132,6 +133,20 @@ const LeadFilters = ({ onDateRangeChange, onStatusFilter, onAssignedToFilter, on
               {assignedToOptions.map((person) => (
                 <SelectItem key={person} value={person} className="text-sm">
                   {person}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+
+          {/* Website Filter */}
+          <Select onValueChange={onWebsiteFilter}>
+            <SelectTrigger className="w-48 h-8 text-sm">
+              <SelectValue placeholder="Filter by Website" />
+            </SelectTrigger>
+            <SelectContent className="z-50">
+              {availableWebsites.map((website) => (
+                <SelectItem key={website} value={website} className="text-sm">
+                  {website}
                 </SelectItem>
               ))}
             </SelectContent>
