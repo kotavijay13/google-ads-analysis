@@ -1,7 +1,9 @@
+
 import { useState } from 'react';
 import Header from '@/components/Header';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import DateRangePicker from '@/components/DateRangePicker';
 import DownloadButton from '@/components/seo/DownloadButton';
 import LeadFilters from '@/components/leads/LeadFilters';
@@ -11,6 +13,7 @@ import LeadsTable from '@/components/leads/LeadsTable';
 import { useLeadsData } from '@/components/leads/hooks/useLeadsData';
 import { useAuth } from '@/context/AuthContext';
 import { useGSCConnection } from '@/hooks/seo/useGSCConnection';
+import { Globe } from 'lucide-react';
 
 const LeadsPage = () => {
   const { user } = useAuth();
@@ -74,9 +77,9 @@ const LeadsPage = () => {
 
   // Calculate stats from filtered data
   const totalLeads = filteredLeads.length;
-  const conversionRate = 0; // This would be calculated based on traffic data
-  const costPerLead = 0; // This would be calculated based on campaign spend
-  const averageValue = 0; // This would be calculated based on deal values
+  const conversionRate = 0;
+  const costPerLead = 0;
+  const averageValue = 0;
 
   // Prepare data for export
   const exportData = filteredLeads.map(lead => ({
@@ -107,6 +110,49 @@ const LeadsPage = () => {
     <div className="container mx-auto py-6 px-4 max-w-7xl">
       <Header onRefresh={handleRefresh} title="Leads Dashboard" />
       
+      {/* Website Selector Card */}
+      <Card className="mb-6 bg-white shadow-sm">
+        <CardHeader>
+          <CardTitle className="flex items-center gap-2 text-lg">
+            <Globe className="w-5 h-5" />
+            Website Filter
+          </CardTitle>
+        </CardHeader>
+        <CardContent>
+          <div className="flex items-center gap-4">
+            <label className="text-sm font-medium text-gray-700 min-w-fit">
+              Select Website:
+            </label>
+            <Select value={filters.website} onValueChange={handleWebsiteFilter}>
+              <SelectTrigger className="w-80">
+                <SelectValue placeholder="Choose a website to view leads" />
+              </SelectTrigger>
+              <SelectContent className="z-50">
+                <SelectItem value="All">
+                  <div className="flex items-center gap-2">
+                    <Globe className="h-4 w-4" />
+                    All Websites
+                  </div>
+                </SelectItem>
+                {availableWebsites.map((website) => (
+                  <SelectItem key={website} value={website}>
+                    <div className="flex items-center gap-2">
+                      <Globe className="h-4 w-4" />
+                      {website}
+                    </div>
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+            {filters.website !== 'All' && (
+              <div className="text-sm text-gray-600">
+                Showing leads from: <span className="font-semibold text-blue-600">{filters.website}</span>
+              </div>
+            )}
+          </div>
+        </CardContent>
+      </Card>
+      
       <LeadsStatsCards
         totalLeads={totalLeads}
         conversionRate={conversionRate}
@@ -127,7 +173,14 @@ const LeadsPage = () => {
       </div>
 
       <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-6 gap-4">
-        <h2 className="text-lg font-medium text-gray-900">Leads Overview</h2>
+        <h2 className="text-lg font-medium text-gray-900">
+          Leads Overview
+          {filters.website !== 'All' && (
+            <span className="text-sm font-normal text-gray-600 ml-2">
+              ({filters.website})
+            </span>
+          )}
+        </h2>
         <div className="flex gap-2">
           <DateRangePicker onDateChange={handleDateChange} />
           <DownloadButton 
