@@ -1,3 +1,4 @@
+
 import { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
@@ -138,7 +139,7 @@ const LeadFilters = ({ onDateRangeChange, onStatusFilter, onAssignedToFilter, on
             </SelectContent>
           </Select>
 
-          {/* Website Filter */}
+          {/* Website Filter - Now using connected forms websites */}
           <Select onValueChange={onWebsiteFilter}>
             <SelectTrigger className="w-48 h-8 text-sm">
               <SelectValue placeholder="Filter by Website" />

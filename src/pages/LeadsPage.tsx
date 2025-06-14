@@ -12,12 +12,12 @@ import LeadsStatsCards from '@/components/leads/LeadsStatsCards';
 import LeadsTable from '@/components/leads/LeadsTable';
 import { useLeadsData } from '@/components/leads/hooks/useLeadsData';
 import { useAuth } from '@/context/AuthContext';
-import { useGSCConnection } from '@/hooks/seo/useGSCConnection';
+import { useConnectedForms } from '@/hooks/useConnectedForms';
 import { Globe } from 'lucide-react';
 
 const LeadsPage = () => {
   const { user } = useAuth();
-  const { availableWebsites } = useGSCConnection();
+  const { connectedForms } = useConnectedForms();
   const [dateRange, setDateRange] = useState({
     from: new Date(Date.now() - 30 * 24 * 60 * 60 * 1000),
     to: new Date()
@@ -28,6 +28,9 @@ const LeadsPage = () => {
     assignedTo: 'All',
     website: 'All'
   });
+
+  // Get unique websites from connected forms
+  const availableWebsites = Array.from(new Set(connectedForms.map(form => form.website_url)));
 
   const {
     leads,
