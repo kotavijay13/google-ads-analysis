@@ -12,7 +12,8 @@ import {
   FileText, 
   Zap,
   ChevronLeft,
-  ChevronRight
+  ChevronRight,
+  UserCog
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { Button } from '@/components/ui/button';
@@ -24,6 +25,7 @@ const navigation = [
   { name: 'SEO', href: '/seo', icon: TrendingUp },
   { name: 'Competition Analysis', href: '/competition', icon: Zap },
   { name: 'Leads', href: '/leads', icon: Users },
+  { name: 'Lead Administration', href: '/lead-admin', icon: UserCog },
   { name: 'WhatsApp', href: '/whatsapp', icon: MessageSquare },
   { name: 'Forms', href: '/forms', icon: FileText },
   { name: 'Integrations', href: '/integrations', icon: Settings },
@@ -40,7 +42,7 @@ export default function Sidebar() {
     )}>
       <div className="flex items-center justify-between p-4 border-b">
         {!isCollapsed && (
-          <h1 className="text-xl font-bold text-gray-900">Merge Insights AI</h1>
+          <h1 className="text-xl font-bold text-primary">Merge Insights AI</h1>
         )}
         <Button
           variant="ghost"
