@@ -1,3 +1,4 @@
+
 import { useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
@@ -62,9 +63,9 @@ const FormsPage = () => {
 
       <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
         <TabsList className="grid w-full grid-cols-3">
-          <TabsTrigger value="website-forms">Website Forms</TabsTrigger>
-          <TabsTrigger value="facebook-forms">Facebook Forms</TabsTrigger>
-          <TabsTrigger value="e-commerce">E-commerce Sales</TabsTrigger>
+          <TabsTrigger value="website-forms" className="data-[state=active]:bg-blue-600 data-[state=active]:text-white">Website Forms</TabsTrigger>
+          <TabsTrigger value="facebook-forms" className="data-[state=active]:bg-blue-600 data-[state=active]:text-white">Facebook Forms</TabsTrigger>
+          <TabsTrigger value="e-commerce" className="data-[state=active]:bg-blue-600 data-[state=active]:text-white">E-commerce Sales</TabsTrigger>
         </TabsList>
 
         <TabsContent value="website-forms" className="space-y-6">
