@@ -17,7 +17,7 @@ import { Globe } from 'lucide-react';
 import { Lead } from './types/leadTypes';
 
 interface LeadsTableProps {
-  leads: Lead[];
+  leads: (Lead & { website_url?: string | null })[];
   isLoading: boolean;
   onStatusChange: (leadId: string, newStatus: string) => void;
   onAssignedToChange: (leadId: string, assignedTo: string) => void;
@@ -92,7 +92,7 @@ const LeadsTable = ({
                     {visibleColumns.includes('source') && <TableCell className="text-gray-700 text-xs lg:text-sm">
                       <Badge variant="outline" className="flex items-center gap-1 w-fit text-xs">
                         <Globe className="w-2 h-2 lg:w-3 lg:h-3" />
-                        <span className="truncate max-w-[100px]">{lead.source || '-'}</span>
+                        <span className="truncate max-w-[100px]">{lead.website_url || lead.source || '-'}</span>
                       </Badge>
                     </TableCell>}
                     {visibleColumns.includes('campaign') && <TableCell className="text-gray-700 text-xs lg:text-sm hidden md:table-cell">

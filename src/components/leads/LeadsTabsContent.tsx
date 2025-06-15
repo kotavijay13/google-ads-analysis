@@ -5,7 +5,7 @@ import LeadsTable from '@/components/leads/LeadsTable';
 import { Lead } from './types/leadTypes';
 
 interface LeadsTabsContentProps {
-  filteredLeads: Lead[];
+  filteredLeads: (Lead & { website_url?: string | null })[];
   isLoading: boolean;
   onStatusChange: (leadId: string, newStatus: string) => void;
   onAssignedToChange: (leadId: string, assignedTo: string) => void;

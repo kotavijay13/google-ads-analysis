@@ -59,6 +59,14 @@ const LeadsPage = () => {
     handleRemarksChange
   } = useLeadsData(dateRange, { ...filters, website: connectedWebsite || 'All' });
 
+  const augmentedLeads = filteredLeads.map(lead => {
+    const form = connectedForms.find(f => f.form_id === lead.form_id);
+    return {
+      ...lead,
+      website_url: form ? form.website_url : null
+    };
+  });
+
   const handleRefresh = () => {
     fetchLeadsData();
   };
@@ -109,12 +117,12 @@ const LeadsPage = () => {
   };
 
   // Prepare data for export
-  const exportData = filteredLeads.map(lead => ({
+  const exportData = augmentedLeads.map(lead => ({
     Name: lead.name || `${lead.first_name || ''} ${lead.last_name || ''}`.trim() || '-',
     Email: lead.email || '-',
     Phone: lead.phone || '-',
     Company: lead.company || '-',
-    Source: lead.source || '-',
+    Source: lead.website_url || lead.source || '-',
     Campaign: lead.campaign || '-',
     'Search Keyword': lead.search_keyword || '-',
     Status: lead.status,
@@ -165,7 +173,7 @@ const LeadsPage = () => {
         />
 
         <LeadsTabsContent
-          filteredLeads={filteredLeads}
+          filteredLeads={augmentedLeads}
           isLoading={isLoading}
           onStatusChange={handleStatusChange}
           onAssignedToChange={handleAssignedToChange}
