@@ -23,13 +23,13 @@ const GoogleAdsAuthButton = ({ loading, configError, onConnect }: GoogleAdsAuthB
               <p>{configError}</p>
               <div className="mt-2 text-xs">
                 <p className="font-medium">Current redirect URI should be:</p>
-                <code className="bg-red-100 px-1 py-0.5 rounded text-red-800">{window.location.origin}/google-callback</code>
+                <code className="bg-red-100 px-1 py-0.5 rounded text-red-800">{window.location.origin}/google/callback</code>
                 <p className="mt-2 font-medium">To fix this:</p>
                 <ol className="list-decimal pl-4 mt-1 space-y-1">
                   <li>Go to your Google Cloud Console</li>
                   <li>Navigate to APIs & Services → Credentials</li>
                   <li>Edit your OAuth 2.0 Client ID</li>
-                  <li>Update the redirect URI to: <code className="bg-gray-100 px-1 py-0.5 rounded">{window.location.origin}/google-callback</code></li>
+                  <li>Update the redirect URI to: <code className="bg-gray-100 px-1 py-0.5 rounded">{window.location.origin}/google/callback</code></li>
                   <li>Save and try connecting again</li>
                 </ol>
               </div>
@@ -56,7 +56,7 @@ const GoogleAdsAuthButton = ({ loading, configError, onConnect }: GoogleAdsAuthB
         <ul className="list-disc pl-4 space-y-1">
           <li>Google Ads API must be enabled in Google Cloud Console</li>
           <li>OAuth consent screen must be configured</li>
-          <li>Current redirect URI: <code className="bg-blue-100 px-1 py-0.5 text-blue-800">{window.location.origin}/google-callback</code></li>
+          <li>Current redirect URI: <code className="bg-blue-100 px-1 py-0.5 text-blue-800">{window.location.origin}/google/callback</code></li>
         </ul>
       </div>
     </div>

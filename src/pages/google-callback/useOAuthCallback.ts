@@ -88,7 +88,7 @@ export const useOAuthCallback = () => {
 
         // Call the appropriate edge function based on auth type
         const functionName = currentAuthType === 'ads' ? 'google-ads-auth' : 'google-search-console-auth';
-        const redirectUri = window.location.origin + '/google-callback';
+        const redirectUri = window.location.origin + '/google/callback';
         
         console.log(`Calling ${functionName} edge function`);
         console.log('Using redirect URI:', redirectUri);
