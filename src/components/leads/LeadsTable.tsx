@@ -49,9 +49,9 @@ const LeadsTable = ({
   return (
     <Card className="bg-white shadow-sm">
       <CardHeader>
-        <CardTitle className="text-gray-900 flex items-center gap-2">
-          <Globe className="w-5 h-5" />
-          Leads ({leads.length})
+        <CardTitle className="flex items-center gap-2">
+          <Globe className="w-5 h-5 text-primary" />
+          <span className="text-primary font-semibold">Leads ({leads.length})</span>
         </CardTitle>
       </CardHeader>
       <CardContent>
