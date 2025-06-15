@@ -9,7 +9,7 @@ const SEOHeader = () => {
           <Globe className="w-6 h-6" />
         </div>
         <div>
-          <h1 className="text-2xl font-bold">SEO Detailed Report</h1>
+          <h1 className="text-2xl font-bold text-primary">SEO Detailed Report</h1>
           <p className="text-muted-foreground text-sm">
             Comprehensive SEO analytics and insights
           </p>

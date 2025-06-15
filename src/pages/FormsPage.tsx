@@ -1,4 +1,3 @@
-
 import { useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
@@ -57,7 +56,7 @@ const FormsPage = () => {
   return (
     <div className="container mx-auto py-6 px-4 max-w-4xl">
       <div className="mb-6">
-        <h1 className="text-2xl font-bold">Forms Management</h1>
+        <h1 className="text-2xl font-bold text-primary">Forms Management</h1>
         <p className="text-muted-foreground">Connect and manage your website and social media forms</p>
       </div>
 

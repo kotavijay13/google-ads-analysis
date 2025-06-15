@@ -1,4 +1,3 @@
-
 import { useState } from 'react';
 import { Button } from "@/components/ui/button";
 import { LineChart, Settings, User } from "lucide-react";
@@ -70,7 +69,7 @@ const Header = ({ onRefresh, title, isLoading }: HeaderProps) => {
           <LineChart size={24} className="text-primary" />
         </div>
         <div>
-          <h1 className="text-2xl font-bold flex items-center">
+          <h1 className="text-2xl font-bold flex items-center text-primary">
             {title}
           </h1>
           <p className="text-muted-foreground text-sm">
