@@ -1,4 +1,3 @@
-
 import { useState } from 'react';
 import { KeywordData, PageData, UrlMetaData, SitePerformance, SerpStats } from './seo/types';
 import { initialKeywords, initialPages } from './seo/constants';
@@ -103,17 +102,6 @@ export const useSEOData = () => {
     }
   };
 
-  const handleDateRangeChange = async (newDateRange: { from: Date; to: Date }) => {
-    setDateRange(newDateRange);
-    
-    if (seoState.selectedWebsite) {
-      const startDate = newDateRange.from.toISOString().split('T')[0];
-      const endDate = newDateRange.to.toISOString().split('T')[0];
-      
-      await fetchDataWithDateRange(seoState.selectedWebsite, startDate, endDate);
-    }
-  };
-
   return {
     isRefreshing,
     selectedWebsite: seoState.selectedWebsite,
@@ -126,6 +114,5 @@ export const useSEOData = () => {
     googleAdsConnected,
     handleRefreshSerpData,
     handleWebsiteChange,
-    handleDateRangeChange,
   };
 };

@@ -25,7 +25,7 @@ const navigation = [
   { name: 'Dashboard', href: '/', icon: Home },
   { name: 'Google Ads', href: '/google-ads', icon: Target },
   { name: 'Meta Ads', href: '/meta-ads', icon: BarChart3 },
-  { name: 'SEO', href: '/seo', icon: TrendingUp },
+  { name: 'SEO Report', href: '/seo', icon: TrendingUp },
   { name: 'Competition Analysis', href: '/competition', icon: Zap },
   { name: 'Leads', href: '/leads', icon: Users },
   { name: 'Lead Administration', href: '/lead-admin', icon: UserCog },

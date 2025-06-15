@@ -4,16 +4,11 @@ import WebsiteSelector from '@/components/seo/WebsiteSelector';
 import SEOStatsCards from '@/components/seo/SEOStatsCards';
 import SEOHeader from '@/components/seo/SEOHeader';
 import SEOTabsContent from '@/components/seo/SEOTabsContent';
-import DateRangePicker from '@/components/DateRangePicker';
 import { useSEOData } from '@/hooks/useSEOData';
 import { useSEOContext } from '@/context/SEOContext';
 
 const SEOPage = () => {
   const [activeTab, setActiveTab] = useState('keywords');
-  const [dateRange, setDateRange] = useState({
-    from: new Date(Date.now() - 28 * 24 * 60 * 60 * 1000),
-    to: new Date()
-  });
 
   const { seoState, updateSEOState } = useSEOContext();
   
@@ -23,7 +18,6 @@ const SEOPage = () => {
     googleAdsConnected,
     handleRefreshSerpData,
     handleWebsiteChange,
-    handleDateRangeChange,
   } = useSEOData();
 
   // Load data from context on mount
@@ -32,11 +26,6 @@ const SEOPage = () => {
       console.log('Loading persisted SEO data from context');
     }
   }, [seoState]);
-
-  const handleDateChange = (range: { from: Date; to: Date }) => {
-    setDateRange(range);
-    handleDateRangeChange(range);
-  };
 
   const connected = availableWebsites.length > 0;
   const gscLoading = false;
@@ -78,13 +67,6 @@ const SEOPage = () => {
               serpStats={seoState.serpStats} 
               serpKeywords={seoState.serpKeywords}
             />
-          </div>
-        </div>
-
-        <div className="mb-6">
-          <div className="flex items-center gap-4">
-            <h3 className="text-lg font-semibold">Date Range</h3>
-            <DateRangePicker onDateChange={handleDateChange} />
           </div>
         </div>
 
