@@ -6,6 +6,11 @@ import { useAuth } from '@/context/AuthContext';
 const LeadAdminPage = () => {
   const { user } = useAuth();
 
+  const handleRefresh = () => {
+    // Placeholder refresh function for lead admin
+    console.log('Refreshing lead admin data...');
+  };
+
   if (!user) {
     return (
       <div className="container mx-auto py-6 px-4 max-w-7xl">
@@ -18,7 +23,7 @@ const LeadAdminPage = () => {
 
   return (
     <div className="container mx-auto py-6 px-4 max-w-7xl">
-      <Header title="Lead Administration" />
+      <Header onRefresh={handleRefresh} title="Lead Administration" />
       <LeadAdmin />
     </div>
   );
