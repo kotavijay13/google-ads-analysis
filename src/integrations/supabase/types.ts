@@ -108,6 +108,38 @@ export type Database = {
         }
         Relationships: []
       }
+      lead_remarks: {
+        Row: {
+          created_at: string
+          id: string
+          lead_id: string
+          remark: string
+          user_id: string | null
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          lead_id: string
+          remark: string
+          user_id?: string | null
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          lead_id?: string
+          remark?: string
+          user_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "lead_remarks_lead_id_fkey"
+            columns: ["lead_id"]
+            isOneToOne: false
+            referencedRelation: "leads"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       leads: {
         Row: {
           assigned_to: string | null
@@ -124,6 +156,7 @@ export type Database = {
           phone: string | null
           raw_data: Json | null
           remarks: string | null
+          search_keyword: string | null
           source: string | null
           status: string | null
           updated_at: string
@@ -144,6 +177,7 @@ export type Database = {
           phone?: string | null
           raw_data?: Json | null
           remarks?: string | null
+          search_keyword?: string | null
           source?: string | null
           status?: string | null
           updated_at?: string
@@ -164,6 +198,7 @@ export type Database = {
           phone?: string | null
           raw_data?: Json | null
           remarks?: string | null
+          search_keyword?: string | null
           source?: string | null
           status?: string | null
           updated_at?: string

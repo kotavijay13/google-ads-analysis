@@ -9,27 +9,12 @@ import {
   TableHeader, 
   TableRow 
 } from "@/components/ui/table";
+import { useNavigate } from 'react-router-dom';
 import LeadStatusSelector from './LeadStatusSelector';
 import LeadAssignedToSelector from './LeadAssignedToSelector';
 import LeadRemarksEditor from './LeadRemarksEditor';
 import { Globe } from 'lucide-react';
-
-interface Lead {
-  id: string;
-  name: string;
-  first_name: string;
-  last_name: string;
-  email: string;
-  phone: string;
-  company: string;
-  message: string;
-  source: string;
-  campaign: string;
-  status: string;
-  assigned_to: string | null;
-  remarks: string | null;
-  created_at: string;
-}
+import { Lead } from './types/leadTypes';
 
 interface LeadsTableProps {
   leads: Lead[];
@@ -37,6 +22,7 @@ interface LeadsTableProps {
   onStatusChange: (leadId: string, newStatus: string) => void;
   onAssignedToChange: (leadId: string, assignedTo: string) => void;
   onRemarksChange: (leadId: string, remarks: string) => void;
+  visibleColumns: string[];
 }
 
 const LeadsTable = ({ 
@@ -44,8 +30,15 @@ const LeadsTable = ({
   isLoading, 
   onStatusChange, 
   onAssignedToChange, 
-  onRemarksChange 
+  onRemarksChange,
+  visibleColumns
 }: LeadsTableProps) => {
+  const navigate = useNavigate();
+
+  const handleRowClick = (leadId: string) => {
+    navigate(`/leads/${leadId}`);
+  };
+
   return (
     <Card className="bg-white shadow-sm w-full">
       <CardHeader>
@@ -64,68 +57,76 @@ const LeadsTable = ({
             <Table>
               <TableHeader>
                 <TableRow>
-                  <TableHead className="text-gray-700 font-medium text-xs lg:text-sm whitespace-nowrap">Name</TableHead>
-                  <TableHead className="text-gray-700 font-medium text-xs lg:text-sm whitespace-nowrap">Email</TableHead>
-                  <TableHead className="text-gray-700 font-medium text-xs lg:text-sm whitespace-nowrap hidden sm:table-cell">Phone</TableHead>
-                  <TableHead className="text-gray-700 font-medium text-xs lg:text-sm whitespace-nowrap">Source</TableHead>
-                  <TableHead className="text-gray-700 font-medium text-xs lg:text-sm whitespace-nowrap hidden md:table-cell">Campaign</TableHead>
-                  <TableHead className="text-gray-700 font-medium text-xs lg:text-sm whitespace-nowrap hidden lg:table-cell">Date</TableHead>
-                  <TableHead className="text-gray-700 font-medium text-xs lg:text-sm whitespace-nowrap">Status</TableHead>
-                  <TableHead className="text-gray-700 font-medium text-xs lg:text-sm whitespace-nowrap hidden md:table-cell">Assigned</TableHead>
-                  <TableHead className="text-gray-700 font-medium text-xs lg:text-sm whitespace-nowrap hidden lg:table-cell">Remarks</TableHead>
+                  {visibleColumns.includes('name') && <TableHead className="text-gray-700 font-medium text-xs lg:text-sm whitespace-nowrap">Name</TableHead>}
+                  {visibleColumns.includes('email') && <TableHead className="text-gray-700 font-medium text-xs lg:text-sm whitespace-nowrap">Email</TableHead>}
+                  {visibleColumns.includes('phone') && <TableHead className="text-gray-700 font-medium text-xs lg:text-sm whitespace-nowrap hidden sm:table-cell">Phone</TableHead>}
+                  {visibleColumns.includes('source') && <TableHead className="text-gray-700 font-medium text-xs lg:text-sm whitespace-nowrap">Source</TableHead>}
+                  {visibleColumns.includes('campaign') && <TableHead className="text-gray-700 font-medium text-xs lg:text-sm whitespace-nowrap hidden md:table-cell">Campaign</TableHead>}
+                  {visibleColumns.includes('search_keyword') && <TableHead className="text-gray-700 font-medium text-xs lg:text-sm whitespace-nowrap hidden md:table-cell">Search Keyword</TableHead>}
+                  {visibleColumns.includes('created_at') && <TableHead className="text-gray-700 font-medium text-xs lg:text-sm whitespace-nowrap hidden lg:table-cell">Created Date</TableHead>}
+                  {visibleColumns.includes('updated_at') && <TableHead className="text-gray-700 font-medium text-xs lg:text-sm whitespace-nowrap hidden lg:table-cell">Updated Date</TableHead>}
+                  {visibleColumns.includes('status') && <TableHead className="text-gray-700 font-medium text-xs lg:text-sm whitespace-nowrap">Status</TableHead>}
+                  {visibleColumns.includes('assigned_to') && <TableHead className="text-gray-700 font-medium text-xs lg:text-sm whitespace-nowrap hidden md:table-cell">Assigned</TableHead>}
+                  {visibleColumns.includes('remarks') && <TableHead className="text-gray-700 font-medium text-xs lg:text-sm whitespace-nowrap hidden lg:table-cell">Remarks</TableHead>}
                 </TableRow>
               </TableHeader>
               <TableBody>
                 {leads.map((lead) => (
-                  <TableRow key={lead.id} className="hover:bg-gray-50">
-                    <TableCell className="font-medium text-gray-900 text-xs lg:text-sm">
+                  <TableRow key={lead.id} onClick={() => handleRowClick(lead.id)} className="cursor-pointer hover:bg-gray-50">
+                    {visibleColumns.includes('name') && <TableCell className="font-medium text-gray-900 text-xs lg:text-sm">
                       <div className="min-w-0">
                         <div className="truncate">
                           {lead.name || `${lead.first_name || ''} ${lead.last_name || ''}`.trim() || '-'}
                         </div>
                       </div>
-                    </TableCell>
-                    <TableCell className="text-gray-700 text-xs lg:text-sm">
+                    </TableCell>}
+                    {visibleColumns.includes('email') && <TableCell className="text-gray-700 text-xs lg:text-sm">
                       <div className="min-w-0">
                         <div className="truncate">{lead.email || '-'}</div>
                       </div>
-                    </TableCell>
-                    <TableCell className="text-gray-700 text-xs lg:text-sm hidden sm:table-cell">
+                    </TableCell>}
+                    {visibleColumns.includes('phone') && <TableCell className="text-gray-700 text-xs lg:text-sm hidden sm:table-cell">
                       {lead.phone || '-'}
-                    </TableCell>
-                    <TableCell className="text-gray-700 text-xs lg:text-sm">
+                    </TableCell>}
+                    {visibleColumns.includes('source') && <TableCell className="text-gray-700 text-xs lg:text-sm">
                       <Badge variant="outline" className="flex items-center gap-1 w-fit text-xs">
                         <Globe className="w-2 h-2 lg:w-3 lg:h-3" />
                         <span className="truncate max-w-[100px]">{lead.source || '-'}</span>
                       </Badge>
-                    </TableCell>
-                    <TableCell className="text-gray-700 text-xs lg:text-sm hidden md:table-cell">
+                    </TableCell>}
+                    {visibleColumns.includes('campaign') && <TableCell className="text-gray-700 text-xs lg:text-sm hidden md:table-cell">
                       <div className="truncate max-w-[120px]">{lead.campaign || '-'}</div>
-                    </TableCell>
-                    <TableCell className="text-gray-700 text-xs lg:text-sm hidden lg:table-cell">
+                    </TableCell>}
+                    {visibleColumns.includes('search_keyword') && <TableCell className="text-gray-700 text-xs lg:text-sm hidden md:table-cell">
+                      <div className="truncate max-w-[120px]">{lead.search_keyword || '-'}</div>
+                    </TableCell>}
+                    {visibleColumns.includes('created_at') && <TableCell className="text-gray-700 text-xs lg:text-sm hidden lg:table-cell">
                       {new Date(lead.created_at).toLocaleDateString()}
-                    </TableCell>
-                    <TableCell>
+                    </TableCell>}
+                    {visibleColumns.includes('updated_at') && <TableCell className="text-gray-700 text-xs lg:text-sm hidden lg:table-cell">
+                      {lead.updated_at ? new Date(lead.updated_at).toLocaleDateString() : '-'}
+                    </TableCell>}
+                    {visibleColumns.includes('status') && <TableCell onClick={(e) => e.stopPropagation()}>
                       <LeadStatusSelector
                         status={lead.status}
                         leadId={lead.id}
                         onStatusChange={onStatusChange}
                       />
-                    </TableCell>
-                    <TableCell className="hidden md:table-cell">
+                    </TableCell>}
+                    {visibleColumns.includes('assigned_to') && <TableCell className="hidden md:table-cell" onClick={(e) => e.stopPropagation()}>
                       <LeadAssignedToSelector
                         assignedTo={lead.assigned_to}
                         leadId={lead.id}
                         onAssignedToChange={onAssignedToChange}
                       />
-                    </TableCell>
-                    <TableCell className="hidden lg:table-cell">
+                    </TableCell>}
+                    {visibleColumns.includes('remarks') && <TableCell className="hidden lg:table-cell" onClick={(e) => e.stopPropagation()}>
                       <LeadRemarksEditor
                         remarks={lead.remarks}
                         leadId={lead.id}
                         onRemarksChange={onRemarksChange}
                       />
-                    </TableCell>
+                    </TableCell>}
                   </TableRow>
                 ))}
               </TableBody>

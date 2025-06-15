@@ -14,7 +14,9 @@ export interface Lead {
   assigned_to: string | null;
   remarks: string | null;
   created_at: string;
+  updated_at: string;
   form_id: string;
+  search_keyword: string | null;
 }
 
 export interface Filters {

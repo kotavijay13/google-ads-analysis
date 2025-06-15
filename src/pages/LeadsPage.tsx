@@ -9,6 +9,7 @@ import { useLeadsData } from '@/components/leads/hooks/useLeadsData';
 import { useAuth } from '@/context/AuthContext';
 import { useConnectedForms } from '@/hooks/useConnectedForms';
 import { toast } from '@/components/ui/sonner';
+import ColumnSelector from '@/components/ColumnSelector';
 
 const LeadsPage = () => {
   const { user } = useAuth();
@@ -25,6 +26,24 @@ const LeadsPage = () => {
   });
 
   const [connectedWebsite, setConnectedWebsite] = useState<string>('');
+
+  const [visibleColumns, setVisibleColumns] = useState([
+    'name', 'email', 'source', 'status', 'assigned_to', 'created_at', 'remarks'
+  ]);
+
+  const allColumns = [
+    { key: 'name', label: 'Name' },
+    { key: 'email', label: 'Email' },
+    { key: 'phone', label: 'Phone' },
+    { key: 'source', label: 'Source' },
+    { key: 'campaign', label: 'Campaign' },
+    { key: 'search_keyword', label: 'Search Keyword' },
+    { key: 'status', label: 'Status' },
+    { key: 'assigned_to', label: 'Assigned To' },
+    { key: 'created_at', label: 'Created Date' },
+    { key: 'updated_at', label: 'Updated Date' },
+    { key: 'remarks', label: 'Remarks' },
+  ];
 
   // Get unique websites from connected forms
   const availableWebsites = Array.from(new Set(connectedForms.map(form => form.website_url)));
@@ -59,6 +78,14 @@ const LeadsPage = () => {
     setFilters(prev => ({ ...prev, website }));
   };
 
+  const handleColumnToggle = (columnKey: string) => {
+    setVisibleColumns(prev =>
+      prev.includes(columnKey)
+        ? prev.filter(key => key !== columnKey)
+        : [...prev, columnKey]
+    );
+  };
+
   const handleConnect = () => {
     if (filters.website && filters.website !== 'All') {
       setConnectedWebsite(filters.website);
@@ -88,9 +115,11 @@ const LeadsPage = () => {
     Company: lead.company || '-',
     Source: lead.source || '-',
     Campaign: lead.campaign || '-',
+    'Search Keyword': lead.search_keyword || '-',
     Status: lead.status,
     'Assigned To': lead.assigned_to || 'Unassigned',
     'Created Date': new Date(lead.created_at).toLocaleDateString(),
+    'Updated Date': lead.updated_at ? new Date(lead.updated_at).toLocaleDateString() : '-',
     Message: lead.message || '-',
     Remarks: lead.remarks || '-'
   }));
@@ -129,6 +158,9 @@ const LeadsPage = () => {
           selectedWebsite={connectedWebsite || filters.website}
           exportData={exportData}
           onDateChange={handleDateChange}
+          columns={allColumns}
+          visibleColumns={visibleColumns}
+          onColumnToggle={handleColumnToggle}
         />
 
         <LeadsTabsContent
@@ -137,6 +169,7 @@ const LeadsPage = () => {
           onStatusChange={handleStatusChange}
           onAssignedToChange={handleAssignedToChange}
           onRemarksChange={handleRemarksChange}
+          visibleColumns={visibleColumns}
         />
       </div>
     </div>

@@ -2,23 +2,7 @@
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import LeadAdmin from '@/components/leads/LeadAdmin';
 import LeadsTable from '@/components/leads/LeadsTable';
-
-interface Lead {
-  id: string;
-  name: string;
-  first_name: string;
-  last_name: string;
-  email: string;
-  phone: string;
-  company: string;
-  message: string;
-  source: string;
-  campaign: string;
-  status: string;
-  assigned_to: string | null;
-  remarks: string | null;
-  created_at: string;
-}
+import { Lead } from './types/leadTypes';
 
 interface LeadsTabsContentProps {
   filteredLeads: Lead[];
@@ -26,6 +10,7 @@ interface LeadsTabsContentProps {
   onStatusChange: (leadId: string, newStatus: string) => void;
   onAssignedToChange: (leadId: string, assignedTo: string) => void;
   onRemarksChange: (leadId: string, remarks: string) => void;
+  visibleColumns: string[];
 }
 
 const LeadsTabsContent = ({ 
@@ -33,7 +18,8 @@ const LeadsTabsContent = ({
   isLoading, 
   onStatusChange, 
   onAssignedToChange, 
-  onRemarksChange 
+  onRemarksChange,
+  visibleColumns
 }: LeadsTabsContentProps) => {
   return (
     <Tabs defaultValue="leads" className="space-y-6">
@@ -48,6 +34,7 @@ const LeadsTabsContent = ({
           onStatusChange={onStatusChange}
           onAssignedToChange={onAssignedToChange}
           onRemarksChange={onRemarksChange}
+          visibleColumns={visibleColumns}
         />
       </TabsContent>
     </Tabs>

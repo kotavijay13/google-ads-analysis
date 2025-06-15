@@ -1,4 +1,3 @@
-
 import { useState, useEffect, useCallback } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/context/AuthContext';
@@ -15,7 +14,7 @@ export const useLeadsData = (
   const [leads, setLeads] = useState<Lead[]>([]);
   const [isLoading, setIsLoading] = useState(false);
 
-  const { handleStatusChange: statusChange, handleAssignedToChange: assignedToChange, handleRemarksChange: remarksChange } = useLeadOperations();
+  const { handleStatusChange: statusChange, handleAssignedToChange: assignedToChange } = useLeadOperations();
   const { filteredLeads } = useLeadFiltering(leads, filters);
 
   const fetchLeadsData = useCallback(async () => {
@@ -60,8 +59,46 @@ export const useLeadsData = (
     assignedToChange(leadId, assignedTo, setLeads);
   };
 
-  const handleRemarksChange = (leadId: string, remarks: string) => {
-    remarksChange(leadId, remarks, setLeads);
+  const handleRemarksChange = async (leadId: string, remarks: string) => {
+    if (!user) {
+      toast.error('You must be logged in to add remarks.');
+      return;
+    }
+
+    try {
+      // 1. Insert new remark into lead_remarks table
+      const { error: remarkError } = await supabase
+        .from('lead_remarks')
+        .insert({
+          lead_id: leadId,
+          remark: remarks,
+          user_id: user.id
+        });
+
+      if (remarkError) throw remarkError;
+
+      // 2. Update the main lead entry with the latest remark and updated_at timestamp
+      const updated_at = new Date().toISOString();
+      const { data: updatedLead, error: leadError } = await supabase
+        .from('leads')
+        .update({ remarks, updated_at })
+        .eq('id', leadId)
+        .select()
+        .single();
+      
+      if (leadError) throw leadError;
+
+      // 3. Update local state
+      setLeads(prevLeads =>
+        prevLeads.map(lead =>
+          lead.id === leadId ? { ...lead, ...updatedLead } : lead
+        )
+      );
+      toast.success('Remark added successfully.');
+    } catch (error: any) {
+      console.error('Error adding remark:', error);
+      toast.error(error.message || 'Failed to add remark.');
+    }
   };
 
   useEffect(() => {

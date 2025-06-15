@@ -21,6 +21,7 @@ import AdminPage from '@/pages/AdminPage';
 import GoogleCallback from '@/pages/GoogleCallback';
 import MetaCallback from '@/pages/MetaCallback';
 import NotFound from '@/pages/NotFound';
+import LeadDetailPage from '@/pages/LeadDetailPage';
 
 const queryClient = new QueryClient();
 
@@ -43,6 +44,7 @@ function App() {
                   <Route path="/seo" element={<ProtectedRoute><SEOPage /></ProtectedRoute>} />
                   <Route path="/competition" element={<ProtectedRoute><CompetitionAnalysis /></ProtectedRoute>} />
                   <Route path="/leads" element={<ProtectedRoute><LeadsPage /></ProtectedRoute>} />
+                  <Route path="/leads/:id" element={<ProtectedRoute><LeadDetailPage /></ProtectedRoute>} />
                   <Route path="/lead-admin" element={<ProtectedRoute><LeadAdminPage /></ProtectedRoute>} />
                   <Route path="/whatsapp" element={<ProtectedRoute><WhatsAppPage /></ProtectedRoute>} />
                   <Route path="/forms" element={<ProtectedRoute><FormsPage /></ProtectedRoute>} />
@@ -61,3 +63,4 @@ function App() {
 }
 
 export default App;
+
