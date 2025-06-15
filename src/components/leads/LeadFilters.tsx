@@ -18,60 +18,67 @@ const LeadFilters = ({ onStatusFilter, onAssignedToFilter, onWebsiteFilter, avai
   const assignedToOptions = ['All', 'Unassigned', 'John Smith', 'Sarah Johnson', 'Mike Wilson', 'Emily Davis', 'David Brown'];
 
   return (
-    <Card className="bg-white shadow-sm">
-      <CardContent className="p-4">
-        <div className="flex flex-wrap gap-4 items-center">
+    <Card className="bg-white shadow-sm w-full">
+      <CardContent className="p-3 lg:p-4">
+        <div className="flex flex-col space-y-3 lg:space-y-0 lg:flex-row lg:flex-wrap lg:gap-4 lg:items-center">
           <div className="flex items-center gap-2">
             <Filter className="w-4 h-4" />
-            <span className="font-medium">Filters:</span>
+            <span className="font-medium text-sm lg:text-base">Filters:</span>
           </div>
 
-          {/* Status Filter */}
-          <Select onValueChange={onStatusFilter}>
-            <SelectTrigger className="w-36 h-8 text-sm">
-              <SelectValue placeholder="Filter by Status" />
-            </SelectTrigger>
-            <SelectContent className="z-50">
-              {statusOptions.map((status) => (
-                <SelectItem key={status} value={status} className="text-sm">
-                  {status}
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 lg:gap-4 flex-1">
+            {/* Status Filter */}
+            <Select onValueChange={onStatusFilter}>
+              <SelectTrigger className="w-full h-8 text-xs lg:text-sm">
+                <SelectValue placeholder="Filter by Status" />
+              </SelectTrigger>
+              <SelectContent className="z-50">
+                {statusOptions.map((status) => (
+                  <SelectItem key={status} value={status} className="text-xs lg:text-sm">
+                    {status}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
 
-          {/* Assigned To Filter */}
-          <Select onValueChange={onAssignedToFilter}>
-            <SelectTrigger className="w-40 h-8 text-sm">
-              <SelectValue placeholder="Filter by Assigned" />
-            </SelectTrigger>
-            <SelectContent className="z-50">
-              {assignedToOptions.map((person) => (
-                <SelectItem key={person} value={person} className="text-sm">
-                  {person}
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
+            {/* Assigned To Filter */}
+            <Select onValueChange={onAssignedToFilter}>
+              <SelectTrigger className="w-full h-8 text-xs lg:text-sm">
+                <SelectValue placeholder="Filter by Assigned" />
+              </SelectTrigger>
+              <SelectContent className="z-50">
+                {assignedToOptions.map((person) => (
+                  <SelectItem key={person} value={person} className="text-xs lg:text-sm">
+                    {person}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
 
-          {/* Website Filter - Now using connected forms websites */}
-          <Select onValueChange={onWebsiteFilter}>
-            <SelectTrigger className="w-48 h-8 text-sm">
-              <SelectValue placeholder="Filter by Website" />
-            </SelectTrigger>
-            <SelectContent className="z-50">
-              {availableWebsites.map((website) => (
-                <SelectItem key={website} value={website} className="text-sm">
-                  {website}
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
+            {/* Website Filter */}
+            <Select onValueChange={onWebsiteFilter}>
+              <SelectTrigger className="w-full h-8 text-xs lg:text-sm">
+                <SelectValue placeholder="Filter by Website" />
+              </SelectTrigger>
+              <SelectContent className="z-50">
+                {availableWebsites.map((website) => (
+                  <SelectItem key={website} value={website} className="text-xs lg:text-sm">
+                    {website}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
 
-          {/* Reset Button */}
-          <Button variant="ghost" size="sm" onClick={onReset} className="h-8 text-sm">
-            Reset Filters
-          </Button>
+            {/* Reset Button */}
+            <Button 
+              variant="ghost" 
+              size="sm" 
+              onClick={onReset} 
+              className="h-8 text-xs lg:text-sm w-full lg:w-auto"
+            >
+              Reset Filters
+            </Button>
+          </div>
         </div>
       </CardContent>
     </Card>

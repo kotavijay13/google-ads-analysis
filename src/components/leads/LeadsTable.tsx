@@ -47,14 +47,14 @@ const LeadsTable = ({
   onRemarksChange 
 }: LeadsTableProps) => {
   return (
-    <Card className="bg-white shadow-sm">
+    <Card className="bg-white shadow-sm w-full">
       <CardHeader>
-        <CardTitle className="flex items-center gap-2">
-          <Globe className="w-5 h-5 text-primary" />
+        <CardTitle className="flex items-center gap-2 text-sm lg:text-base">
+          <Globe className="w-4 h-4 lg:w-5 lg:h-5 text-primary" />
           <span className="text-primary font-semibold">Leads ({leads.length})</span>
         </CardTitle>
       </CardHeader>
-      <CardContent>
+      <CardContent className="p-0 lg:p-6">
         {isLoading ? (
           <div className="text-center py-10">
             <p className="text-gray-500">Loading leads...</p>
@@ -64,33 +64,47 @@ const LeadsTable = ({
             <Table>
               <TableHeader>
                 <TableRow>
-                  <TableHead className="text-gray-700 font-medium">Name</TableHead>
-                  <TableHead className="text-gray-700 font-medium">Email</TableHead>
-                  <TableHead className="text-gray-700 font-medium">Phone</TableHead>
-                  <TableHead className="text-gray-700 font-medium">Website Source</TableHead>
-                  <TableHead className="text-gray-700 font-medium">Campaign</TableHead>
-                  <TableHead className="text-gray-700 font-medium">Date</TableHead>
-                  <TableHead className="text-gray-700 font-medium">Status</TableHead>
-                  <TableHead className="text-gray-700 font-medium">Assigned To</TableHead>
-                  <TableHead className="text-gray-700 font-medium">Remarks</TableHead>
+                  <TableHead className="text-gray-700 font-medium text-xs lg:text-sm whitespace-nowrap">Name</TableHead>
+                  <TableHead className="text-gray-700 font-medium text-xs lg:text-sm whitespace-nowrap">Email</TableHead>
+                  <TableHead className="text-gray-700 font-medium text-xs lg:text-sm whitespace-nowrap hidden sm:table-cell">Phone</TableHead>
+                  <TableHead className="text-gray-700 font-medium text-xs lg:text-sm whitespace-nowrap">Source</TableHead>
+                  <TableHead className="text-gray-700 font-medium text-xs lg:text-sm whitespace-nowrap hidden md:table-cell">Campaign</TableHead>
+                  <TableHead className="text-gray-700 font-medium text-xs lg:text-sm whitespace-nowrap hidden lg:table-cell">Date</TableHead>
+                  <TableHead className="text-gray-700 font-medium text-xs lg:text-sm whitespace-nowrap">Status</TableHead>
+                  <TableHead className="text-gray-700 font-medium text-xs lg:text-sm whitespace-nowrap hidden md:table-cell">Assigned</TableHead>
+                  <TableHead className="text-gray-700 font-medium text-xs lg:text-sm whitespace-nowrap hidden lg:table-cell">Remarks</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
                 {leads.map((lead) => (
                   <TableRow key={lead.id} className="hover:bg-gray-50">
-                    <TableCell className="font-medium text-gray-900">
-                      {lead.name || `${lead.first_name || ''} ${lead.last_name || ''}`.trim() || '-'}
+                    <TableCell className="font-medium text-gray-900 text-xs lg:text-sm">
+                      <div className="min-w-0">
+                        <div className="truncate">
+                          {lead.name || `${lead.first_name || ''} ${lead.last_name || ''}`.trim() || '-'}
+                        </div>
+                      </div>
                     </TableCell>
-                    <TableCell className="text-gray-700">{lead.email || '-'}</TableCell>
-                    <TableCell className="text-gray-700">{lead.phone || '-'}</TableCell>
-                    <TableCell className="text-gray-700">
-                      <Badge variant="outline" className="flex items-center gap-1 w-fit">
-                        <Globe className="w-3 h-3" />
-                        {lead.source || '-'}
+                    <TableCell className="text-gray-700 text-xs lg:text-sm">
+                      <div className="min-w-0">
+                        <div className="truncate">{lead.email || '-'}</div>
+                      </div>
+                    </TableCell>
+                    <TableCell className="text-gray-700 text-xs lg:text-sm hidden sm:table-cell">
+                      {lead.phone || '-'}
+                    </TableCell>
+                    <TableCell className="text-gray-700 text-xs lg:text-sm">
+                      <Badge variant="outline" className="flex items-center gap-1 w-fit text-xs">
+                        <Globe className="w-2 h-2 lg:w-3 lg:h-3" />
+                        <span className="truncate max-w-[100px]">{lead.source || '-'}</span>
                       </Badge>
                     </TableCell>
-                    <TableCell className="text-gray-700">{lead.campaign || '-'}</TableCell>
-                    <TableCell className="text-gray-700">{new Date(lead.created_at).toLocaleDateString()}</TableCell>
+                    <TableCell className="text-gray-700 text-xs lg:text-sm hidden md:table-cell">
+                      <div className="truncate max-w-[120px]">{lead.campaign || '-'}</div>
+                    </TableCell>
+                    <TableCell className="text-gray-700 text-xs lg:text-sm hidden lg:table-cell">
+                      {new Date(lead.created_at).toLocaleDateString()}
+                    </TableCell>
                     <TableCell>
                       <LeadStatusSelector
                         status={lead.status}
@@ -98,14 +112,14 @@ const LeadsTable = ({
                         onStatusChange={onStatusChange}
                       />
                     </TableCell>
-                    <TableCell>
+                    <TableCell className="hidden md:table-cell">
                       <LeadAssignedToSelector
                         assignedTo={lead.assigned_to}
                         leadId={lead.id}
                         onAssignedToChange={onAssignedToChange}
                       />
                     </TableCell>
-                    <TableCell>
+                    <TableCell className="hidden lg:table-cell">
                       <LeadRemarksEditor
                         remarks={lead.remarks}
                         leadId={lead.id}
@@ -118,7 +132,7 @@ const LeadsTable = ({
             </Table>
           </div>
         ) : (
-          <div className="text-center py-10">
+          <div className="text-center py-10 px-4">
             <Globe className="w-12 h-12 text-gray-300 mx-auto mb-4" />
             <p className="text-gray-500">No leads data available</p>
             <p className="text-sm text-gray-400 mt-2">

@@ -94,16 +94,16 @@ const LeadsPage = () => {
   }
 
   return (
-    <div className="container mx-auto py-6 px-4 max-w-7xl">
-      <Header onRefresh={handleRefresh} title="Leads Dashboard" />
-      
-      <WebsiteFilterCard
-        selectedWebsite={filters.website}
-        availableWebsites={availableWebsites}
-        onWebsiteChange={handleWebsiteFilter}
-      />
+    <div className="w-full min-h-screen bg-gray-50 p-4 lg:p-6">
+      <div className="max-w-7xl mx-auto space-y-6">
+        <Header onRefresh={handleRefresh} title="Leads Dashboard" />
+        
+        <WebsiteFilterCard
+          selectedWebsite={filters.website}
+          availableWebsites={availableWebsites}
+          onWebsiteChange={handleWebsiteFilter}
+        />
 
-      <div className="mb-6">
         <LeadFilters
           onStatusFilter={handleStatusFilter}
           onAssignedToFilter={handleAssignedToFilter}
@@ -111,21 +111,21 @@ const LeadsPage = () => {
           availableWebsites={['All', ...availableWebsites]}
           onReset={handleResetFilters}
         />
+
+        <LeadsPageHeader
+          selectedWebsite={filters.website}
+          exportData={exportData}
+          onDateChange={handleDateChange}
+        />
+
+        <LeadsTabsContent
+          filteredLeads={filteredLeads}
+          isLoading={isLoading}
+          onStatusChange={handleStatusChange}
+          onAssignedToChange={handleAssignedToChange}
+          onRemarksChange={handleRemarksChange}
+        />
       </div>
-
-      <LeadsPageHeader
-        selectedWebsite={filters.website}
-        exportData={exportData}
-        onDateChange={handleDateChange}
-      />
-
-      <LeadsTabsContent
-        filteredLeads={filteredLeads}
-        isLoading={isLoading}
-        onStatusChange={handleStatusChange}
-        onAssignedToChange={handleAssignedToChange}
-        onRemarksChange={handleRemarksChange}
-      />
     </div>
   );
 };

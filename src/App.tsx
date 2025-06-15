@@ -32,7 +32,7 @@ function App() {
           <Router>
             <div className="min-h-screen bg-gray-50 flex w-full">
               <Sidebar />
-              <div className="flex-1 ml-64">
+              <div className="flex-1 lg:ml-64 transition-all duration-300">
                 <Routes>
                   <Route path="/auth" element={<AuthPage />} />
                   <Route path="/google/callback" element={<GoogleCallback />} />
