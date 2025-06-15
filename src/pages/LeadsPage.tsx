@@ -8,6 +8,7 @@ import LeadsTabsContent from '@/components/leads/LeadsTabsContent';
 import { useLeadsData } from '@/components/leads/hooks/useLeadsData';
 import { useAuth } from '@/context/AuthContext';
 import { useConnectedForms } from '@/hooks/useConnectedForms';
+import { toast } from '@/components/ui/sonner';
 
 const LeadsPage = () => {
   const { user } = useAuth();
@@ -23,6 +24,8 @@ const LeadsPage = () => {
     website: 'All'
   });
 
+  const [connectedWebsite, setConnectedWebsite] = useState<string>('');
+
   // Get unique websites from connected forms
   const availableWebsites = Array.from(new Set(connectedForms.map(form => form.website_url)));
 
@@ -34,7 +37,7 @@ const LeadsPage = () => {
     handleStatusChange,
     handleAssignedToChange,
     handleRemarksChange
-  } = useLeadsData(dateRange, filters);
+  } = useLeadsData(dateRange, { ...filters, website: connectedWebsite || 'All' });
 
   const handleRefresh = () => {
     fetchLeadsData();
@@ -56,12 +59,21 @@ const LeadsPage = () => {
     setFilters(prev => ({ ...prev, website }));
   };
 
+  const handleConnect = () => {
+    if (filters.website && filters.website !== 'All') {
+      setConnectedWebsite(filters.website);
+      toast.success(`Connected to ${filters.website}. Loading leads...`);
+      // The useLeadsData hook will automatically refetch when connectedWebsite changes
+    }
+  };
+
   const handleResetFilters = () => {
     setFilters({
       status: 'All',
       assignedTo: 'All',
       website: 'All'
     });
+    setConnectedWebsite('');
     setDateRange({
       from: new Date(Date.now() - 30 * 24 * 60 * 60 * 1000),
       to: new Date()
@@ -102,6 +114,7 @@ const LeadsPage = () => {
           selectedWebsite={filters.website}
           availableWebsites={availableWebsites}
           onWebsiteChange={handleWebsiteFilter}
+          onConnect={handleConnect}
         />
 
         <LeadFilters
@@ -113,7 +126,7 @@ const LeadsPage = () => {
         />
 
         <LeadsPageHeader
-          selectedWebsite={filters.website}
+          selectedWebsite={connectedWebsite || filters.website}
           exportData={exportData}
           onDateChange={handleDateChange}
         />
