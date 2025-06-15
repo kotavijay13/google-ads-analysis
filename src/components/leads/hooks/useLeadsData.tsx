@@ -1,4 +1,3 @@
-
 import { useState, useEffect, useCallback } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/context/AuthContext';
@@ -19,6 +18,7 @@ interface Lead {
   assigned_to: string | null;
   remarks: string | null;
   created_at: string;
+  form_id: string;
 }
 
 interface UseLeadsDataReturn {
