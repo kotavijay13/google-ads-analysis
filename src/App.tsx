@@ -1,3 +1,4 @@
+
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { Toaster } from '@/components/ui/sonner';
@@ -13,7 +14,6 @@ import CompetitionAnalysis from '@/pages/CompetitionAnalysis';
 import LeadsPage from '@/pages/LeadsPage';
 import LeadAdminPage from '@/pages/LeadAdminPage';
 import ChatsPage from '@/pages/ChatsPage';
-import WhatsAppPage from '@/pages/WhatsAppPage';
 import FormsPage from '@/pages/FormsPage';
 import IntegrationsPage from '@/pages/IntegrationsPage';
 import AuthPage from '@/pages/AuthPage';
