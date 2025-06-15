@@ -1,41 +1,11 @@
+
 import { useState, useEffect, useCallback } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/context/AuthContext';
 import { toast } from '@/components/ui/sonner';
-
-interface Lead {
-  id: string;
-  name: string;
-  first_name: string;
-  last_name: string;
-  email: string;
-  phone: string;
-  company: string;
-  message: string;
-  source: string;
-  campaign: string;
-  status: string;
-  assigned_to: string | null;
-  remarks: string | null;
-  created_at: string;
-  form_id: string;
-}
-
-interface UseLeadsDataReturn {
-  leads: Lead[];
-  filteredLeads: Lead[];
-  isLoading: boolean;
-  fetchLeadsData: () => void;
-  handleStatusChange: (leadId: string, newStatus: string) => void;
-  handleAssignedToChange: (leadId: string, assignedTo: string) => void;
-  handleRemarksChange: (leadId: string, remarks: string) => void;
-}
-
-interface Filters {
-  status: string;
-  assignedTo: string;
-  website: string;
-}
+import { Lead, Filters, UseLeadsDataReturn } from '../types/leadTypes';
+import { useLeadOperations } from './useLeadOperations';
+import { useLeadFiltering } from './useLeadFiltering';
 
 export const useLeadsData = (
   dateRange: { from: Date; to: Date },
@@ -43,8 +13,10 @@ export const useLeadsData = (
 ): UseLeadsDataReturn => {
   const { user } = useAuth();
   const [leads, setLeads] = useState<Lead[]>([]);
-  const [filteredLeads, setFilteredLeads] = useState<Lead[]>([]);
   const [isLoading, setIsLoading] = useState(false);
+
+  const { handleStatusChange: statusChange, handleAssignedToChange: assignedToChange, handleRemarksChange: remarksChange } = useLeadOperations();
+  const { filteredLeads } = useLeadFiltering(leads, filters);
 
   const fetchLeadsData = useCallback(async () => {
     if (!user) return;
@@ -75,138 +47,21 @@ export const useLeadsData = (
     }
   }, [user, dateRange.from, dateRange.to]);
 
-  const applyFilters = useCallback(async () => {
-    if (!user) return;
-    
-    let filtered = [...leads];
-
-    // Apply website filter first by getting form IDs for the selected website
-    if (filters.website && filters.website !== 'All') {
-      try {
-        const { data: forms, error: formsError } = await supabase
-          .from('connected_forms')
-          .select('form_id')
-          .eq('user_id', user.id)
-          .eq('website_url', filters.website);
-        
-        if (formsError) {
-          console.error('Error fetching forms for website:', formsError);
-        } else {
-          const formIds = forms ? forms.map(f => f.form_id) : [];
-          console.log('Form IDs for website', filters.website, ':', formIds);
-          
-          if (formIds.length > 0) {
-            filtered = filtered.filter(lead => formIds.includes(lead.form_id));
-          } else {
-            // No forms found for this website, so no leads should be shown
-            filtered = [];
-          }
-        }
-      } catch (error) {
-        console.error('Error filtering by website:', error);
-      }
-    }
-
-    // Apply status filter
-    if (filters.status !== 'All') {
-      filtered = filtered.filter(lead => lead.status === filters.status);
-    }
-
-    // Apply assigned to filter
-    if (filters.assignedTo !== 'All') {
-      if (filters.assignedTo === 'Unassigned') {
-        filtered = filtered.filter(lead => !lead.assigned_to);
-      } else {
-        filtered = filtered.filter(lead => lead.assigned_to === filters.assignedTo);
-      }
-    }
-
-    console.log('Filtered leads:', filtered.length, 'from total:', leads.length);
-    setFilteredLeads(filtered);
-  }, [leads, filters, user]);
-
-  const handleStatusChange = async (leadId: string, newStatus: string) => {
-    try {
-      const { error } = await supabase
-        .from('leads')
-        .update({ status: newStatus })
-        .eq('id', leadId)
-        .eq('user_id', user?.id);
-
-      if (error) {
-        console.error('Error updating lead status:', error);
-        toast.error('Failed to update lead status');
-        return;
-      }
-
-      setLeads(prev => prev.map(lead => 
-        lead.id === leadId ? { ...lead, status: newStatus } : lead
-      ));
-      
-      toast.success('Lead status updated successfully');
-    } catch (error) {
-      console.error('Error updating lead status:', error);
-      toast.error('Failed to update lead status');
-    }
+  const handleStatusChange = (leadId: string, newStatus: string) => {
+    statusChange(leadId, newStatus, setLeads);
   };
 
-  const handleAssignedToChange = async (leadId: string, assignedTo: string) => {
-    try {
-      const { error } = await supabase
-        .from('leads')
-        .update({ assigned_to: assignedTo || null })
-        .eq('id', leadId)
-        .eq('user_id', user?.id);
-
-      if (error) {
-        console.error('Error updating lead assignment:', error);
-        toast.error('Failed to update lead assignment');
-        return;
-      }
-
-      setLeads(prev => prev.map(lead => 
-        lead.id === leadId ? { ...lead, assigned_to: assignedTo || null } : lead
-      ));
-      
-      toast.success('Lead assignment updated successfully');
-    } catch (error) {
-      console.error('Error updating lead assignment:', error);
-      toast.error('Failed to update lead assignment');
-    }
+  const handleAssignedToChange = (leadId: string, assignedTo: string) => {
+    assignedToChange(leadId, assignedTo, setLeads);
   };
 
-  const handleRemarksChange = async (leadId: string, remarks: string) => {
-    try {
-      const { error } = await supabase
-        .from('leads')
-        .update({ remarks: remarks })
-        .eq('id', leadId)
-        .eq('user_id', user?.id);
-
-      if (error) {
-        console.error('Error updating lead remarks:', error);
-        toast.error('Failed to update lead remarks');
-        return;
-      }
-
-      setLeads(prev => prev.map(lead => 
-        lead.id === leadId ? { ...lead, remarks: remarks } : lead
-      ));
-      
-      toast.success('Remarks updated successfully');
-    } catch (error) {
-      console.error('Error updating lead remarks:', error);
-      toast.error('Failed to update lead remarks');
-    }
+  const handleRemarksChange = (leadId: string, remarks: string) => {
+    remarksChange(leadId, remarks, setLeads);
   };
 
   useEffect(() => {
     fetchLeadsData();
   }, [fetchLeadsData]);
-
-  useEffect(() => {
-    applyFilters();
-  }, [applyFilters]);
 
   return {
     leads,
