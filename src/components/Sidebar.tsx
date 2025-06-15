@@ -37,18 +37,18 @@ export default function Sidebar() {
 
   return (
     <div className={cn(
-      "bg-white shadow-lg transition-all duration-300 ease-in-out flex flex-col fixed left-0 top-0 h-screen z-10",
+      "bg-blue-600 shadow-lg transition-all duration-300 ease-in-out flex flex-col fixed left-0 top-0 h-screen z-10",
       isCollapsed ? "w-16" : "w-64"
     )}>
-      <div className="flex items-center justify-between p-4 border-b">
+      <div className="flex items-center justify-between p-4 border-b border-blue-500">
         {!isCollapsed && (
-          <h1 className="text-xl font-bold text-primary">Merge Insights AI</h1>
+          <h1 className="text-xl font-bold text-white">Merge Insights AI</h1>
         )}
         <Button
           variant="ghost"
           size="sm"
           onClick={() => setIsCollapsed(!isCollapsed)}
-          className="p-1.5"
+          className="p-1.5 text-white hover:bg-blue-500 hover:text-white"
         >
           {isCollapsed ? <ChevronRight className="h-4 w-4" /> : <ChevronLeft className="h-4 w-4" />}
         </Button>
@@ -64,15 +64,15 @@ export default function Sidebar() {
               className={cn(
                 'group flex items-center px-2 py-2 text-sm font-medium rounded-md transition-colors',
                 isActive
-                  ? 'bg-primary/10 text-primary font-semibold'
-                  : 'text-gray-600 hover:bg-gray-50 hover:text-primary'
+                  ? 'bg-blue-700 text-white font-semibold'
+                  : 'text-blue-100 hover:bg-blue-500 hover:text-white'
               )}
               title={isCollapsed ? item.name : undefined}
             >
               <item.icon
                 className={cn(
                   'flex-shrink-0 h-5 w-5',
-                  isActive ? 'text-primary' : 'text-gray-400 group-hover:text-primary',
+                  isActive ? 'text-white' : 'text-blue-200 group-hover:text-white',
                   isCollapsed ? 'mx-auto' : 'mr-3'
                 )}
                 aria-hidden="true"
