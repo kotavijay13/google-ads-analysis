@@ -35,7 +35,7 @@ function App() {
               <div className="flex-1 lg:ml-64 transition-all duration-300">
                 <Routes>
                   <Route path="/auth" element={<AuthPage />} />
-                  <Route path="/google/callback" element={<GoogleCallback />} />
+                  <Route path="/google-callback" element={<GoogleCallback />} />
                   <Route path="/meta/callback" element={<MetaCallback />} />
                   <Route path="/" element={<ProtectedRoute><Index /></ProtectedRoute>} />
                   <Route path="/google-ads" element={<ProtectedRoute><GoogleAdsPage /></ProtectedRoute>} />
