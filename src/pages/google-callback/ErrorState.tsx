@@ -43,7 +43,7 @@ const ErrorState = ({ errorMessage, errorDetails, authType }: ErrorStateProps) =
         <ul className="list-disc pl-4 mt-1 space-y-1">
           <li>Verify {getServiceName(authType)} API is enabled</li>
           <li>Check OAuth consent screen configuration</li>
-          <li>Ensure redirect URIs are properly set to: <code className="bg-gray-100 px-1 py-0.5">{window.location.origin}/google/callback</code></li>
+          <li>Ensure redirect URIs are properly set to: <code className="bg-gray-100 px-1 py-0.5">{window.location.origin}/google-callback</code></li>
           <li>Confirm client ID and secret are correctly configured</li>
         </ul>
       </div>

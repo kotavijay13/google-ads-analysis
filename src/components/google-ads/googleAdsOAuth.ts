@@ -5,7 +5,7 @@ export const initiateGoogleAdsOAuth = async (): Promise<void> => {
   const state = Math.random().toString(36).substring(2);
   localStorage.setItem('googleOAuthState', state);
   
-  const redirectUri = window.location.origin + '/google/callback';
+  const redirectUri = window.location.origin + '/google-callback';
   
   console.log('OAuth parameters:', { redirectUri, state });
   console.log('Current domain:', window.location.origin);
