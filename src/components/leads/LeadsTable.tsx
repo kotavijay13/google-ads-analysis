@@ -63,6 +63,7 @@ const LeadsTable = ({
                   {visibleColumns.includes('source') && <TableHead className="text-gray-700 font-medium text-xs lg:text-sm whitespace-nowrap">Source</TableHead>}
                   {visibleColumns.includes('campaign') && <TableHead className="text-gray-700 font-medium text-xs lg:text-sm whitespace-nowrap hidden md:table-cell">Campaign</TableHead>}
                   {visibleColumns.includes('search_keyword') && <TableHead className="text-gray-700 font-medium text-xs lg:text-sm whitespace-nowrap hidden md:table-cell">Search Keyword</TableHead>}
+                  {visibleColumns.includes('message') && <TableHead className="text-gray-700 font-medium text-xs lg:text-sm whitespace-nowrap hidden lg:table-cell">Message</TableHead>}
                   {visibleColumns.includes('created_at') && <TableHead className="text-gray-700 font-medium text-xs lg:text-sm whitespace-nowrap hidden lg:table-cell">Created Date</TableHead>}
                   {visibleColumns.includes('updated_at') && <TableHead className="text-gray-700 font-medium text-xs lg:text-sm whitespace-nowrap hidden lg:table-cell">Updated Date</TableHead>}
                   {visibleColumns.includes('status') && <TableHead className="text-gray-700 font-medium text-xs lg:text-sm whitespace-nowrap">Status</TableHead>}
@@ -72,7 +73,7 @@ const LeadsTable = ({
               </TableHeader>
               <TableBody>
                 {leads.map((lead) => (
-                  <TableRow key={lead.id} onClick={() => handleRowClick(lead.id)} className="cursor-pointer hover:bg-gray-50">
+                  <TableRow key={lead.id} onClick={() => handleRowClick(lead.id)} className="cursor-pointer hover:bg-blue-100">
                     {visibleColumns.includes('name') && <TableCell className="font-medium text-gray-900 text-xs lg:text-sm">
                       <div className="min-w-0">
                         <div className="truncate">
@@ -99,6 +100,9 @@ const LeadsTable = ({
                     </TableCell>}
                     {visibleColumns.includes('search_keyword') && <TableCell className="text-gray-700 text-xs lg:text-sm hidden md:table-cell">
                       <div className="truncate max-w-[120px]">{lead.search_keyword || '-'}</div>
+                    </TableCell>}
+                    {visibleColumns.includes('message') && <TableCell className="text-gray-700 text-xs lg:text-sm hidden lg:table-cell">
+                      <div className="truncate max-w-[120px]">{lead.message || '-'}</div>
                     </TableCell>}
                     {visibleColumns.includes('created_at') && <TableCell className="text-gray-700 text-xs lg:text-sm hidden lg:table-cell">
                       {new Date(lead.created_at).toLocaleDateString()}

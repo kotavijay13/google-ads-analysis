@@ -38,6 +38,7 @@ const LeadsPage = () => {
     { key: 'source', label: 'Source' },
     { key: 'campaign', label: 'Campaign' },
     { key: 'search_keyword', label: 'Search Keyword' },
+    { key: 'message', label: 'Message' },
     { key: 'status', label: 'Status' },
     { key: 'assigned_to', label: 'Assigned To' },
     { key: 'created_at', label: 'Created Date' },
