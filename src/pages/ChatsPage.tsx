@@ -1,4 +1,3 @@
-
 import Header from '@/components/Header';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
@@ -45,7 +44,7 @@ const ChatsPage = () => {
       <Tabs defaultValue="whatsapp" className="w-full">
         <TabsList className="grid w-full grid-cols-3">
           {platforms.map((platform) => (
-            <TabsTrigger key={platform.value} value={platform.value} className="flex items-center gap-2">
+            <TabsTrigger key={platform.value} value={platform.value} className="flex items-center gap-2 data-[state=active]:bg-blue-600 data-[state=active]:text-white">
               {platform.icon}
               {platform.name}
             </TabsTrigger>
