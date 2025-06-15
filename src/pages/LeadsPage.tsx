@@ -1,4 +1,3 @@
-
 import { useState } from 'react';
 import Header from '@/components/Header';
 import LeadFilters from '@/components/leads/LeadFilters';
@@ -57,7 +56,7 @@ const LeadsPage = () => {
     handleStatusChange,
     handleAssignedToChange,
     handleRemarksChange
-  } = useLeadsData(dateRange, { ...filters, website: connectedWebsite || 'All' });
+  } = useLeadsData(dateRange, { ...filters, website: connectedWebsite || filters.website });
 
   const augmentedLeads = filteredLeads.map(lead => {
     const form = connectedForms.find(f => f.form_id === lead.form_id);
@@ -150,6 +149,7 @@ const LeadsPage = () => {
         
         <WebsiteFilterCard
           selectedWebsite={filters.website}
+          connectedWebsite={connectedWebsite}
           availableWebsites={availableWebsites}
           onWebsiteChange={handleWebsiteFilter}
           onConnect={handleConnect}
@@ -158,8 +158,6 @@ const LeadsPage = () => {
         <LeadFilters
           onStatusFilter={handleStatusFilter}
           onAssignedToFilter={handleAssignedToFilter}
-          onWebsiteFilter={handleWebsiteFilter}
-          availableWebsites={['All', ...availableWebsites]}
           onReset={handleResetFilters}
         />
 

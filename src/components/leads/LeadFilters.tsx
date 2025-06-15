@@ -8,12 +8,10 @@ import { Filter } from 'lucide-react';
 interface LeadFiltersProps {
   onStatusFilter: (status: string) => void;
   onAssignedToFilter: (assignedTo: string) => void;
-  onWebsiteFilter: (website: string) => void;
-  availableWebsites: string[];
   onReset: () => void;
 }
 
-const LeadFilters = ({ onStatusFilter, onAssignedToFilter, onWebsiteFilter, availableWebsites, onReset }: LeadFiltersProps) => {
+const LeadFilters = ({ onStatusFilter, onAssignedToFilter, onReset }: LeadFiltersProps) => {
   const statusOptions = ['All', 'New', 'Contacted', 'Qualified', 'Follow-up', 'Not Reachable', 'Converted', 'Lost'];
   const assignedToOptions = ['All', 'Unassigned', 'John Smith', 'Sarah Johnson', 'Mike Wilson', 'Emily Davis', 'David Brown'];
 
@@ -26,7 +24,7 @@ const LeadFilters = ({ onStatusFilter, onAssignedToFilter, onWebsiteFilter, avai
             <span className="font-medium text-sm lg:text-base">Filters:</span>
           </div>
 
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 lg:gap-4 flex-1">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 lg:gap-4 flex-1">
             {/* Status Filter */}
             <Select onValueChange={onStatusFilter}>
               <SelectTrigger className="w-full h-8 text-xs lg:text-sm">
@@ -50,20 +48,6 @@ const LeadFilters = ({ onStatusFilter, onAssignedToFilter, onWebsiteFilter, avai
                 {assignedToOptions.map((person) => (
                   <SelectItem key={person} value={person} className="text-xs lg:text-sm">
                     {person}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-
-            {/* Website Filter */}
-            <Select onValueChange={onWebsiteFilter}>
-              <SelectTrigger className="w-full h-8 text-xs lg:text-sm">
-                <SelectValue placeholder="Filter by Website" />
-              </SelectTrigger>
-              <SelectContent className="z-50">
-                {availableWebsites.map((website) => (
-                  <SelectItem key={website} value={website} className="text-xs lg:text-sm">
-                    {website}
                   </SelectItem>
                 ))}
               </SelectContent>

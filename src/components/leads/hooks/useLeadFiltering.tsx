@@ -31,9 +31,9 @@ export const useLeadFiltering = (leads: Lead[], filters: Filters) => {
           console.log('Form IDs for website', filters.website, ':', formIds);
           
           if (formIds.length > 0) {
-            // Filter leads by form_id OR by source (website URL) for backward compatibility
+            // Filter leads by form_id
             filtered = filtered.filter(lead => 
-              formIds.includes(lead.form_id) || lead.source === filters.website
+              formIds.includes(lead.form_id)
             );
             console.log('After website filter:', filtered.length, 'leads');
           } else {

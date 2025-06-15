@@ -6,12 +6,15 @@ import { Globe, Link } from 'lucide-react';
 
 interface WebsiteFilterCardProps {
   selectedWebsite: string;
+  connectedWebsite: string;
   availableWebsites: string[];
   onWebsiteChange: (website: string) => void;
   onConnect: () => void;
 }
 
-const WebsiteFilterCard = ({ selectedWebsite, availableWebsites, onWebsiteChange, onConnect }: WebsiteFilterCardProps) => {
+const WebsiteFilterCard = ({ selectedWebsite, connectedWebsite, availableWebsites, onWebsiteChange, onConnect }: WebsiteFilterCardProps) => {
+  const isConnected = selectedWebsite && selectedWebsite !== 'All' && selectedWebsite === connectedWebsite;
+  
   return (
     <Card className="mb-6 bg-white shadow-sm">
       <CardHeader>
@@ -51,18 +54,23 @@ const WebsiteFilterCard = ({ selectedWebsite, availableWebsites, onWebsiteChange
           
           <Button 
             onClick={onConnect}
-            disabled={!selectedWebsite || selectedWebsite === 'All'}
+            disabled={!selectedWebsite || selectedWebsite === 'All' || isConnected}
             className="flex items-center gap-2 bg-blue-600 hover:bg-blue-700 text-white px-6 py-2"
           >
             <Link className="h-4 w-4" />
-            Connect
+            {isConnected ? 'Connected' : 'Connect'}
           </Button>
         </div>
         
-        {selectedWebsite !== 'All' && selectedWebsite && (
+        {selectedWebsite !== 'All' && selectedWebsite && !isConnected && (
           <div className="text-sm text-gray-600 mt-4">
             Ready to connect to: <span className="font-semibold text-blue-600">{selectedWebsite}</span>
           </div>
+        )}
+        {isConnected && (
+            <div className="text-sm text-green-600 mt-4">
+                Connected to: <span className="font-semibold">{selectedWebsite}</span>
+            </div>
         )}
       </CardContent>
     </Card>
