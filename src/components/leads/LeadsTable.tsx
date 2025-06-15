@@ -51,7 +51,7 @@ const LeadsTable = ({
       <CardHeader>
         <CardTitle className="text-gray-900 flex items-center gap-2">
           <Globe className="w-5 h-5" />
-          Recent Leads ({leads.length})
+          Leads ({leads.length})
         </CardTitle>
       </CardHeader>
       <CardContent>

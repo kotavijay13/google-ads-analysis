@@ -2,7 +2,6 @@
 import { useState } from 'react';
 import Header from '@/components/Header';
 import LeadFilters from '@/components/leads/LeadFilters';
-import LeadsStatsCards from '@/components/leads/LeadsStatsCards';
 import WebsiteFilterCard from '@/components/leads/WebsiteFilterCard';
 import LeadsPageHeader from '@/components/leads/LeadsPageHeader';
 import LeadsTabsContent from '@/components/leads/LeadsTabsContent';
@@ -69,12 +68,6 @@ const LeadsPage = () => {
     });
   };
 
-  // Calculate stats from filtered data
-  const totalLeads = filteredLeads.length;
-  const conversionRate = 0;
-  const costPerLead = 0;
-  const averageValue = 0;
-
   // Prepare data for export
   const exportData = filteredLeads.map(lead => ({
     Name: lead.name || `${lead.first_name || ''} ${lead.last_name || ''}`.trim() || '-',
@@ -108,14 +101,6 @@ const LeadsPage = () => {
         selectedWebsite={filters.website}
         availableWebsites={availableWebsites}
         onWebsiteChange={handleWebsiteFilter}
-      />
-      
-      <LeadsStatsCards
-        totalLeads={totalLeads}
-        conversionRate={conversionRate}
-        costPerLead={costPerLead}
-        averageValue={averageValue}
-        dateRange={dateRange}
       />
 
       <div className="mb-6">
