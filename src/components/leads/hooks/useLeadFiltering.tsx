@@ -12,6 +12,8 @@ export const useLeadFiltering = (leads: Lead[], filters: Filters) => {
     if (!user) return;
     
     let filtered = [...leads];
+    console.log('Starting filter process with', filtered.length, 'leads');
+    console.log('Current filters:', filters);
 
     // Apply website filter first by getting form IDs for the selected website
     if (filters.website && filters.website !== 'All') {
@@ -29,10 +31,15 @@ export const useLeadFiltering = (leads: Lead[], filters: Filters) => {
           console.log('Form IDs for website', filters.website, ':', formIds);
           
           if (formIds.length > 0) {
-            filtered = filtered.filter(lead => formIds.includes(lead.form_id));
+            // Filter leads by form_id OR by source (website URL) for backward compatibility
+            filtered = filtered.filter(lead => 
+              formIds.includes(lead.form_id) || lead.source === filters.website
+            );
+            console.log('After website filter:', filtered.length, 'leads');
           } else {
-            // No forms found for this website, so no leads should be shown
-            filtered = [];
+            // No forms found for this website, check if any leads have this website as source
+            filtered = filtered.filter(lead => lead.source === filters.website);
+            console.log('No forms found, filtering by source. After filter:', filtered.length, 'leads');
           }
         }
       } catch (error) {
@@ -43,6 +50,7 @@ export const useLeadFiltering = (leads: Lead[], filters: Filters) => {
     // Apply status filter
     if (filters.status !== 'All') {
       filtered = filtered.filter(lead => lead.status === filters.status);
+      console.log('After status filter:', filtered.length, 'leads');
     }
 
     // Apply assigned to filter
@@ -52,9 +60,10 @@ export const useLeadFiltering = (leads: Lead[], filters: Filters) => {
       } else {
         filtered = filtered.filter(lead => lead.assigned_to === filters.assignedTo);
       }
+      console.log('After assigned filter:', filtered.length, 'leads');
     }
 
-    console.log('Filtered leads:', filtered.length, 'from total:', leads.length);
+    console.log('Final filtered leads:', filtered.length, 'from total:', leads.length);
     setFilteredLeads(filtered);
   }, [leads, filters, user]);
 

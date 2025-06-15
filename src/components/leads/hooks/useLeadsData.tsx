@@ -23,6 +23,9 @@ export const useLeadsData = (
     
     setIsLoading(true);
     try {
+      console.log('Fetching leads for user:', user.id);
+      console.log('Date range:', dateRange.from.toISOString(), 'to', dateRange.to.toISOString());
+      
       let query = supabase
         .from('leads')
         .select('*')
@@ -38,6 +41,8 @@ export const useLeadsData = (
         return;
       }
 
+      console.log('Fetched leads from database:', data?.length || 0);
+      console.log('Sample lead data:', data?.[0]);
       setLeads(data || []);
     } catch (error) {
       console.error('Error fetching leads:', error);
