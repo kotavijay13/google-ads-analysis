@@ -45,10 +45,6 @@ const LeadsPage = () => {
     setDateRange(range);
   };
 
-  const handleDateRangeFilter = (range: { from: Date; to: Date }) => {
-    setDateRange(range);
-  };
-
   const handleStatusFilter = (status: string) => {
     setFilters(prev => ({ ...prev, status }));
   };
@@ -124,7 +120,6 @@ const LeadsPage = () => {
 
       <div className="mb-6">
         <LeadFilters
-          onDateRangeChange={handleDateRangeFilter}
           onStatusFilter={handleStatusFilter}
           onAssignedToFilter={handleAssignedToFilter}
           onWebsiteFilter={handleWebsiteFilter}
