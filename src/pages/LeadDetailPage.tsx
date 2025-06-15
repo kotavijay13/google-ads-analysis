@@ -100,7 +100,11 @@ const LeadDetailPage = () => {
   return (
     <div className="w-full min-h-screen bg-gray-50 p-4 lg:p-6">
       <div className="max-w-4xl mx-auto space-y-6">
-        <Header title={`Lead Details: ${leadFullName}`} />
+        <Header 
+          title={`Lead Details: ${leadFullName}`} 
+          onRefresh={fetchLeadDetails}
+          isLoading={isLoading}
+        />
         <Button variant="outline" onClick={() => navigate('/leads')} className="flex items-center gap-2">
           <ArrowLeft className="h-4 w-4" />
           Back to Leads
@@ -163,4 +167,3 @@ const LeadDetailPage = () => {
 };
 
 export default LeadDetailPage;
-
