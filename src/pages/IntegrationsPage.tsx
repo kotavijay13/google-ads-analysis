@@ -24,8 +24,7 @@ const IntegrationsPage = () => {
         <CardContent>
           <CardDescription className="text-sm">
             <p className="mb-4">
-              <strong>Important Note:</strong> You do not need to create Google Cloud or Meta developer apps.
-              Simply log in with your existing Google/Meta accounts to access your ad accounts and analytics data.
+              <strong>Note for Administrators:</strong> This application requires API credentials from Google Cloud and Meta for Developers to be configured in the project's secrets. End-users of this application will not need to create their own developer apps.
             </p>
             <p>
               Once you connect your accounts, you can select specific ad accounts or properties from the dropdown menus.
