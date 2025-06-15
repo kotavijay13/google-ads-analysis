@@ -56,7 +56,7 @@ const LeadsPage = () => {
     handleStatusChange,
     handleAssignedToChange,
     handleRemarksChange
-  } = useLeadsData(dateRange, { ...filters, website: connectedWebsite || filters.website });
+  } = useLeadsData(dateRange, filters);
 
   const augmentedLeads = filteredLeads.map(lead => {
     const form = connectedForms.find(f => f.form_id === lead.form_id);
