@@ -1,4 +1,3 @@
-
 import { useState } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { 
@@ -29,7 +28,7 @@ const navigation = [
   { name: 'Competition Analysis', href: '/competition', icon: Zap },
   { name: 'Leads', href: '/leads', icon: Users },
   { name: 'Lead Administration', href: '/lead-admin', icon: UserCog },
-  { name: 'WhatsApp', href: '/whatsapp', icon: MessageSquare },
+  { name: 'Chats', href: '/chats', icon: MessageSquare },
   { name: 'Forms', href: '/forms', icon: FileText },
   { name: 'Integrations', href: '/integrations', icon: Settings },
 ];

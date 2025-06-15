@@ -1,4 +1,3 @@
-
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { Toaster } from '@/components/ui/sonner';
@@ -13,6 +12,7 @@ import SEOPage from '@/pages/SEOPage';
 import CompetitionAnalysis from '@/pages/CompetitionAnalysis';
 import LeadsPage from '@/pages/LeadsPage';
 import LeadAdminPage from '@/pages/LeadAdminPage';
+import ChatsPage from '@/pages/ChatsPage';
 import WhatsAppPage from '@/pages/WhatsAppPage';
 import FormsPage from '@/pages/FormsPage';
 import IntegrationsPage from '@/pages/IntegrationsPage';
@@ -46,7 +46,7 @@ function App() {
                   <Route path="/leads" element={<ProtectedRoute><LeadsPage /></ProtectedRoute>} />
                   <Route path="/leads/:id" element={<ProtectedRoute><LeadDetailPage /></ProtectedRoute>} />
                   <Route path="/lead-admin" element={<ProtectedRoute><LeadAdminPage /></ProtectedRoute>} />
-                  <Route path="/whatsapp" element={<ProtectedRoute><WhatsAppPage /></ProtectedRoute>} />
+                  <Route path="/chats" element={<ProtectedRoute><ChatsPage /></ProtectedRoute>} />
                   <Route path="/forms" element={<ProtectedRoute><FormsPage /></ProtectedRoute>} />
                   <Route path="/integrations" element={<ProtectedRoute><IntegrationsPage /></ProtectedRoute>} />
                   <Route path="/admin" element={<ProtectedRoute><AdminPage /></ProtectedRoute>} />
@@ -63,4 +63,3 @@ function App() {
 }
 
 export default App;
-
