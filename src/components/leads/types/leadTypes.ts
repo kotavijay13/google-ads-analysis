@@ -26,3 +26,13 @@ export interface Filters {
   assignedTo: string;
   source: string;
 }
+
+export interface UseLeadsDataReturn {
+  leads: Lead[];
+  filteredLeads: Lead[];
+  isLoading: boolean;
+  fetchLeadsData: () => void;
+  handleStatusChange: (leadId: string, newStatus: string) => void;
+  handleAssignedToChange: (leadId: string, assignedTo: string) => void;
+  handleRemarksChange: (leadId: string, remarks: string) => void;
+}
