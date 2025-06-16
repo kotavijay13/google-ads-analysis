@@ -13,7 +13,8 @@ interface WebsiteFilterCardProps {
 }
 
 const WebsiteFilterCard = ({ selectedWebsite, connectedWebsite, availableWebsites, onWebsiteChange, onConnect }: WebsiteFilterCardProps) => {
-  const isConnected = selectedWebsite && selectedWebsite !== 'All' && selectedWebsite === connectedWebsite;
+  // Check if the selected website is actually in the available websites list (meaning it has connected forms)
+  const isActuallyConnected = selectedWebsite && selectedWebsite !== 'All' && availableWebsites.includes(selectedWebsite);
   
   return (
     <Card className="mb-6 bg-white shadow-sm">
@@ -54,20 +55,20 @@ const WebsiteFilterCard = ({ selectedWebsite, connectedWebsite, availableWebsite
           
           <Button 
             onClick={onConnect}
-            disabled={!selectedWebsite || selectedWebsite === 'All' || isConnected}
+            disabled={!selectedWebsite || selectedWebsite === 'All' || isActuallyConnected}
             className="flex items-center gap-2 bg-blue-600 hover:bg-blue-700 text-white px-6 py-2"
           >
             <Link className="h-4 w-4" />
-            {isConnected ? 'Connected' : 'Connect'}
+            {isActuallyConnected ? 'Connected' : 'Connect'}
           </Button>
         </div>
         
-        {selectedWebsite !== 'All' && selectedWebsite && !isConnected && (
-          <div className="text-sm text-gray-600 mt-4">
-            Ready to connect to: <span className="font-semibold text-blue-600">{selectedWebsite}</span>
+        {selectedWebsite !== 'All' && selectedWebsite && !isActuallyConnected && (
+          <div className="text-sm text-orange-600 mt-4">
+            This website is not connected. Click "Connect" to set up form tracking for: <span className="font-semibold">{selectedWebsite}</span>
           </div>
         )}
-        {isConnected && (
+        {isActuallyConnected && (
             <div className="text-sm text-green-600 mt-4">
                 Connected to: <span className="font-semibold">{selectedWebsite}</span>
             </div>

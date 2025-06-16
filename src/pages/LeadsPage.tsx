@@ -84,6 +84,8 @@ const LeadsPage = () => {
 
   const handleWebsiteFilter = (website: string) => {
     setFilters(prev => ({ ...prev, website }));
+    // Reset connected website when changing filter
+    setConnectedWebsite('');
   };
 
   const handleColumnToggle = (columnKey: string) => {
@@ -96,9 +98,13 @@ const LeadsPage = () => {
 
   const handleConnect = () => {
     if (filters.website && filters.website !== 'All') {
-      setConnectedWebsite(filters.website);
-      toast.success(`Connected to ${filters.website}. Loading leads...`);
-      // The useLeadsData hook will automatically refetch when connectedWebsite changes
+      // Only set as connected if the website actually has forms
+      if (availableWebsites.includes(filters.website)) {
+        setConnectedWebsite(filters.website);
+        toast.success(`Already connected to ${filters.website}. Showing leads...`);
+      } else {
+        toast.error(`No forms found for ${filters.website}. Please connect forms first.`);
+      }
     }
   };
 

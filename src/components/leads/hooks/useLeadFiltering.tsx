@@ -26,24 +26,28 @@ export const useLeadFiltering = (leads: Lead[], filters: Filters) => {
         
         if (formsError) {
           console.error('Error fetching forms for website:', formsError);
+          // If there's an error, show no leads for this website filter
+          filtered = [];
         } else {
           const formIds = forms ? forms.map(f => f.form_id) : [];
           console.log('Form IDs for website', filters.website, ':', formIds);
           
           if (formIds.length > 0) {
-            // Filter leads by form_id
+            // Filter leads by form_id - only show leads that match the form IDs for this website
             filtered = filtered.filter(lead => 
               formIds.includes(lead.form_id)
             );
-            console.log('After website filter:', filtered.length, 'leads');
+            console.log('After website filter (by form_id):', filtered.length, 'leads');
           } else {
-            // No forms found for this website, check if any leads have this website as source
-            filtered = filtered.filter(lead => lead.source === filters.website);
-            console.log('No forms found, filtering by source. After filter:', filtered.length, 'leads');
+            // No forms found for this website, so no leads should be shown
+            console.log('No forms found for website, showing 0 leads');
+            filtered = [];
           }
         }
       } catch (error) {
         console.error('Error filtering by website:', error);
+        // On error, show no leads to be safe
+        filtered = [];
       }
     }
 
