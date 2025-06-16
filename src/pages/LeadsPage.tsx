@@ -7,7 +7,6 @@ import LeadsTabsContent from '@/components/leads/LeadsTabsContent';
 import { useLeadsData } from '@/components/leads/hooks/useLeadsData';
 import { useAuth } from '@/context/AuthContext';
 import { useConnectedForms } from '@/hooks/useConnectedForms';
-import ColumnSelector from '@/components/ColumnSelector';
 
 const LeadsPage = () => {
   const { user } = useAuth();
@@ -58,7 +57,8 @@ const LeadsPage = () => {
     fetchLeadsData,
     handleStatusChange,
     handleAssignedToChange,
-    handleRemarksChange
+    handleRemarksChange,
+    applyFilters
   } = useLeadsData(dateRange, filters);
 
   const augmentedLeads = filteredLeads.map(lead => {
@@ -138,7 +138,7 @@ const LeadsPage = () => {
 
   return (
     <div className="w-full min-h-screen bg-gray-50 p-4 lg:p-6">
-      <div className="max-w-7xl mx-auto space-y-6">
+      <div className="max-w-7xl mx-auto space-y-4">
         <Header onRefresh={handleRefresh} title="Leads Dashboard" />
 
         <LeadFilters
@@ -146,6 +146,7 @@ const LeadsPage = () => {
           onAssignedToFilter={handleAssignedToFilter}
           onSourceFilter={handleSourceFilter}
           onReset={handleResetFilters}
+          onApplyFilters={applyFilters}
           availableSources={availableSources}
         />
 

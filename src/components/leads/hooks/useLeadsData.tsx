@@ -1,3 +1,4 @@
+
 import { useState, useEffect, useCallback } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/context/AuthContext';
@@ -15,7 +16,7 @@ export const useLeadsData = (
   const [isLoading, setIsLoading] = useState(false);
 
   const { handleStatusChange: statusChange, handleAssignedToChange: assignedToChange } = useLeadOperations();
-  const { filteredLeads } = useLeadFiltering(leads, filters);
+  const { filteredLeads, applyFilters } = useLeadFiltering(leads, filters);
 
   const fetchLeadsData = useCallback(async () => {
     if (!user) return;
@@ -112,6 +113,7 @@ export const useLeadsData = (
     fetchLeadsData,
     handleStatusChange,
     handleAssignedToChange,
-    handleRemarksChange
+    handleRemarksChange,
+    applyFilters
   };
 };

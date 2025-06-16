@@ -78,5 +78,5 @@ export const useLeadFiltering = (leads: Lead[], filters: Filters) => {
     applyFilters();
   }, [applyFilters]);
 
-  return { filteredLeads };
+  return { filteredLeads, applyFilters };
 };

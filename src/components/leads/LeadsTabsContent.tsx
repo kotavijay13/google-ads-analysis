@@ -22,12 +22,12 @@ const LeadsTabsContent = ({
   visibleColumns
 }: LeadsTabsContentProps) => {
   return (
-    <Tabs defaultValue="leads" className="space-y-6">
+    <Tabs defaultValue="leads" className="space-y-3">
       <TabsList>
         <TabsTrigger value="leads">Leads</TabsTrigger>
       </TabsList>
 
-      <TabsContent value="leads">
+      <TabsContent value="leads" className="mt-2">
         <LeadsTable
           leads={filteredLeads}
           isLoading={isLoading}

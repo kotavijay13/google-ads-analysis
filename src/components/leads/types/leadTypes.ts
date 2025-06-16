@@ -35,4 +35,5 @@ export interface UseLeadsDataReturn {
   handleStatusChange: (leadId: string, newStatus: string) => void;
   handleAssignedToChange: (leadId: string, assignedTo: string) => void;
   handleRemarksChange: (leadId: string, remarks: string) => void;
+  applyFilters: () => void;
 }
