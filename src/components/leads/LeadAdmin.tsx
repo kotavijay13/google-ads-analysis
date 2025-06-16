@@ -1,5 +1,5 @@
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Button } from '@/components/ui/button';
@@ -10,6 +10,8 @@ import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, D
 import { Badge } from '@/components/ui/badge';
 import { toast } from '@/components/ui/sonner';
 import { UserPlus, Edit, Trash2, Users } from 'lucide-react';
+import { supabase } from '@/integrations/supabase/client';
+import { useAuth } from '@/context/AuthContext';
 
 type UserRole = 'Manager' | 'Sales Rep' | 'Junior Rep';
 type UserStatus = 'active' | 'inactive';
@@ -23,20 +25,13 @@ interface SalesUser {
   leadsAssigned: number;
 }
 
-// Mock data for sales users
-const mockSalesUsers: SalesUser[] = [
-  { id: '1', name: 'John Smith', email: 'john.smith@company.com', role: 'Manager', status: 'active', leadsAssigned: 25 },
-  { id: '2', name: 'Sarah Johnson', email: 'sarah.johnson@company.com', role: 'Sales Rep', status: 'active', leadsAssigned: 18 },
-  { id: '3', name: 'Mike Wilson', email: 'mike.wilson@company.com', role: 'Sales Rep', status: 'active', leadsAssigned: 22 },
-  { id: '4', name: 'Emily Davis', email: 'emily.davis@company.com', role: 'Junior Rep', status: 'active', leadsAssigned: 12 },
-  { id: '5', name: 'David Brown', email: 'david.brown@company.com', role: 'Sales Rep', status: 'inactive', leadsAssigned: 8 },
-];
-
 const LeadAdmin = () => {
-  const [users, setUsers] = useState<SalesUser[]>(mockSalesUsers);
+  const { user } = useAuth();
+  const [users, setUsers] = useState<SalesUser[]>([]);
   const [isAddUserOpen, setIsAddUserOpen] = useState(false);
   const [isEditUserOpen, setIsEditUserOpen] = useState(false);
   const [currentUser, setCurrentUser] = useState<SalesUser | null>(null);
+  const [isLoading, setIsLoading] = useState(true);
   const [newUser, setNewUser] = useState({
     name: '',
     email: '',
@@ -44,47 +39,95 @@ const LeadAdmin = () => {
     status: 'active' as UserStatus
   });
 
-  const handleAddUser = () => {
-    const user: SalesUser = {
-      id: Math.random().toString(36).substring(7),
-      ...newUser,
-      leadsAssigned: 0
-    };
-    
-    setUsers([...users, user]);
-    setNewUser({
-      name: '',
-      email: '',
-      role: 'Sales Rep',
-      status: 'active'
-    });
-    setIsAddUserOpen(false);
-    toast.success('Sales user added successfully');
+  useEffect(() => {
+    if (user) {
+      fetchSalesUsers();
+    }
+  }, [user]);
+
+  const fetchSalesUsers = async () => {
+    try {
+      setIsLoading(true);
+      // In a real implementation, you would fetch from a sales_users table
+      // For now, we'll show an empty state
+      setUsers([]);
+    } catch (error) {
+      console.error('Error fetching sales users:', error);
+      toast.error('Failed to load sales users');
+    } finally {
+      setIsLoading(false);
+    }
   };
 
-  const handleEditUser = () => {
+  const handleAddUser = async () => {
+    try {
+      // In a real implementation, you would save to database
+      const salesUser: SalesUser = {
+        id: Math.random().toString(36).substring(7),
+        ...newUser,
+        leadsAssigned: 0
+      };
+      
+      setUsers([...users, salesUser]);
+      setNewUser({
+        name: '',
+        email: '',
+        role: 'Sales Rep',
+        status: 'active'
+      });
+      setIsAddUserOpen(false);
+      toast.success('Sales user added successfully');
+    } catch (error) {
+      console.error('Error adding user:', error);
+      toast.error('Failed to add user');
+    }
+  };
+
+  const handleEditUser = async () => {
     if (!currentUser) return;
     
-    const updatedUsers = users.map(user => 
-      user.id === currentUser.id ? currentUser : user
-    );
-    
-    setUsers(updatedUsers);
-    setCurrentUser(null);
-    setIsEditUserOpen(false);
-    toast.success('User updated successfully');
+    try {
+      const updatedUsers = users.map(user => 
+        user.id === currentUser.id ? currentUser : user
+      );
+      
+      setUsers(updatedUsers);
+      setCurrentUser(null);
+      setIsEditUserOpen(false);
+      toast.success('User updated successfully');
+    } catch (error) {
+      console.error('Error updating user:', error);
+      toast.error('Failed to update user');
+    }
   };
 
-  const handleDeleteUser = (id: string) => {
-    const updatedUsers = users.filter(user => user.id !== id);
-    setUsers(updatedUsers);
-    toast.success('User removed successfully');
+  const handleDeleteUser = async (id: string) => {
+    try {
+      const updatedUsers = users.filter(user => user.id !== id);
+      setUsers(updatedUsers);
+      toast.success('User removed successfully');
+    } catch (error) {
+      console.error('Error deleting user:', error);
+      toast.error('Failed to remove user');
+    }
   };
 
   const handleEditClick = (user: SalesUser) => {
     setCurrentUser(user);
     setIsEditUserOpen(true);
   };
+
+  if (isLoading) {
+    return (
+      <Card className="bg-white shadow-sm">
+        <CardContent className="p-6">
+          <div className="text-center py-8">
+            <p className="text-gray-500">Loading sales team...</p>
+          </div>
+        </CardContent>
+      </Card>
+    );
+  }
 
   return (
     <Card className="bg-white shadow-sm">
@@ -102,47 +145,57 @@ const LeadAdmin = () => {
         </Button>
       </CardHeader>
       <CardContent>
-        <Table>
-          <TableHeader>
-            <TableRow>
-              <TableHead>Name</TableHead>
-              <TableHead>Email</TableHead>
-              <TableHead>Role</TableHead>
-              <TableHead>Status</TableHead>
-              <TableHead>Leads Assigned</TableHead>
-              <TableHead className="text-right">Actions</TableHead>
-            </TableRow>
-          </TableHeader>
-          <TableBody>
-            {users.map(user => (
-              <TableRow key={user.id}>
-                <TableCell className="font-medium">{user.name}</TableCell>
-                <TableCell>{user.email}</TableCell>
-                <TableCell>
-                  <Badge variant={user.role === 'Manager' ? 'default' : 'secondary'}>
-                    {user.role}
-                  </Badge>
-                </TableCell>
-                <TableCell>
-                  <Badge variant={user.status === 'active' ? 'default' : 'secondary'}>
-                    {user.status}
-                  </Badge>
-                </TableCell>
-                <TableCell>
-                  <span className="font-medium">{user.leadsAssigned}</span>
-                </TableCell>
-                <TableCell className="text-right space-x-2">
-                  <Button variant="ghost" size="sm" onClick={() => handleEditClick(user)}>
-                    <Edit size={16} />
-                  </Button>
-                  <Button variant="ghost" size="sm" onClick={() => handleDeleteUser(user.id)}>
-                    <Trash2 size={16} />
-                  </Button>
-                </TableCell>
+        {users.length === 0 ? (
+          <div className="text-center py-8">
+            <Users className="w-12 h-12 text-gray-300 mx-auto mb-4" />
+            <p className="text-gray-500">No sales users added yet</p>
+            <p className="text-sm text-gray-400 mt-2">
+              Add your first sales team member to start managing lead assignments
+            </p>
+          </div>
+        ) : (
+          <Table>
+            <TableHeader>
+              <TableRow>
+                <TableHead>Name</TableHead>
+                <TableHead>Email</TableHead>
+                <TableHead>Role</TableHead>
+                <TableHead>Status</TableHead>
+                <TableHead>Leads Assigned</TableHead>
+                <TableHead className="text-right">Actions</TableHead>
               </TableRow>
-            ))}
-          </TableBody>
-        </Table>
+            </TableHeader>
+            <TableBody>
+              {users.map(user => (
+                <TableRow key={user.id}>
+                  <TableCell className="font-medium">{user.name}</TableCell>
+                  <TableCell>{user.email}</TableCell>
+                  <TableCell>
+                    <Badge variant={user.role === 'Manager' ? 'default' : 'secondary'}>
+                      {user.role}
+                    </Badge>
+                  </TableCell>
+                  <TableCell>
+                    <Badge variant={user.status === 'active' ? 'default' : 'secondary'}>
+                      {user.status}
+                    </Badge>
+                  </TableCell>
+                  <TableCell>
+                    <span className="font-medium">{user.leadsAssigned}</span>
+                  </TableCell>
+                  <TableCell className="text-right space-x-2">
+                    <Button variant="ghost" size="sm" onClick={() => handleEditClick(user)}>
+                      <Edit size={16} />
+                    </Button>
+                    <Button variant="ghost" size="sm" onClick={() => handleDeleteUser(user.id)}>
+                      <Trash2 size={16} />
+                    </Button>
+                  </TableCell>
+                </TableRow>
+              ))}
+            </TableBody>
+          </Table>
+        )}
       </CardContent>
 
       {/* Add User Dialog */}

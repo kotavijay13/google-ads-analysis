@@ -1,13 +1,12 @@
+
 import { useState } from 'react';
 import Header from '@/components/Header';
 import LeadFilters from '@/components/leads/LeadFilters';
-import WebsiteFilterCard from '@/components/leads/WebsiteFilterCard';
 import LeadsPageHeader from '@/components/leads/LeadsPageHeader';
 import LeadsTabsContent from '@/components/leads/LeadsTabsContent';
 import { useLeadsData } from '@/components/leads/hooks/useLeadsData';
 import { useAuth } from '@/context/AuthContext';
 import { useConnectedForms } from '@/hooks/useConnectedForms';
-import { toast } from '@/components/ui/sonner';
 import ColumnSelector from '@/components/ColumnSelector';
 
 const LeadsPage = () => {
@@ -21,10 +20,8 @@ const LeadsPage = () => {
   const [filters, setFilters] = useState({
     status: 'All',
     assignedTo: 'All',
-    website: 'All'
+    source: 'All'
   });
-
-  const [connectedWebsite, setConnectedWebsite] = useState<string>('');
 
   const [visibleColumns, setVisibleColumns] = useState([
     'name', 'email', 'source', 'status', 'assigned_to', 'created_at', 'remarks'
@@ -45,8 +42,14 @@ const LeadsPage = () => {
     { key: 'remarks', label: 'Remarks' },
   ];
 
-  // Get unique websites from connected forms
-  const availableWebsites = Array.from(new Set(connectedForms.map(form => form.website_url)));
+  // Get unique sources from connected forms and add social media sources
+  const availableSources = [
+    'All',
+    ...Array.from(new Set(connectedForms.map(form => form.website_url))),
+    'Instagram',
+    'Facebook Messenger',
+    'WhatsApp'
+  ];
 
   const {
     leads,
@@ -82,10 +85,8 @@ const LeadsPage = () => {
     setFilters(prev => ({ ...prev, assignedTo }));
   };
 
-  const handleWebsiteFilter = (website: string) => {
-    setFilters(prev => ({ ...prev, website }));
-    // Reset connected website when changing filter
-    setConnectedWebsite('');
+  const handleSourceFilter = (source: string) => {
+    setFilters(prev => ({ ...prev, source }));
   };
 
   const handleColumnToggle = (columnKey: string) => {
@@ -96,25 +97,12 @@ const LeadsPage = () => {
     );
   };
 
-  const handleConnect = () => {
-    if (filters.website && filters.website !== 'All') {
-      // Only set as connected if the website actually has forms
-      if (availableWebsites.includes(filters.website)) {
-        setConnectedWebsite(filters.website);
-        toast.success(`Already connected to ${filters.website}. Showing leads...`);
-      } else {
-        toast.error(`No forms found for ${filters.website}. Please connect forms first.`);
-      }
-    }
-  };
-
   const handleResetFilters = () => {
     setFilters({
       status: 'All',
       assignedTo: 'All',
-      website: 'All'
+      source: 'All'
     });
-    setConnectedWebsite('');
     setDateRange({
       from: new Date(Date.now() - 30 * 24 * 60 * 60 * 1000),
       to: new Date()
@@ -152,23 +140,17 @@ const LeadsPage = () => {
     <div className="w-full min-h-screen bg-gray-50 p-4 lg:p-6">
       <div className="max-w-7xl mx-auto space-y-6">
         <Header onRefresh={handleRefresh} title="Leads Dashboard" />
-        
-        <WebsiteFilterCard
-          selectedWebsite={filters.website}
-          connectedWebsite={connectedWebsite}
-          availableWebsites={availableWebsites}
-          onWebsiteChange={handleWebsiteFilter}
-          onConnect={handleConnect}
-        />
 
         <LeadFilters
           onStatusFilter={handleStatusFilter}
           onAssignedToFilter={handleAssignedToFilter}
+          onSourceFilter={handleSourceFilter}
           onReset={handleResetFilters}
+          availableSources={availableSources}
         />
 
         <LeadsPageHeader
-          selectedWebsite={connectedWebsite || filters.website}
+          selectedWebsite="All Sources"
           exportData={exportData}
           onDateChange={handleDateChange}
           columns={allColumns}

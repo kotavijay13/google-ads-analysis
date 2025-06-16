@@ -1,8 +1,11 @@
+
 import Header from '@/components/Header';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Instagram, Facebook, MessageSquare as WhatsAppIcon } from 'lucide-react';
+import { Badge } from '@/components/ui/badge';
+import { Instagram, Facebook, MessageSquare as WhatsAppIcon, Loader2 } from 'lucide-react';
+import { useSocialMediaIntegration } from '@/hooks/useSocialMediaIntegration';
 
 const platforms = [
   {
@@ -29,8 +32,45 @@ const platforms = [
 ];
 
 const ChatsPage = () => {
+  const {
+    connectedAccounts,
+    messages,
+    isLoading,
+    connectInstagram,
+    connectFacebook,
+    connectWhatsApp,
+    disconnectAccount,
+  } = useSocialMediaIntegration();
+
   const handleRefresh = () => {
     window.location.reload();
+  };
+
+  const isConnected = (platform: string) => {
+    return connectedAccounts.some(account => account.platform === platform);
+  };
+
+  const handleConnect = (platform: string) => {
+    switch (platform) {
+      case 'instagram':
+        connectInstagram();
+        break;
+      case 'facebook':
+        connectFacebook();
+        break;
+      case 'whatsapp':
+        connectWhatsApp();
+        break;
+      default:
+        console.error('Unknown platform:', platform);
+    }
+  };
+
+  const handleDisconnect = (platform: string) => {
+    const account = connectedAccounts.find(acc => acc.platform === platform);
+    if (account) {
+      disconnectAccount(account.id);
+    }
   };
 
   return (
@@ -44,9 +84,16 @@ const ChatsPage = () => {
       <Tabs defaultValue="whatsapp" className="w-full">
         <TabsList className="grid w-full grid-cols-3">
           {platforms.map((platform) => (
-            <TabsTrigger key={platform.value} value={platform.value} className="flex items-center gap-2 data-[state=active]:bg-blue-600 data-[state=active]:text-white">
+            <TabsTrigger 
+              key={platform.value} 
+              value={platform.value} 
+              className="flex items-center gap-2 data-[state=active]:bg-blue-600 data-[state=active]:text-white"
+            >
               {platform.icon}
-              {platform.name}
+              <span>{platform.name}</span>
+              {isConnected(platform.value) && (
+                <Badge className="ml-2 bg-green-500 text-white text-xs">Connected</Badge>
+              )}
             </TabsTrigger>
           ))}
         </TabsList>
@@ -54,9 +101,14 @@ const ChatsPage = () => {
           <TabsContent key={platform.value} value={platform.value}>
             <Card className="mt-4">
               <CardHeader>
-                <CardTitle className="flex items-center">
-                  {platform.icon}
-                  <span className="ml-2">Integrate {platform.name}</span>
+                <CardTitle className="flex items-center justify-between">
+                  <div className="flex items-center">
+                    {platform.icon}
+                    <span className="ml-2">Integrate {platform.name}</span>
+                  </div>
+                  {isConnected(platform.value) && (
+                    <Badge className="bg-green-500 text-white">Connected</Badge>
+                  )}
                 </CardTitle>
                 <CardDescription>
                   {platform.description}
@@ -64,12 +116,44 @@ const ChatsPage = () => {
               </CardHeader>
               <CardContent>
                 <div className="flex flex-col items-start space-y-4">
-                  <p className="text-sm text-muted-foreground">
-                    Once connected, you will be able to view and reply to your {platform.name} messages here.
-                  </p>
-                  <Button className={platform.color}>
-                    Connect {platform.name}
-                  </Button>
+                  {!isConnected(platform.value) ? (
+                    <>
+                      <p className="text-sm text-muted-foreground">
+                        Once connected, you will be able to view and reply to your {platform.name} messages here.
+                      </p>
+                      <Button 
+                        className={platform.color}
+                        onClick={() => handleConnect(platform.value)}
+                        disabled={isLoading}
+                      >
+                        {isLoading ? (
+                          <>
+                            <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                            Connecting...
+                          </>
+                        ) : (
+                          <>Connect {platform.name}</>
+                        )}
+                      </Button>
+                    </>
+                  ) : (
+                    <>
+                      <p className="text-sm text-green-600">
+                        ✅ {platform.name} is successfully connected! You can now manage your messages from this platform.
+                      </p>
+                      <div className="flex gap-2">
+                        <Button variant="outline">
+                          View Messages ({messages.filter(m => m.platform === platform.value).length})
+                        </Button>
+                        <Button 
+                          variant="destructive"
+                          onClick={() => handleDisconnect(platform.value)}
+                        >
+                          Disconnect
+                        </Button>
+                      </div>
+                    </>
+                  )}
                 </div>
               </CardContent>
             </Card>
