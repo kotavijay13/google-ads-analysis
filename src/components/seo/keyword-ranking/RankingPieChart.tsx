@@ -17,9 +17,9 @@ const RankingPieChart = ({ chartData, totalKeywords }: RankingPieChartProps) => 
     if (active && payload && payload.length) {
       const data = payload[0];
       return (
-        <div className="bg-white border rounded-xl shadow-lg p-4 border-gray-200">
-          <p className="font-semibold text-gray-900">{data.name}</p>
-          <p className="text-sm text-gray-600 mt-1">
+        <div className="bg-white border rounded-lg shadow-lg p-3 border-gray-200">
+          <p className="font-semibold text-gray-900 text-sm">{data.name}</p>
+          <p className="text-xs text-gray-600 mt-1">
             {data.value} keywords ({((data.value / totalKeywords) * 100).toFixed(1)}%)
           </p>
         </div>
@@ -43,7 +43,7 @@ const RankingPieChart = ({ chartData, totalKeywords }: RankingPieChartProps) => 
         fill="white" 
         textAnchor={x > cx ? 'start' : 'end'} 
         dominantBaseline="central"
-        fontSize={12}
+        fontSize={10}
         fontWeight="600"
       >
         {`${(percent * 100).toFixed(0)}%`}
@@ -52,7 +52,7 @@ const RankingPieChart = ({ chartData, totalKeywords }: RankingPieChartProps) => 
   };
 
   return (
-    <ResponsiveContainer width="100%" height={300}>
+    <ResponsiveContainer width="100%" height={220}>
       <PieChart>
         <Pie
           data={chartData}
@@ -60,10 +60,10 @@ const RankingPieChart = ({ chartData, totalKeywords }: RankingPieChartProps) => 
           cy="50%"
           labelLine={false}
           label={renderCustomizedLabel}
-          outerRadius={110}
+          outerRadius={85}
           fill="#8884d8"
           dataKey="value"
-          strokeWidth={3}
+          strokeWidth={2}
           stroke="#fff"
         >
           {chartData.map((entry, index) => (

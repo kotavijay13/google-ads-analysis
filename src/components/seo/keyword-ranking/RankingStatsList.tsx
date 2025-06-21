@@ -28,40 +28,40 @@ const RankingStatsList = ({ breakdown, totalKeywords, hasData }: RankingStatsLis
   ];
 
   return (
-    <div className="space-y-3">
+    <div className="space-y-2">
       {statsItems.map((item) => (
         <div 
           key={item.label} 
-          className={`flex items-center justify-between p-4 rounded-xl border border-gray-100 transition-colors ${
+          className={`flex items-center justify-between p-2.5 rounded-lg border border-gray-100 transition-colors ${
             hasData ? 'bg-gray-50 hover:bg-gray-100' : 'bg-gray-50/70 hover:bg-gray-50'
           }`}
         >
-          <div className="flex items-center gap-4">
-            <div className="flex items-center gap-3">
+          <div className="flex items-center gap-3">
+            <div className="flex items-center gap-2">
               <div 
-                className="w-4 h-4 rounded-full shadow-sm border-2 border-white"
+                className="w-3 h-3 rounded-full shadow-sm border border-white"
                 style={{ backgroundColor: item.color }}
               />
-              <div className="p-2 bg-white rounded-lg shadow-sm">
-                <item.icon className={`w-4 h-4 ${hasData ? 'text-gray-600' : 'text-gray-400'}`} />
+              <div className="p-1 bg-white rounded-md shadow-sm">
+                <item.icon className={`w-3 h-3 ${hasData ? 'text-gray-600' : 'text-gray-400'}`} />
               </div>
               <div>
-                <span className={`text-sm font-semibold ${hasData ? 'text-gray-700' : 'text-gray-600'}`}>
+                <span className={`text-xs font-semibold ${hasData ? 'text-gray-700' : 'text-gray-600'}`}>
                   {item.label}
                 </span>
-                <p className={`text-xs ${hasData ? 'text-gray-500' : 'text-gray-400'}`}>
+                <p className={`text-xs ${hasData ? 'text-gray-500' : 'text-gray-400'} hidden sm:block`}>
                   {item.desc}
                 </p>
               </div>
             </div>
           </div>
-          <div className="flex items-center gap-3">
-            <span className={`text-sm font-medium ${hasData ? 'text-gray-600' : 'text-gray-400'}`}>
+          <div className="flex items-center gap-2">
+            <span className={`text-xs font-medium ${hasData ? 'text-gray-600' : 'text-gray-400'}`}>
               {hasData && totalKeywords > 0 ? ((item.value / totalKeywords) * 100).toFixed(0) : 0}%
             </span>
             <Badge 
               variant="secondary" 
-              className={`text-sm px-3 py-1 bg-white border border-gray-200 min-w-[2.5rem] justify-center ${
+              className={`text-xs px-2 py-0.5 bg-white border border-gray-200 min-w-[2rem] justify-center ${
                 hasData ? 'text-gray-700' : 'text-gray-400'
               }`}
             >

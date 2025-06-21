@@ -32,29 +32,29 @@ const WebsiteSelector = ({
 
   return (
     <Card className="border-0 shadow-md hover:shadow-lg transition-shadow duration-300 h-fit">
-      <CardHeader className="pb-3">
-        <CardTitle className="text-base flex items-center gap-3">
-          <div className="p-2 bg-blue-100 rounded-lg">
-            <Globe className="h-4 w-4 text-blue-600" />
+      <CardHeader className="pb-2 pt-3">
+        <CardTitle className="text-sm flex items-center gap-2">
+          <div className="p-1.5 bg-blue-100 rounded-lg">
+            <Globe className="h-3 w-3 text-blue-600" />
           </div>
           Website Details
         </CardTitle>
       </CardHeader>
-      <CardContent className="space-y-4">
+      <CardContent className="space-y-3 px-4 pb-4">
         <div>
-          <label className="text-sm font-semibold text-gray-700 mb-2 block">
+          <label className="text-xs font-semibold text-gray-700 mb-1.5 block">
             Select Website
           </label>
           <Select value={selectedWebsite || ''} onValueChange={onWebsiteChange}>
-            <SelectTrigger className="w-full h-10 border-gray-200 rounded-xl hover:border-blue-300 focus:border-blue-500 transition-colors">
+            <SelectTrigger className="w-full h-8 border-gray-200 rounded-lg hover:border-blue-300 focus:border-blue-500 transition-colors text-xs">
               <SelectValue placeholder="Choose a website to analyze" />
             </SelectTrigger>
-            <SelectContent className="rounded-xl">
+            <SelectContent className="rounded-lg">
               {validWebsites.map((website) => (
-                <SelectItem key={website} value={website} className="rounded-lg">
-                  <div className="flex items-center gap-3 py-1">
-                    <Globe className="h-4 w-4 text-blue-600" />
-                    <span className="font-medium">{website}</span>
+                <SelectItem key={website} value={website} className="rounded-md text-xs">
+                  <div className="flex items-center gap-2 py-0.5">
+                    <Globe className="h-3 w-3 text-blue-600" />
+                    <span className="font-medium truncate max-w-[200px]">{website}</span>
                   </div>
                 </SelectItem>
               ))}
@@ -63,24 +63,24 @@ const WebsiteSelector = ({
         </div>
         
         {selectedWebsite && (
-          <div className="bg-blue-50 rounded-xl p-3 border border-blue-100">
+          <div className="bg-blue-50 rounded-lg p-2.5 border border-blue-100">
             <div className="flex items-center justify-between">
-              <div className="flex items-center gap-3">
-                <div className="p-1.5 bg-blue-500 rounded-lg">
-                  <Globe className="h-3 w-3 text-white" />
+              <div className="flex items-center gap-2 min-w-0 flex-1">
+                <div className="p-1 bg-blue-500 rounded-md">
+                  <Globe className="h-2.5 w-2.5 text-white" />
                 </div>
-                <div>
+                <div className="min-w-0 flex-1">
                   <p className="text-xs font-medium text-blue-700">Selected Website</p>
-                  <p className="text-sm font-bold text-blue-900">{selectedWebsite}</p>
+                  <p className="text-xs font-bold text-blue-900 truncate">{selectedWebsite}</p>
                 </div>
               </div>
               <Button
                 variant="ghost"
                 size="sm"
                 onClick={() => window.open(`https://${selectedWebsite}`, '_blank')}
-                className="p-1.5 h-7 w-7 hover:bg-blue-100 rounded-lg"
+                className="p-1 h-6 w-6 hover:bg-blue-100 rounded-md flex-shrink-0"
               >
-                <ExternalLink className="h-3 w-3 text-blue-600" />
+                <ExternalLink className="h-2.5 w-2.5 text-blue-600" />
               </Button>
             </div>
           </div>
@@ -91,18 +91,18 @@ const WebsiteSelector = ({
             onClick={connected ? () => {} : onConnect}
             disabled={gscLoading}
             variant={connected ? "secondary" : "default"}
-            className={`flex items-center gap-2 w-full h-10 rounded-xl font-medium transition-all duration-200 text-sm ${
+            className={`flex items-center gap-2 w-full h-8 rounded-lg font-medium transition-all duration-200 text-xs ${
               connected 
                 ? 'bg-green-50 text-green-700 border-green-200 hover:bg-green-100' 
                 : 'bg-blue-500 hover:bg-blue-600 text-white shadow-md hover:shadow-lg'
             }`}
           >
             {gscLoading ? (
-              <Loader2 className="h-4 w-4 animate-spin" />
+              <Loader2 className="h-3 w-3 animate-spin" />
             ) : connected ? (
-              <CheckCircle2 className="h-4 w-4" />
+              <CheckCircle2 className="h-3 w-3" />
             ) : (
-              <LinkIcon className="h-4 w-4" />
+              <LinkIcon className="h-3 w-3" />
             )}
             {connected ? 'Connected to GSC' : 'Connect Google Search Console'}
           </Button>
@@ -111,12 +111,12 @@ const WebsiteSelector = ({
             onClick={onRefresh}
             disabled={isRefreshing || !selectedWebsite}
             variant="outline"
-            className="flex items-center gap-2 w-full h-10 rounded-xl font-medium border-gray-200 hover:border-blue-300 hover:bg-blue-50 transition-all duration-200 text-sm"
+            className="flex items-center gap-2 w-full h-8 rounded-lg font-medium border-gray-200 hover:border-blue-300 hover:bg-blue-50 transition-all duration-200 text-xs"
           >
             {isRefreshing ? (
-              <Loader2 className="h-4 w-4 animate-spin text-blue-600" />
+              <Loader2 className="h-3 w-3 animate-spin text-blue-600" />
             ) : (
-              <RefreshCw className="h-4 w-4 text-blue-600" />
+              <RefreshCw className="h-3 w-3 text-blue-600" />
             )}
             <span className={isRefreshing ? 'text-blue-600' : 'text-gray-700'}>
               {isRefreshing ? 'Refreshing Data...' : 'Refresh SEO Data'}

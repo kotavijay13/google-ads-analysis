@@ -16,18 +16,18 @@ const KeywordRankingBreakdown = ({ keywords }: KeywordRankingBreakdownProps) => 
   const hasData = keywords.length > 0;
 
   return (
-    <div className="p-5">
-      <div className="flex items-center gap-4 mb-5">
-        <div className="p-2.5 bg-blue-100 rounded-xl">
-          <Target className="h-5 w-5 text-blue-600" />
+    <div className="p-4">
+      <div className="flex items-center gap-3 mb-4">
+        <div className="p-2 bg-blue-100 rounded-lg">
+          <Target className="h-4 w-4 text-blue-600" />
         </div>
-        <div>
-          <h3 className="text-lg font-bold text-gray-900">Current Search Result Rankings</h3>
-          <p className="text-gray-500 text-sm mt-0.5">Keyword performance breakdown by ranking position</p>
+        <div className="flex-1">
+          <h3 className="text-base font-bold text-gray-900">Current Search Result Rankings</h3>
+          <p className="text-gray-500 text-xs mt-0.5">Keyword performance breakdown by ranking position</p>
         </div>
         <Badge 
           variant="outline" 
-          className={`ml-auto text-sm px-3 py-1 border-gray-200 ${
+          className={`text-xs px-2 py-1 border-gray-200 ${
             hasData ? 'bg-blue-50 text-blue-700 border-blue-200' : 'bg-gray-50 text-gray-600'
           }`}
         >
@@ -35,7 +35,7 @@ const KeywordRankingBreakdown = ({ keywords }: KeywordRankingBreakdownProps) => 
         </Badge>
       </div>
       
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
         <div>
           {hasData ? (
             <RankingPieChart chartData={chartData} totalKeywords={keywords.length} />
