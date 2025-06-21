@@ -6,7 +6,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { toast } from '@/components/ui/sonner';
-import { Package, ShoppingCart, TrendingUp, DollarSign, Copy, Check } from 'lucide-react';
+import { Package, ShoppingCart, TrendingUp, DollarSign, Copy, Check, ExternalLink, Zap, Globe } from 'lucide-react';
 
 const ProductSalesPage = () => {
   const [activeTab, setActiveTab] = useState('overview');
@@ -178,145 +178,219 @@ const ProductSalesPage = () => {
           </Card>
         </TabsContent>
 
-        <TabsContent value="integrations" className="space-y-4">
-          <Card>
-            <CardHeader>
-              <CardTitle>E-commerce Platforms</CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-4">
-              <div className="space-y-2">
-                <Label htmlFor="ecom-platform">Platform</Label>
-                <Select defaultValue="shopify">
-                  <SelectTrigger>
-                    <SelectValue placeholder="Select platform" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="shopify">Shopify</SelectItem>
-                    <SelectItem value="woocommerce" disabled>WooCommerce (coming soon)</SelectItem>
-                    <SelectItem value="bigcommerce" disabled>BigCommerce (coming soon)</SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
-
-              <div className="space-y-2">
-                <Label htmlFor="shopify-url">Shopify Store URL</Label>
-                <Input
-                  id="shopify-url"
-                  placeholder="e.g., your-store.myshopify.com"
-                  value={shopifyStoreUrl}
-                  onChange={(e) => setShopifyStoreUrl(e.target.value)}
-                />
-              </div>
-
-              <Button 
-                onClick={handleEcomConnect}
-                disabled={isConnectingEcom}
-                className="w-full"
-              >
-                {isConnectingEcom ? 'Connecting...' : 'Connect to Shopify'}
-              </Button>
-            </CardContent>
-          </Card>
-
-          <Card>
-            <CardHeader>
-              <CardTitle>Custom Website Integration</CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-4">
-              <div className="space-y-2">
-                <Label htmlFor="custom-website">Website URL</Label>
-                <Input
-                  id="custom-website"
-                  placeholder="e.g., https://yourwebsite.com"
-                  value={customWebsiteUrl}
-                  onChange={(e) => setCustomWebsiteUrl(e.target.value)}
-                />
-              </div>
-
-              <Button 
-                onClick={handleCustomWebsiteConnect}
-                disabled={isConnectingCustom}
-                className="w-full"
-                variant="outline"
-              >
-                {isConnectingCustom ? 'Connecting...' : 'Connect Custom Website'}
-              </Button>
-
-              {connectedWebsites.length > 0 && (
-                <div className="mt-6 space-y-4">
-                  <div className="bg-green-50 p-4 rounded-lg border border-green-200">
-                    <h4 className="font-semibold text-green-900 mb-2">✅ Website Connected Successfully!</h4>
-                    <p className="text-sm text-green-800">
-                      Your website <strong>{connectedWebsites[0]}</strong> has been connected. 
-                      Follow the integration steps below to start tracking sales.
-                    </p>
+        <TabsContent value="integrations" className="space-y-6">
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+            {/* Shopify Integration Card */}
+            <Card className="border-2 hover:border-blue-200 transition-colors">
+              <CardHeader className="pb-3">
+                <div className="flex items-center gap-3">
+                  <div className="w-10 h-10 bg-green-100 rounded-lg flex items-center justify-center">
+                    <ShoppingCart className="h-5 w-5 text-green-600" />
                   </div>
-
-                  <div className="bg-blue-50 p-4 rounded-lg border border-blue-200">
-                    <h4 className="font-semibold text-blue-900 mb-3">📋 Integration Steps</h4>
-                    <ol className="list-decimal list-inside text-sm text-blue-800 space-y-2">
-                      <li><strong>Copy the tracking script below</strong> and paste it in your website's HTML head section</li>
-                      <li><strong>Add product tracking</strong> on your product pages using the provided functions</li>
-                      <li><strong>Set up purchase tracking</strong> on your checkout completion page</li>
-                      <li><strong>Test the integration</strong> by making a test purchase</li>
-                    </ol>
-                  </div>
-
-                  <div className="bg-gray-50 p-4 rounded-lg border">
-                    <div className="flex items-center justify-between mb-3">
-                      <h4 className="font-semibold text-gray-900">Tracking Script</h4>
-                      <Button
-                        onClick={copyTrackingScript}
-                        size="sm"
-                        variant="outline"
-                        className="flex items-center gap-2"
-                      >
-                        {copiedScript ? <Check className="h-4 w-4" /> : <Copy className="h-4 w-4" />}
-                        {copiedScript ? 'Copied!' : 'Copy Script'}
-                      </Button>
-                    </div>
-                    <pre className="text-xs bg-white p-3 rounded border overflow-x-auto">
-                      <code>{trackingScript}</code>
-                    </pre>
-                  </div>
-
-                  <div className="bg-yellow-50 p-4 rounded-lg border border-yellow-200">
-                    <h4 className="font-semibold text-yellow-900 mb-2">🔧 Additional Implementation</h4>
-                    <div className="text-sm text-yellow-800 space-y-2">
-                      <p><strong>For Product Pages:</strong></p>
-                      <code className="block bg-white p-2 rounded text-xs">
-                        MergeInsightsAI.trackProductView('product-123', 'Product Name', 29.99);
-                      </code>
-                      
-                      <p className="mt-3"><strong>For Purchase Completion:</strong></p>
-                      <code className="block bg-white p-2 rounded text-xs">
-                        {`MergeInsightsAI.trackPurchase('order-456', 59.98, [{ id: 'product-123', name: 'Product Name', price: 29.99, quantity: 2 }]);`}
-                      </code>
-                    </div>
+                  <div>
+                    <CardTitle className="text-lg">Shopify Store</CardTitle>
+                    <p className="text-sm text-muted-foreground">Connect your Shopify store</p>
                   </div>
                 </div>
-              )}
-
-              {connectedWebsites.length === 0 && (
-                <div className="bg-blue-50 p-4 rounded-lg">
-                  <h4 className="font-semibold text-blue-900 mb-2">Integration Guide for Custom Websites</h4>
-                  <p className="text-sm text-blue-800 mb-3">
-                    To track sales from your custom website built with VS Code, you'll need to:
-                  </p>
-                  <ol className="list-decimal list-inside text-sm text-blue-800 space-y-1">
-                    <li>Add our tracking script to your website</li>
-                    <li>Configure product tracking events</li>
-                    <li>Set up conversion tracking for purchases</li>
-                    <li>Map your product data to our analytics system</li>
-                  </ol>
-                  <p className="text-xs text-blue-600 mt-3">
-                    After connecting, we'll provide you with detailed integration instructions and code snippets.
-                  </p>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                <div className="space-y-2">
+                  <Label htmlFor="shopify-url" className="text-sm font-medium">Store URL</Label>
+                  <Input
+                    id="shopify-url"
+                    placeholder="your-store.myshopify.com"
+                    value={shopifyStoreUrl}
+                    onChange={(e) => setShopifyStoreUrl(e.target.value)}
+                    className="h-10"
+                  />
                 </div>
-              )}
-            </CardContent>
-          </Card>
+                <Button 
+                  onClick={handleEcomConnect}
+                  disabled={isConnectingEcom}
+                  className="w-full h-10 bg-green-600 hover:bg-green-700"
+                >
+                  {isConnectingEcom ? (
+                    <>
+                      <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin mr-2" />
+                      Connecting...
+                    </>
+                  ) : (
+                    <>
+                      <Zap className="w-4 h-4 mr-2" />
+                      Connect Shopify
+                    </>
+                  )}
+                </Button>
+                <div className="text-xs text-muted-foreground bg-gray-50 p-2 rounded">
+                  <p>• Automatic order tracking</p>
+                  <p>• Real-time sales data</p>
+                  <p>• Product performance insights</p>
+                </div>
+              </CardContent>
+            </Card>
 
+            {/* Custom Website Integration Card */}
+            <Card className="border-2 hover:border-blue-200 transition-colors">
+              <CardHeader className="pb-3">
+                <div className="flex items-center gap-3">
+                  <div className="w-10 h-10 bg-blue-100 rounded-lg flex items-center justify-center">
+                    <Globe className="h-5 w-5 text-blue-600" />
+                  </div>
+                  <div>
+                    <CardTitle className="text-lg">Custom Website</CardTitle>
+                    <p className="text-sm text-muted-foreground">Connect any website or web app</p>
+                  </div>
+                </div>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                <div className="space-y-2">
+                  <Label htmlFor="custom-website" className="text-sm font-medium">Website URL</Label>
+                  <Input
+                    id="custom-website"
+                    placeholder="https://yourwebsite.com"
+                    value={customWebsiteUrl}
+                    onChange={(e) => setCustomWebsiteUrl(e.target.value)}
+                    className="h-10"
+                  />
+                </div>
+                <Button 
+                  onClick={handleCustomWebsiteConnect}
+                  disabled={isConnectingCustom}
+                  variant="outline"
+                  className="w-full h-10 border-blue-200 hover:bg-blue-50"
+                >
+                  {isConnectingCustom ? (
+                    <>
+                      <div className="w-4 h-4 border-2 border-blue-600 border-t-transparent rounded-full animate-spin mr-2" />
+                      Connecting...
+                    </>
+                  ) : (
+                    <>
+                      <ExternalLink className="w-4 h-4 mr-2" />
+                      Connect Website
+                    </>
+                  )}
+                </Button>
+                <div className="text-xs text-muted-foreground bg-gray-50 p-2 rounded">
+                  <p>• Manual integration setup</p>
+                  <p>• Custom tracking script</p>
+                  <p>• Full control over data</p>
+                </div>
+              </CardContent>
+            </Card>
+          </div>
+
+          {/* Integration Success and Instructions */}
+          {connectedWebsites.length > 0 && (
+            <div className="space-y-4">
+              <div className="bg-green-50 p-4 rounded-lg border border-green-200">
+                <h4 className="font-semibold text-green-900 mb-2 flex items-center">
+                  <Check className="w-5 h-5 mr-2" />
+                  Website Connected Successfully!
+                </h4>
+                <p className="text-sm text-green-800">
+                  Your website <strong>{connectedWebsites[0]}</strong> has been connected. 
+                  Follow the integration steps below to start tracking sales.
+                </p>
+              </div>
+
+              <div className="bg-blue-50 p-4 rounded-lg border border-blue-200">
+                <h4 className="font-semibold text-blue-900 mb-3 flex items-center">
+                  <Package className="w-5 h-5 mr-2" />
+                  Integration Steps
+                </h4>
+                <ol className="list-decimal list-inside text-sm text-blue-800 space-y-2">
+                  <li><strong>Copy the tracking script below</strong> and paste it in your website's HTML head section</li>
+                  <li><strong>Add product tracking</strong> on your product pages using the provided functions</li>
+                  <li><strong>Set up purchase tracking</strong> on your checkout completion page</li>
+                  <li><strong>Test the integration</strong> by making a test purchase</li>
+                </ol>
+              </div>
+
+              <Card>
+                <CardHeader className="pb-3">
+                  <div className="flex items-center justify-between">
+                    <CardTitle className="text-lg">Tracking Script</CardTitle>
+                    <Button
+                      onClick={copyTrackingScript}
+                      size="sm"
+                      variant="outline"
+                      className="flex items-center gap-2"
+                    >
+                      {copiedScript ? <Check className="h-4 w-4" /> : <Copy className="h-4 w-4" />}
+                      {copiedScript ? 'Copied!' : 'Copy Script'}
+                    </Button>
+                  </div>
+                </CardHeader>
+                <CardContent>
+                  <pre className="text-xs bg-gray-800 text-green-400 p-4 rounded-lg overflow-x-auto font-mono">
+                    <code>{trackingScript}</code>
+                  </pre>
+                </CardContent>
+              </Card>
+
+              <Card>
+                <CardHeader>
+                  <CardTitle className="text-lg flex items-center">
+                    <Zap className="w-5 h-5 mr-2" />
+                    Implementation Examples
+                  </CardTitle>
+                </CardHeader>
+                <CardContent className="space-y-4">
+                  <div>
+                    <p className="font-medium text-sm mb-2">For Product Pages:</p>
+                    <code className="block bg-gray-800 text-blue-300 p-3 rounded text-xs font-mono">
+                      MergeInsightsAI.trackProductView('product-123', 'Product Name', 29.99);
+                    </code>
+                  </div>
+                  
+                  <div>
+                    <p className="font-medium text-sm mb-2">For Purchase Completion:</p>
+                    <code className="block bg-gray-800 text-blue-300 p-3 rounded text-xs font-mono">
+                      {`MergeInsightsAI.trackPurchase('order-456', 59.98, [{ id: 'product-123', name: 'Product Name', price: 29.99, quantity: 2 }]);`}
+                    </code>
+                  </div>
+                </CardContent>
+              </Card>
+            </div>
+          )}
+
+          {/* Pre-connection Guide */}
+          {connectedWebsites.length === 0 && (
+            <Card>
+              <CardHeader>
+                <CardTitle className="flex items-center">
+                  <Globe className="w-5 h-5 mr-2" />
+                  Integration Guide for Custom Websites
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <p className="text-sm text-muted-foreground mb-4">
+                  To track sales from your custom website built with VS Code, you'll need to:
+                </p>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div className="bg-blue-50 p-4 rounded-lg">
+                    <h5 className="font-medium text-blue-900 mb-2">1. Add Tracking Script</h5>
+                    <p className="text-xs text-blue-700">Include our JavaScript tracking code in your website's HTML head section</p>
+                  </div>
+                  <div className="bg-green-50 p-4 rounded-lg">
+                    <h5 className="font-medium text-green-900 mb-2">2. Configure Events</h5>
+                    <p className="text-xs text-green-700">Set up product view and purchase tracking events in your code</p>
+                  </div>
+                  <div className="bg-purple-50 p-4 rounded-lg">
+                    <h5 className="font-medium text-purple-900 mb-2">3. Map Product Data</h5>
+                    <p className="text-xs text-purple-700">Connect your product information to our analytics system</p>
+                  </div>
+                  <div className="bg-orange-50 p-4 rounded-lg">
+                    <h5 className="font-medium text-orange-900 mb-2">4. Test Integration</h5>
+                    <p className="text-xs text-orange-700">Verify tracking works correctly with test purchases</p>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+          )}
+
+          {/* Connected Sales Channels */}
           <Card>
             <CardHeader>
               <CardTitle>Connected Sales Channels</CardTitle>
@@ -325,24 +399,30 @@ const ProductSalesPage = () => {
               {connectedWebsites.length > 0 ? (
                 <div className="space-y-3">
                   {connectedWebsites.map((website, index) => (
-                    <div key={index} className="flex items-center justify-between p-3 bg-green-50 rounded-lg border border-green-200">
+                    <div key={index} className="flex items-center justify-between p-4 bg-green-50 rounded-lg border border-green-200">
                       <div className="flex items-center gap-3">
-                        <div className="w-2 h-2 bg-green-500 rounded-full"></div>
+                        <div className="w-3 h-3 bg-green-500 rounded-full animate-pulse"></div>
                         <div>
                           <p className="font-medium text-green-900">{website}</p>
                           <p className="text-xs text-green-700">Custom Website • Connected</p>
                         </div>
                       </div>
-                      <div className="text-xs text-green-600 bg-green-100 px-2 py-1 rounded">
-                        Active
+                      <div className="flex items-center gap-2">
+                        <div className="text-xs text-green-600 bg-green-100 px-3 py-1 rounded-full">
+                          Active
+                        </div>
+                        <Button size="sm" variant="ghost" className="h-8 w-8 p-0">
+                          <ExternalLink className="h-4 w-4" />
+                        </Button>
                       </div>
                     </div>
                   ))}
                 </div>
               ) : (
-                <div className="text-center py-8 text-muted-foreground">
-                  <p>No sales channels connected yet.</p>
-                  <p className="text-sm">Connect your first sales channel to start tracking performance.</p>
+                <div className="text-center py-12 text-muted-foreground">
+                  <Package className="h-12 w-12 mx-auto mb-4 opacity-50" />
+                  <p className="font-medium">No sales channels connected yet</p>
+                  <p className="text-sm">Connect your first sales channel to start tracking performance</p>
                 </div>
               )}
             </CardContent>
