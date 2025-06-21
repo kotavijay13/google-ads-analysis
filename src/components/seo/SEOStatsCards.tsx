@@ -58,7 +58,7 @@ const SEOStatsCards = ({
   // Show only Stats Cards
   if (showOnlyStatsCards) {
     return (
-      <div className="grid grid-cols-1 gap-3">
+      <div className="grid grid-cols-1 gap-3 h-full">
         <Card className="relative overflow-hidden border-0 bg-white shadow-sm hover:shadow-md transition-all duration-300 group">
           <div className="absolute inset-0 bg-gradient-to-br from-blue-500/5 to-blue-600/10"></div>
           <CardHeader className="pb-1 pt-2 px-3 relative">
