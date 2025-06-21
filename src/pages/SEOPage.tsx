@@ -49,27 +49,29 @@ const SEOPage = () => {
         <div className="max-w-none">
           <SEOHeader />
 
-          <div className="grid grid-cols-1 xl:grid-cols-6 gap-4 mb-4">
-            <div className="xl:col-span-1">
-              <WebsiteSelector
-                selectedWebsite={seoState.selectedWebsite}
-                availableWebsites={availableWebsites}
-                connected={connected}
-                gscLoading={gscLoading}
-                isRefreshing={isRefreshing}
-                onWebsiteChange={handleWebsiteSelection}
-                onConnect={handleConnect}
-                onRefresh={handleRefresh}
-              />
+          <div className="space-y-4 mb-4">
+            {/* Website Details Card - Now at the top */}
+            <div className="flex justify-start">
+              <div className="w-full max-w-sm">
+                <WebsiteSelector
+                  selectedWebsite={seoState.selectedWebsite}
+                  availableWebsites={availableWebsites}
+                  connected={connected}
+                  gscLoading={gscLoading}
+                  isRefreshing={isRefreshing}
+                  onWebsiteChange={handleWebsiteSelection}
+                  onConnect={handleConnect}
+                  onRefresh={handleRefresh}
+                />
+              </div>
             </div>
 
-            <div className="xl:col-span-5">
-              <SEOStatsCards 
-                serpStats={seoState.serpStats} 
-                serpKeywords={seoState.serpKeywords}
-                selectedWebsite={seoState.selectedWebsite}
-              />
-            </div>
+            {/* Stats Cards - Now below website details */}
+            <SEOStatsCards 
+              serpStats={seoState.serpStats} 
+              serpKeywords={seoState.serpKeywords}
+              selectedWebsite={seoState.selectedWebsite}
+            />
           </div>
 
           <SEOTabsContent
