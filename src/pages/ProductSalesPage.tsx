@@ -290,7 +290,7 @@ const ProductSalesPage = () => {
                       
                       <p className="mt-3"><strong>For Purchase Completion:</strong></p>
                       <code className="block bg-white p-2 rounded text-xs">
-                        MergeInsightsAI.trackPurchase('order-456', 59.98, [{'{'} id: 'product-123', name: 'Product Name', price: 29.99, quantity: 2 {'}']);
+                        {`MergeInsightsAI.trackPurchase('order-456', 59.98, [{ id: 'product-123', name: 'Product Name', price: 29.99, quantity: 2 }]);`}
                       </code>
                     </div>
                   </div>
