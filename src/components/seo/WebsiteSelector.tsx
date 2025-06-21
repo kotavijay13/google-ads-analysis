@@ -31,22 +31,22 @@ const WebsiteSelector = ({
   );
 
   return (
-    <Card className="border-0 shadow-md hover:shadow-lg transition-shadow duration-300">
-      <CardHeader className="pb-4">
-        <CardTitle className="text-lg flex items-center gap-3">
+    <Card className="border-0 shadow-md hover:shadow-lg transition-shadow duration-300 h-fit">
+      <CardHeader className="pb-3">
+        <CardTitle className="text-base flex items-center gap-3">
           <div className="p-2 bg-blue-100 rounded-lg">
-            <Globe className="h-5 w-5 text-blue-600" />
+            <Globe className="h-4 w-4 text-blue-600" />
           </div>
           Website Details
         </CardTitle>
       </CardHeader>
-      <CardContent className="space-y-5">
+      <CardContent className="space-y-4">
         <div>
-          <label className="text-sm font-semibold text-gray-700 mb-3 block">
+          <label className="text-sm font-semibold text-gray-700 mb-2 block">
             Select Website
           </label>
           <Select value={selectedWebsite || ''} onValueChange={onWebsiteChange}>
-            <SelectTrigger className="w-full h-12 border-gray-200 rounded-xl hover:border-blue-300 focus:border-blue-500 transition-colors">
+            <SelectTrigger className="w-full h-10 border-gray-200 rounded-xl hover:border-blue-300 focus:border-blue-500 transition-colors">
               <SelectValue placeholder="Choose a website to analyze" />
             </SelectTrigger>
             <SelectContent className="rounded-xl">
@@ -63,35 +63,35 @@ const WebsiteSelector = ({
         </div>
         
         {selectedWebsite && (
-          <div className="bg-blue-50 rounded-xl p-4 border border-blue-100">
+          <div className="bg-blue-50 rounded-xl p-3 border border-blue-100">
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-3">
-                <div className="p-2 bg-blue-500 rounded-lg">
-                  <Globe className="h-4 w-4 text-white" />
+                <div className="p-1.5 bg-blue-500 rounded-lg">
+                  <Globe className="h-3 w-3 text-white" />
                 </div>
                 <div>
-                  <p className="text-sm font-medium text-blue-700">Selected Website</p>
-                  <p className="text-lg font-bold text-blue-900">{selectedWebsite}</p>
+                  <p className="text-xs font-medium text-blue-700">Selected Website</p>
+                  <p className="text-sm font-bold text-blue-900">{selectedWebsite}</p>
                 </div>
               </div>
               <Button
                 variant="ghost"
                 size="sm"
                 onClick={() => window.open(`https://${selectedWebsite}`, '_blank')}
-                className="p-2 h-8 w-8 hover:bg-blue-100 rounded-lg"
+                className="p-1.5 h-7 w-7 hover:bg-blue-100 rounded-lg"
               >
-                <ExternalLink className="h-4 w-4 text-blue-600" />
+                <ExternalLink className="h-3 w-3 text-blue-600" />
               </Button>
             </div>
           </div>
         )}
 
-        <div className="space-y-3">
+        <div className="space-y-2">
           <Button 
             onClick={connected ? () => {} : onConnect}
             disabled={gscLoading}
             variant={connected ? "secondary" : "default"}
-            className={`flex items-center gap-3 w-full h-12 rounded-xl font-medium transition-all duration-200 ${
+            className={`flex items-center gap-2 w-full h-10 rounded-xl font-medium transition-all duration-200 text-sm ${
               connected 
                 ? 'bg-green-50 text-green-700 border-green-200 hover:bg-green-100' 
                 : 'bg-blue-500 hover:bg-blue-600 text-white shadow-md hover:shadow-lg'
@@ -111,7 +111,7 @@ const WebsiteSelector = ({
             onClick={onRefresh}
             disabled={isRefreshing || !selectedWebsite}
             variant="outline"
-            className="flex items-center gap-3 w-full h-12 rounded-xl font-medium border-gray-200 hover:border-blue-300 hover:bg-blue-50 transition-all duration-200"
+            className="flex items-center gap-2 w-full h-10 rounded-xl font-medium border-gray-200 hover:border-blue-300 hover:bg-blue-50 transition-all duration-200 text-sm"
           >
             {isRefreshing ? (
               <Loader2 className="h-4 w-4 animate-spin text-blue-600" />

@@ -45,11 +45,11 @@ const SEOPage = () => {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-gray-50 to-blue-50/30">
-      <div className="w-full px-6 py-8">
+      <div className="w-full px-6 py-6">
         <div className="max-w-none">
           <SEOHeader />
 
-          <div className="grid grid-cols-1 xl:grid-cols-4 gap-8 mb-8">
+          <div className="grid grid-cols-1 xl:grid-cols-5 gap-6 mb-6">
             <div className="xl:col-span-1">
               <WebsiteSelector
                 selectedWebsite={seoState.selectedWebsite}
@@ -63,7 +63,7 @@ const SEOPage = () => {
               />
             </div>
 
-            <div className="xl:col-span-3">
+            <div className="xl:col-span-4">
               <SEOStatsCards 
                 serpStats={seoState.serpStats} 
                 serpKeywords={seoState.serpKeywords}
