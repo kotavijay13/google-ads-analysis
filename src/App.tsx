@@ -1,4 +1,3 @@
-
 import { BrowserRouter as Router, Routes, Route, useLocation } from 'react-router-dom';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { Toaster } from '@/components/ui/sonner';
@@ -12,6 +11,7 @@ import MetaAdsPage from '@/pages/MetaAdsPage';
 import SEOPage from '@/pages/SEOPage';
 import CompetitionAnalysis from '@/pages/CompetitionAnalysis';
 import LeadsPage from '@/pages/LeadsPage';
+import ProductSalesPage from '@/pages/ProductSalesPage';
 import LeadAdminPage from '@/pages/LeadAdminPage';
 import ChatsPage from '@/pages/ChatsPage';
 import FormsPage from '@/pages/FormsPage';
@@ -48,6 +48,7 @@ function AppLayout() {
           <Route path="/seo" element={<ProtectedRoute><SEOPage /></ProtectedRoute>} />
           <Route path="/competition" element={<ProtectedRoute><CompetitionAnalysis /></ProtectedRoute>} />
           <Route path="/leads" element={<ProtectedRoute><LeadsPage /></ProtectedRoute>} />
+          <Route path="/product-sales" element={<ProtectedRoute><ProductSalesPage /></ProtectedRoute>} />
           <Route path="/leads/:id" element={<ProtectedRoute><LeadDetailPage /></ProtectedRoute>} />
           <Route path="/lead-admin" element={<ProtectedRoute><LeadAdminPage /></ProtectedRoute>} />
           <Route path="/chats" element={<ProtectedRoute><ChatsPage /></ProtectedRoute>} />

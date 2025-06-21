@@ -14,7 +14,8 @@ import {
   ChevronRight,
   UserCog,
   Menu,
-  X
+  X,
+  Package
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { Button } from '@/components/ui/button';
@@ -27,6 +28,7 @@ const navigation = [
   { name: 'SEO Report', href: '/seo', icon: TrendingUp },
   { name: 'Competition Analysis', href: '/competition', icon: Zap },
   { name: 'Leads', href: '/leads', icon: Users },
+  { name: 'Product Sales', href: '/product-sales', icon: Package },
   { name: 'Lead Administration', href: '/lead-admin', icon: UserCog },
   { name: 'Chats', href: '/chats', icon: MessageSquare },
   { name: 'Forms', href: '/forms', icon: FileText },
