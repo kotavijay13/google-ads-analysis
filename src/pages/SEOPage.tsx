@@ -51,8 +51,8 @@ const SEOPage = () => {
 
           <div className="space-y-4 mb-4">
             {/* Top Section: Website Details + Average Position */}
-            <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
-              <div className="lg:col-span-1">
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 items-end">
+              <div className="h-fit">
                 <WebsiteSelector
                   selectedWebsite={seoState.selectedWebsite}
                   availableWebsites={availableWebsites}
@@ -64,7 +64,7 @@ const SEOPage = () => {
                   onRefresh={handleRefresh}
                 />
               </div>
-              <div className="lg:col-span-2">
+              <div className="h-fit">
                 <SEOStatsCards 
                   serpStats={seoState.serpStats} 
                   serpKeywords={seoState.serpKeywords}
@@ -75,12 +75,29 @@ const SEOPage = () => {
             </div>
 
             {/* Bottom Section: Stats Cards + Ranking Breakdown */}
-            <SEOStatsCards 
-              serpStats={seoState.serpStats} 
-              serpKeywords={seoState.serpKeywords}
-              selectedWebsite={seoState.selectedWebsite}
-              showOnlyStatsAndRanking={true}
-            />
+            <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 items-end">
+              {/* Stats Cards - Left Side */}
+              <div className="lg:col-span-1 h-fit">
+                <SEOStatsCards 
+                  serpStats={seoState.serpStats} 
+                  serpKeywords={seoState.serpKeywords}
+                  selectedWebsite={seoState.selectedWebsite}
+                  showOnlyStatsCards={true}
+                />
+              </div>
+              
+              {/* Keyword Ranking Breakdown - Right Side */}
+              <div className="lg:col-span-2 h-fit">
+                <div className="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
+                  <SEOStatsCards 
+                    serpStats={seoState.serpStats} 
+                    serpKeywords={seoState.serpKeywords}
+                    selectedWebsite={seoState.selectedWebsite}
+                    showOnlyRankingBreakdown={true}
+                  />
+                </div>
+              </div>
+            </div>
           </div>
 
           <SEOTabsContent
