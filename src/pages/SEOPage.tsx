@@ -50,9 +50,9 @@ const SEOPage = () => {
           <SEOHeader />
 
           <div className="space-y-4 mb-4">
-            {/* Website Details Card - Now at the top */}
-            <div className="flex justify-start">
-              <div className="w-full max-w-sm">
+            {/* Top Section: Website Details + Average Position */}
+            <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
+              <div className="lg:col-span-1">
                 <WebsiteSelector
                   selectedWebsite={seoState.selectedWebsite}
                   availableWebsites={availableWebsites}
@@ -64,13 +64,22 @@ const SEOPage = () => {
                   onRefresh={handleRefresh}
                 />
               </div>
+              <div className="lg:col-span-2">
+                <SEOStatsCards 
+                  serpStats={seoState.serpStats} 
+                  serpKeywords={seoState.serpKeywords}
+                  selectedWebsite={seoState.selectedWebsite}
+                  showOnlyAveragePosition={true}
+                />
+              </div>
             </div>
 
-            {/* Stats Cards - Now below website details */}
+            {/* Bottom Section: Stats Cards + Ranking Breakdown */}
             <SEOStatsCards 
               serpStats={seoState.serpStats} 
               serpKeywords={seoState.serpKeywords}
               selectedWebsite={seoState.selectedWebsite}
+              showOnlyStatsAndRanking={true}
             />
           </div>
 
