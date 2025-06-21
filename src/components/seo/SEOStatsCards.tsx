@@ -31,81 +31,101 @@ const SEOStatsCards = ({ serpStats, serpKeywords = [] }: SEOStatsCardsProps) => 
 
   return (
     <div className="space-y-8">
-      {/* Main Stats Grid - Enhanced with better visual hierarchy */}
-      <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-6">
-        <Card className="border-0 shadow-lg bg-gradient-to-br from-blue-50 to-blue-100/50 hover:shadow-xl transition-all duration-300">
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-3">
-            <CardTitle className="text-sm font-semibold text-blue-700">Total Clicks</CardTitle>
-            <div className="p-2 bg-blue-100 rounded-lg">
-              <MousePointer className="h-5 w-5 text-blue-600" />
-            </div>
-          </CardHeader>
-          <CardContent className="pt-0">
-            <div className="text-3xl font-bold text-blue-900 mb-1">{formatNumber(serpStats.totalClicks)}</div>
-            <div className="flex items-center text-xs text-blue-600">
-              <Badge variant="outline" className="text-xs border-blue-200 text-blue-700 bg-blue-50">
-                From GSC data
-              </Badge>
-            </div>
-          </CardContent>
-        </Card>
-
-        <Card className="border-0 shadow-lg bg-gradient-to-br from-green-50 to-green-100/50 hover:shadow-xl transition-all duration-300">
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-3">
-            <CardTitle className="text-sm font-semibold text-green-700">Keywords Ranked</CardTitle>
-            <div className="p-2 bg-green-100 rounded-lg">
-              <TrendingUp className="h-5 w-5 text-green-600" />
-            </div>
-          </CardHeader>
-          <CardContent className="pt-0">
-            <div className="text-3xl font-bold text-green-900 mb-1">{formatNumber(serpStats.totalKeywords)}</div>
-            <div className="flex items-center text-xs">
-              <div className="flex items-center text-green-600 bg-green-100 px-2 py-1 rounded-full">
-                <TrendingUp className="h-3 w-3 mr-1" />
-                +{serpStats.top10Keywords} in top 10
+      {/* Main Stats Grid - Modern card design */}
+      <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-4">
+        <Card className="relative overflow-hidden border-0 bg-white shadow-md hover:shadow-lg transition-all duration-300 group">
+          <div className="absolute inset-0 bg-gradient-to-br from-blue-500/5 to-blue-600/10"></div>
+          <CardHeader className="pb-3 relative">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-3">
+                <div className="p-2.5 bg-blue-500 rounded-xl shadow-sm group-hover:scale-110 transition-transform duration-200">
+                  <MousePointer className="h-4 w-4 text-white" />
+                </div>
+                <div>
+                  <CardTitle className="text-sm font-medium text-gray-600">Total Clicks</CardTitle>
+                  <div className="text-2xl font-bold text-gray-900 mt-1">{formatNumber(serpStats.totalClicks)}</div>
+                </div>
               </div>
             </div>
+          </CardHeader>
+          <CardContent className="pt-0 pb-4 relative">
+            <Badge variant="outline" className="text-xs bg-blue-50 text-blue-700 border-blue-200">
+              From GSC data
+            </Badge>
           </CardContent>
         </Card>
 
-        <Card className="border-0 shadow-lg bg-gradient-to-br from-amber-50 to-amber-100/50 hover:shadow-xl transition-all duration-300">
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-3">
-            <CardTitle className="text-sm font-semibold text-amber-700">Average Position</CardTitle>
-            <div className="p-2 bg-amber-100 rounded-lg">
-              <Zap className="h-5 w-5 text-amber-600" />
-            </div>
-          </CardHeader>
-          <CardContent className="pt-0">
-            <div className="text-3xl font-bold text-amber-900 mb-1">{serpStats.avgPosition}</div>
-            <div className="flex items-center text-xs text-amber-600">
-              <Badge variant="outline" className="text-xs border-amber-200 text-amber-700 bg-amber-50">
-                Overall ranking
-              </Badge>
-            </div>
-          </CardContent>
-        </Card>
-
-        <Card className="border-0 shadow-lg bg-gradient-to-br from-purple-50 to-purple-100/50 hover:shadow-xl transition-all duration-300">
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-3">
-            <CardTitle className="text-sm font-semibold text-purple-700">Total Impressions</CardTitle>
-            <div className="p-2 bg-purple-100 rounded-lg">
-              <Eye className="h-5 w-5 text-purple-600" />
-            </div>
-          </CardHeader>
-          <CardContent className="pt-0">
-            <div className="text-3xl font-bold text-purple-900 mb-1">{formatNumber(serpStats.totalImpressions)}</div>
-            <div className="flex items-center text-xs">
-              <div className="flex items-center text-purple-600 bg-purple-100 px-2 py-1 rounded-full">
-                <Eye className="h-3 w-3 mr-1" />
-                CTR: {serpStats.avgCTR.toFixed(1)}%
+        <Card className="relative overflow-hidden border-0 bg-white shadow-md hover:shadow-lg transition-all duration-300 group">
+          <div className="absolute inset-0 bg-gradient-to-br from-green-500/5 to-green-600/10"></div>
+          <CardHeader className="pb-3 relative">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-3">
+                <div className="p-2.5 bg-green-500 rounded-xl shadow-sm group-hover:scale-110 transition-transform duration-200">
+                  <TrendingUp className="h-4 w-4 text-white" />
+                </div>
+                <div>
+                  <CardTitle className="text-sm font-medium text-gray-600">Keywords Ranked</CardTitle>
+                  <div className="text-2xl font-bold text-gray-900 mt-1">{formatNumber(serpStats.totalKeywords)}</div>
+                </div>
               </div>
+            </div>
+          </CardHeader>
+          <CardContent className="pt-0 pb-4 relative">
+            <div className="flex items-center gap-2">
+              <TrendingUp className="h-3 w-3 text-green-600" />
+              <span className="text-xs text-green-600 font-medium">+{serpStats.top10Keywords} in top 10</span>
+            </div>
+          </CardContent>
+        </Card>
+
+        <Card className="relative overflow-hidden border-0 bg-white shadow-md hover:shadow-lg transition-all duration-300 group">
+          <div className="absolute inset-0 bg-gradient-to-br from-amber-500/5 to-amber-600/10"></div>
+          <CardHeader className="pb-3 relative">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-3">
+                <div className="p-2.5 bg-amber-500 rounded-xl shadow-sm group-hover:scale-110 transition-transform duration-200">
+                  <Zap className="h-4 w-4 text-white" />
+                </div>
+                <div>
+                  <CardTitle className="text-sm font-medium text-gray-600">Average Position</CardTitle>
+                  <div className="text-2xl font-bold text-gray-900 mt-1">{serpStats.avgPosition}</div>
+                </div>
+              </div>
+            </div>
+          </CardHeader>
+          <CardContent className="pt-0 pb-4 relative">
+            <Badge variant="outline" className="text-xs bg-amber-50 text-amber-700 border-amber-200">
+              Overall ranking
+            </Badge>
+          </CardContent>
+        </Card>
+
+        <Card className="relative overflow-hidden border-0 bg-white shadow-md hover:shadow-lg transition-all duration-300 group">
+          <div className="absolute inset-0 bg-gradient-to-br from-purple-500/5 to-purple-600/10"></div>
+          <CardHeader className="pb-3 relative">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-3">
+                <div className="p-2.5 bg-purple-500 rounded-xl shadow-sm group-hover:scale-110 transition-transform duration-200">
+                  <Eye className="h-4 w-4 text-white" />
+                </div>
+                <div>
+                  <CardTitle className="text-sm font-medium text-gray-600">Total Impressions</CardTitle>
+                  <div className="text-2xl font-bold text-gray-900 mt-1">{formatNumber(serpStats.totalImpressions)}</div>
+                </div>
+              </div>
+            </div>
+          </CardHeader>
+          <CardContent className="pt-0 pb-4 relative">
+            <div className="flex items-center gap-2">
+              <Eye className="h-3 w-3 text-purple-600" />
+              <span className="text-xs text-purple-600 font-medium">CTR: {serpStats.avgCTR.toFixed(1)}%</span>
             </div>
           </CardContent>
         </Card>
       </div>
 
       {/* Keyword Ranking Breakdown - Always visible with placeholder */}
-      <div className="bg-white rounded-xl shadow-lg border-0 overflow-hidden">
+      <div className="bg-white rounded-2xl shadow-md border border-gray-100 overflow-hidden">
         <KeywordRankingBreakdown keywords={serpKeywords} />
       </div>
     </div>

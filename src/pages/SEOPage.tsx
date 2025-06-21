@@ -44,41 +44,43 @@ const SEOPage = () => {
   };
 
   return (
-    <div className="w-full px-4 py-6">
-      <div className="max-w-none">
-        <SEOHeader />
+    <div className="min-h-screen bg-gradient-to-br from-gray-50 to-blue-50/30">
+      <div className="w-full px-6 py-8">
+        <div className="max-w-none">
+          <SEOHeader />
 
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-6">
-          <div className="lg:col-span-1">
-            <WebsiteSelector
-              selectedWebsite={seoState.selectedWebsite}
-              availableWebsites={availableWebsites}
-              connected={connected}
-              gscLoading={gscLoading}
-              isRefreshing={isRefreshing}
-              onWebsiteChange={handleWebsiteSelection}
-              onConnect={handleConnect}
-              onRefresh={handleRefresh}
-            />
+          <div className="grid grid-cols-1 xl:grid-cols-4 gap-8 mb-8">
+            <div className="xl:col-span-1">
+              <WebsiteSelector
+                selectedWebsite={seoState.selectedWebsite}
+                availableWebsites={availableWebsites}
+                connected={connected}
+                gscLoading={gscLoading}
+                isRefreshing={isRefreshing}
+                onWebsiteChange={handleWebsiteSelection}
+                onConnect={handleConnect}
+                onRefresh={handleRefresh}
+              />
+            </div>
+
+            <div className="xl:col-span-3">
+              <SEOStatsCards 
+                serpStats={seoState.serpStats} 
+                serpKeywords={seoState.serpKeywords}
+              />
+            </div>
           </div>
 
-          <div className="lg:col-span-2">
-            <SEOStatsCards 
-              serpStats={seoState.serpStats} 
-              serpKeywords={seoState.serpKeywords}
-            />
-          </div>
+          <SEOTabsContent
+            activeTab={activeTab}
+            onTabChange={setActiveTab}
+            serpKeywords={seoState.serpKeywords}
+            pages={seoState.pages}
+            urlMetaData={seoState.urlMetaData}
+            sitePerformance={seoState.sitePerformance}
+            selectedWebsite={seoState.selectedWebsite}
+          />
         </div>
-
-        <SEOTabsContent
-          activeTab={activeTab}
-          onTabChange={setActiveTab}
-          serpKeywords={seoState.serpKeywords}
-          pages={seoState.pages}
-          urlMetaData={seoState.urlMetaData}
-          sitePerformance={seoState.sitePerformance}
-          selectedWebsite={seoState.selectedWebsite}
-        />
       </div>
     </div>
   );
