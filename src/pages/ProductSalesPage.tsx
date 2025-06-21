@@ -1,4 +1,3 @@
-
 import { useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
@@ -7,7 +6,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { toast } from '@/components/ui/sonner';
-import { Package, ShoppingCart, TrendingUp, DollarSign } from 'lucide-react';
+import { Package, ShoppingCart, TrendingUp, DollarSign, Copy, Check } from 'lucide-react';
 
 const ProductSalesPage = () => {
   const [activeTab, setActiveTab] = useState('overview');
@@ -15,6 +14,8 @@ const ProductSalesPage = () => {
   const [isConnectingEcom, setIsConnectingEcom] = useState(false);
   const [customWebsiteUrl, setCustomWebsiteUrl] = useState('');
   const [isConnectingCustom, setIsConnectingCustom] = useState(false);
+  const [connectedWebsites, setConnectedWebsites] = useState<string[]>([]);
+  const [copiedScript, setCopiedScript] = useState(false);
 
   const handleEcomConnect = async () => {
     if (!shopifyStoreUrl.trim()) {
@@ -46,11 +47,59 @@ const ProductSalesPage = () => {
       // Simulate connection process
       await new Promise(resolve => setTimeout(resolve, 2000));
       toast.success(`Successfully connected to custom website: ${customWebsiteUrl}`);
+      setConnectedWebsites(prev => [...prev, customWebsiteUrl]);
       setCustomWebsiteUrl('');
+      // Switch to integrations tab to show the tracking script
+      setActiveTab('integrations');
     } catch (error) {
       toast.error('Failed to connect to custom website');
     } finally {
       setIsConnectingCustom(false);
+    }
+  };
+
+  const trackingScript = `<!-- Merge Insights AI Sales Tracking Script -->
+<script>
+  (function() {
+    // Initialize tracking
+    window.MergeInsightsAI = window.MergeInsightsAI || {};
+    window.MergeInsightsAI.websiteUrl = '${connectedWebsites[0] || 'your-website.com'}';
+    
+    // Track page views
+    function trackPageView() {
+      console.log('Page view tracked:', window.location.href);
+      // Send data to your analytics endpoint
+    }
+    
+    // Track product views
+    function trackProductView(productId, productName, price) {
+      console.log('Product view:', { productId, productName, price });
+      // Send product view data
+    }
+    
+    // Track purchases
+    function trackPurchase(orderId, total, items) {
+      console.log('Purchase tracked:', { orderId, total, items });
+      // Send purchase data
+    }
+    
+    // Auto-track page views
+    trackPageView();
+    
+    // Expose functions globally
+    window.MergeInsightsAI.trackProductView = trackProductView;
+    window.MergeInsightsAI.trackPurchase = trackPurchase;
+  })();
+</script>`;
+
+  const copyTrackingScript = async () => {
+    try {
+      await navigator.clipboard.writeText(trackingScript);
+      setCopiedScript(true);
+      toast.success('Tracking script copied to clipboard!');
+      setTimeout(() => setCopiedScript(false), 2000);
+    } catch (error) {
+      toast.error('Failed to copy script');
     }
   };
 
@@ -184,22 +233,6 @@ const ProductSalesPage = () => {
                 />
               </div>
 
-              <div className="bg-blue-50 p-4 rounded-lg">
-                <h4 className="font-semibold text-blue-900 mb-2">Integration Guide for Custom Websites</h4>
-                <p className="text-sm text-blue-800 mb-3">
-                  To track sales from your custom website built with VS Code, you'll need to:
-                </p>
-                <ol className="list-decimal list-inside text-sm text-blue-800 space-y-1">
-                  <li>Add our tracking script to your website</li>
-                  <li>Configure product tracking events</li>
-                  <li>Set up conversion tracking for purchases</li>
-                  <li>Map your product data to our analytics system</li>
-                </ol>
-                <p className="text-xs text-blue-600 mt-3">
-                  After connecting, we'll provide you with detailed integration instructions and code snippets.
-                </p>
-              </div>
-
               <Button 
                 onClick={handleCustomWebsiteConnect}
                 disabled={isConnectingCustom}
@@ -208,6 +241,79 @@ const ProductSalesPage = () => {
               >
                 {isConnectingCustom ? 'Connecting...' : 'Connect Custom Website'}
               </Button>
+
+              {connectedWebsites.length > 0 && (
+                <div className="mt-6 space-y-4">
+                  <div className="bg-green-50 p-4 rounded-lg border border-green-200">
+                    <h4 className="font-semibold text-green-900 mb-2">✅ Website Connected Successfully!</h4>
+                    <p className="text-sm text-green-800">
+                      Your website <strong>{connectedWebsites[0]}</strong> has been connected. 
+                      Follow the integration steps below to start tracking sales.
+                    </p>
+                  </div>
+
+                  <div className="bg-blue-50 p-4 rounded-lg border border-blue-200">
+                    <h4 className="font-semibold text-blue-900 mb-3">📋 Integration Steps</h4>
+                    <ol className="list-decimal list-inside text-sm text-blue-800 space-y-2">
+                      <li><strong>Copy the tracking script below</strong> and paste it in your website's HTML head section</li>
+                      <li><strong>Add product tracking</strong> on your product pages using the provided functions</li>
+                      <li><strong>Set up purchase tracking</strong> on your checkout completion page</li>
+                      <li><strong>Test the integration</strong> by making a test purchase</li>
+                    </ol>
+                  </div>
+
+                  <div className="bg-gray-50 p-4 rounded-lg border">
+                    <div className="flex items-center justify-between mb-3">
+                      <h4 className="font-semibold text-gray-900">Tracking Script</h4>
+                      <Button
+                        onClick={copyTrackingScript}
+                        size="sm"
+                        variant="outline"
+                        className="flex items-center gap-2"
+                      >
+                        {copiedScript ? <Check className="h-4 w-4" /> : <Copy className="h-4 w-4" />}
+                        {copiedScript ? 'Copied!' : 'Copy Script'}
+                      </Button>
+                    </div>
+                    <pre className="text-xs bg-white p-3 rounded border overflow-x-auto">
+                      <code>{trackingScript}</code>
+                    </pre>
+                  </div>
+
+                  <div className="bg-yellow-50 p-4 rounded-lg border border-yellow-200">
+                    <h4 className="font-semibold text-yellow-900 mb-2">🔧 Additional Implementation</h4>
+                    <div className="text-sm text-yellow-800 space-y-2">
+                      <p><strong>For Product Pages:</strong></p>
+                      <code className="block bg-white p-2 rounded text-xs">
+                        MergeInsightsAI.trackProductView('product-123', 'Product Name', 29.99);
+                      </code>
+                      
+                      <p className="mt-3"><strong>For Purchase Completion:</strong></p>
+                      <code className="block bg-white p-2 rounded text-xs">
+                        MergeInsightsAI.trackPurchase('order-456', 59.98, [{'{'} id: 'product-123', name: 'Product Name', price: 29.99, quantity: 2 {'}']);
+                      </code>
+                    </div>
+                  </div>
+                </div>
+              )}
+
+              {connectedWebsites.length === 0 && (
+                <div className="bg-blue-50 p-4 rounded-lg">
+                  <h4 className="font-semibold text-blue-900 mb-2">Integration Guide for Custom Websites</h4>
+                  <p className="text-sm text-blue-800 mb-3">
+                    To track sales from your custom website built with VS Code, you'll need to:
+                  </p>
+                  <ol className="list-decimal list-inside text-sm text-blue-800 space-y-1">
+                    <li>Add our tracking script to your website</li>
+                    <li>Configure product tracking events</li>
+                    <li>Set up conversion tracking for purchases</li>
+                    <li>Map your product data to our analytics system</li>
+                  </ol>
+                  <p className="text-xs text-blue-600 mt-3">
+                    After connecting, we'll provide you with detailed integration instructions and code snippets.
+                  </p>
+                </div>
+              )}
             </CardContent>
           </Card>
 
@@ -216,10 +322,29 @@ const ProductSalesPage = () => {
               <CardTitle>Connected Sales Channels</CardTitle>
             </CardHeader>
             <CardContent>
-              <div className="text-center py-8 text-muted-foreground">
-                <p>No sales channels connected yet.</p>
-                <p className="text-sm">Connect your first sales channel to start tracking performance.</p>
-              </div>
+              {connectedWebsites.length > 0 ? (
+                <div className="space-y-3">
+                  {connectedWebsites.map((website, index) => (
+                    <div key={index} className="flex items-center justify-between p-3 bg-green-50 rounded-lg border border-green-200">
+                      <div className="flex items-center gap-3">
+                        <div className="w-2 h-2 bg-green-500 rounded-full"></div>
+                        <div>
+                          <p className="font-medium text-green-900">{website}</p>
+                          <p className="text-xs text-green-700">Custom Website • Connected</p>
+                        </div>
+                      </div>
+                      <div className="text-xs text-green-600 bg-green-100 px-2 py-1 rounded">
+                        Active
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              ) : (
+                <div className="text-center py-8 text-muted-foreground">
+                  <p>No sales channels connected yet.</p>
+                  <p className="text-sm">Connect your first sales channel to start tracking performance.</p>
+                </div>
+              )}
             </CardContent>
           </Card>
         </TabsContent>
