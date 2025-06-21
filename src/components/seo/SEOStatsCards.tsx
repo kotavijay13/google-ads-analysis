@@ -1,4 +1,3 @@
-
 import KeywordRankingBreakdown from './KeywordRankingBreakdown';
 import AveragePositionChart from './AveragePositionChart';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
