@@ -1,3 +1,4 @@
+
 import KeywordRankingBreakdown from './KeywordRankingBreakdown';
 import AveragePositionChart from './AveragePositionChart';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -40,7 +41,7 @@ const SEOStatsCards = ({
     return num.toString();
   };
 
-  const hasData = serpKeywords.length > 0 && selectedWebsite;
+  const hasData = serpKeywords.length > 0 && Boolean(selectedWebsite);
 
   // Show only Average Position Chart
   if (showOnlyAveragePosition) {
