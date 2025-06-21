@@ -15,14 +15,15 @@ import {
   UserCog,
   Menu,
   X,
-  Package
+  Package,
+  Brain
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { Button } from '@/components/ui/button';
 import { useIsMobile } from '@/hooks/use-mobile';
 
 const navigation = [
-  { name: 'Dashboard', href: '/', icon: Home },
+  { name: 'AI Insights', href: '/', icon: Brain },
   { name: 'Google Ads', href: '/google-ads', icon: Target },
   { name: 'Meta Ads', href: '/meta-ads', icon: BarChart3 },
   { name: 'SEO Report', href: '/seo', icon: TrendingUp },

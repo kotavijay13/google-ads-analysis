@@ -2,6 +2,7 @@
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { PieChart, Pie, Cell, ResponsiveContainer, Legend, Tooltip } from 'recharts';
+import { TrendingUp, Award, Target } from 'lucide-react';
 
 interface KeywordRankingBreakdownProps {
   keywords: any[];
@@ -54,9 +55,9 @@ const KeywordRankingBreakdown = ({ keywords }: KeywordRankingBreakdownProps) => 
     if (active && payload && payload.length) {
       const data = payload[0];
       return (
-        <div className="bg-white border rounded-lg shadow-lg p-3">
-          <p className="font-medium">{data.name}</p>
-          <p className="text-sm text-muted-foreground">
+        <div className="bg-white border rounded-xl shadow-lg p-4 border-gray-200">
+          <p className="font-semibold text-gray-900">{data.name}</p>
+          <p className="text-sm text-gray-600 mt-1">
             {data.value} keywords ({((data.value / keywords.length) * 100).toFixed(1)}%)
           </p>
         </div>
@@ -81,7 +82,7 @@ const KeywordRankingBreakdown = ({ keywords }: KeywordRankingBreakdownProps) => 
         textAnchor={x > cx ? 'start' : 'end'} 
         dominantBaseline="central"
         fontSize={12}
-        fontWeight="500"
+        fontWeight="600"
       >
         {`${(percent * 100).toFixed(0)}%`}
       </text>
@@ -89,19 +90,22 @@ const KeywordRankingBreakdown = ({ keywords }: KeywordRankingBreakdownProps) => 
   };
 
   return (
-    <Card>
-      <CardHeader>
-        <CardTitle className="text-lg font-semibold flex items-center gap-2">
+    <Card className="border-0 shadow-none">
+      <CardHeader className="pb-4">
+        <CardTitle className="text-xl font-bold flex items-center gap-3">
+          <div className="p-2 bg-blue-100 rounded-lg">
+            <Target className="h-5 w-5 text-blue-600" />
+          </div>
           Current Search Result Rankings
-          <Badge variant="outline" className="text-xs">
+          <Badge variant="outline" className="text-sm px-3 py-1 bg-blue-50 border-blue-200 text-blue-700">
             {keywords.length} total
           </Badge>
         </CardTitle>
       </CardHeader>
       <CardContent>
-        <div className="flex flex-col lg:flex-row items-start gap-6">
+        <div className="flex flex-col lg:flex-row items-start gap-8">
           <div className="w-full lg:w-1/2">
-            <ResponsiveContainer width="100%" height={200}>
+            <ResponsiveContainer width="100%" height={280}>
               <PieChart>
                 <Pie
                   data={chartData}
@@ -109,9 +113,11 @@ const KeywordRankingBreakdown = ({ keywords }: KeywordRankingBreakdownProps) => 
                   cy="50%"
                   labelLine={false}
                   label={renderCustomizedLabel}
-                  outerRadius={80}
+                  outerRadius={100}
                   fill="#8884d8"
                   dataKey="value"
+                  strokeWidth={2}
+                  stroke="#fff"
                 >
                   {chartData.map((entry, index) => (
                     <Cell key={`cell-${index}`} fill={entry.color} />
@@ -122,28 +128,31 @@ const KeywordRankingBreakdown = ({ keywords }: KeywordRankingBreakdownProps) => 
             </ResponsiveContainer>
           </div>
           
-          <div className="w-full lg:w-1/2 space-y-3">
+          <div className="w-full lg:w-1/2 space-y-4">
             {[
-              { label: 'Top 3', value: breakdown.top3, color: '#10b981' },
-              { label: 'Top 5', value: breakdown.top5, color: '#f59e0b' },
-              { label: 'Top 10', value: breakdown.top10, color: '#3b82f6' },
-              { label: 'Top 50', value: breakdown.top50, color: '#8b5cf6' },
-              { label: 'Top 100', value: breakdown.top100, color: '#ef4444' },
-              { label: 'Not ranking', value: breakdown.notRanking, color: '#f87171' }
+              { label: 'Top 3', value: breakdown.top3, color: '#10b981', icon: Award },
+              { label: 'Top 5', value: breakdown.top5, color: '#f59e0b', icon: TrendingUp },
+              { label: 'Top 10', value: breakdown.top10, color: '#3b82f6', icon: Target },
+              { label: 'Top 50', value: breakdown.top50, color: '#8b5cf6', icon: TrendingUp },
+              { label: 'Top 100', value: breakdown.top100, color: '#ef4444', icon: TrendingUp },
+              { label: 'Not ranking', value: breakdown.notRanking, color: '#f87171', icon: TrendingUp }
             ].map((item) => (
-              <div key={item.label} className="flex items-center justify-between">
-                <div className="flex items-center gap-3">
-                  <div 
-                    className="w-4 h-4 rounded"
-                    style={{ backgroundColor: item.color }}
-                  />
-                  <span className="text-sm font-medium">{item.label}</span>
+              <div key={item.label} className="flex items-center justify-between p-3 rounded-lg bg-gray-50 hover:bg-gray-100 transition-colors">
+                <div className="flex items-center gap-4">
+                  <div className="flex items-center gap-3">
+                    <div 
+                      className="w-5 h-5 rounded-full shadow-sm"
+                      style={{ backgroundColor: item.color }}
+                    />
+                    <item.icon className="w-4 h-4 text-gray-600" />
+                    <span className="text-sm font-semibold text-gray-700">{item.label}</span>
+                  </div>
                 </div>
-                <div className="flex items-center gap-2">
-                  <span className="text-sm text-muted-foreground">
+                <div className="flex items-center gap-3">
+                  <span className="text-sm font-medium text-gray-600">
                     {keywords.length > 0 ? ((item.value / keywords.length) * 100).toFixed(0) : 0}%
                   </span>
-                  <Badge variant="outline" className="text-xs">
+                  <Badge variant="secondary" className="text-sm px-2 py-1 bg-white border">
                     {item.value}
                   </Badge>
                 </div>
