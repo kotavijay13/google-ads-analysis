@@ -2,7 +2,7 @@
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { PieChart, Pie, Cell, ResponsiveContainer, Legend, Tooltip } from 'recharts';
-import { TrendingUp, Award, Target } from 'lucide-react';
+import { TrendingUp, Award, Target, BarChart3 } from 'lucide-react';
 
 interface KeywordRankingBreakdownProps {
   keywords: any[];
@@ -88,6 +88,69 @@ const KeywordRankingBreakdown = ({ keywords }: KeywordRankingBreakdownProps) => 
       </text>
     );
   };
+
+  // Placeholder content when no keywords
+  if (keywords.length === 0) {
+    return (
+      <Card className="border-0 shadow-none">
+        <CardHeader className="pb-4">
+          <CardTitle className="text-xl font-bold flex items-center gap-3">
+            <div className="p-2 bg-blue-100 rounded-lg">
+              <Target className="h-5 w-5 text-blue-600" />
+            </div>
+            Current Search Result Rankings
+            <Badge variant="outline" className="text-sm px-3 py-1 bg-blue-50 border-blue-200 text-blue-700">
+              0 total
+            </Badge>
+          </CardTitle>
+        </CardHeader>
+        <CardContent>
+          <div className="flex flex-col lg:flex-row items-center gap-8">
+            <div className="w-full lg:w-1/2 flex items-center justify-center">
+              <div className="text-center p-12">
+                <div className="w-24 h-24 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                  <BarChart3 className="w-8 h-8 text-gray-400" />
+                </div>
+                <p className="text-gray-500 text-sm">
+                  Please select a website and refresh data to load keyword ranking information.
+                </p>
+              </div>
+            </div>
+            
+            <div className="w-full lg:w-1/2 space-y-4">
+              {[
+                { label: 'Top 3', value: 0, color: '#10b981', icon: Award },
+                { label: 'Top 5', value: 0, color: '#f59e0b', icon: TrendingUp },
+                { label: 'Top 10', value: 0, color: '#3b82f6', icon: Target },
+                { label: 'Top 50', value: 0, color: '#8b5cf6', icon: TrendingUp },
+                { label: 'Top 100', value: 0, color: '#ef4444', icon: TrendingUp },
+                { label: 'Not ranking', value: 0, color: '#f87171', icon: TrendingUp }
+              ].map((item) => (
+                <div key={item.label} className="flex items-center justify-between p-3 rounded-lg bg-gray-50">
+                  <div className="flex items-center gap-4">
+                    <div className="flex items-center gap-3">
+                      <div 
+                        className="w-5 h-5 rounded-full shadow-sm"
+                        style={{ backgroundColor: item.color }}
+                      />
+                      <item.icon className="w-4 h-4 text-gray-400" />
+                      <span className="text-sm font-semibold text-gray-400">{item.label}</span>
+                    </div>
+                  </div>
+                  <div className="flex items-center gap-3">
+                    <span className="text-sm font-medium text-gray-400">0%</span>
+                    <Badge variant="secondary" className="text-sm px-2 py-1 bg-white border text-gray-400">
+                      0
+                    </Badge>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+        </CardContent>
+      </Card>
+    );
+  }
 
   return (
     <Card className="border-0 shadow-none">

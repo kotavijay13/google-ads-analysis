@@ -104,12 +104,10 @@ const SEOStatsCards = ({ serpStats, serpKeywords = [] }: SEOStatsCardsProps) => 
         </Card>
       </div>
 
-      {/* Keyword Ranking Breakdown - Enhanced card */}
-      {serpKeywords.length > 0 && (
-        <div className="bg-white rounded-xl shadow-lg border-0 overflow-hidden">
-          <KeywordRankingBreakdown keywords={serpKeywords} />
-        </div>
-      )}
+      {/* Keyword Ranking Breakdown - Always visible with placeholder */}
+      <div className="bg-white rounded-xl shadow-lg border-0 overflow-hidden">
+        <KeywordRankingBreakdown keywords={serpKeywords} />
+      </div>
     </div>
   );
 };
