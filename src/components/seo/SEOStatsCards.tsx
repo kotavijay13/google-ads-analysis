@@ -34,25 +34,25 @@ const SEOStatsCards = ({ serpStats, serpKeywords = [], selectedWebsite = '' }: S
   const hasData = serpKeywords.length > 0 && selectedWebsite;
 
   return (
-    <div className="space-y-3">
-      {/* Main Stats Grid - Compact */}
+    <div className="space-y-2">
+      {/* Main Stats Grid - More Compact */}
       <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-2">
         <Card className="relative overflow-hidden border-0 bg-white shadow-sm hover:shadow-md transition-all duration-300 group">
           <div className="absolute inset-0 bg-gradient-to-br from-blue-500/5 to-blue-600/10"></div>
-          <CardHeader className="pb-1 pt-2 relative">
+          <CardHeader className="pb-1 pt-1.5 px-3 relative">
             <div className="flex items-center justify-between">
-              <div className="flex items-center gap-2">
+              <div className="flex items-center gap-1.5">
                 <div className="p-1 bg-blue-500 rounded-md shadow-sm group-hover:scale-110 transition-transform duration-200">
-                  <MousePointer className="h-2.5 w-2.5 text-white" />
+                  <MousePointer className="h-2 w-2 text-white" />
                 </div>
                 <div>
                   <CardTitle className="text-xs font-medium text-gray-600">Total Clicks</CardTitle>
-                  <div className="text-base font-bold text-gray-900 mt-0.5">{formatNumber(serpStats.totalClicks)}</div>
+                  <div className="text-sm font-bold text-gray-900 mt-0.5">{formatNumber(serpStats.totalClicks)}</div>
                 </div>
               </div>
             </div>
           </CardHeader>
-          <CardContent className="pt-0 pb-2 relative">
+          <CardContent className="pt-0 pb-1.5 px-3 relative">
             <Badge variant="outline" className="text-xs bg-blue-50 text-blue-700 border-blue-200">
               From GSC data
             </Badge>
@@ -61,22 +61,22 @@ const SEOStatsCards = ({ serpStats, serpKeywords = [], selectedWebsite = '' }: S
 
         <Card className="relative overflow-hidden border-0 bg-white shadow-sm hover:shadow-md transition-all duration-300 group">
           <div className="absolute inset-0 bg-gradient-to-br from-green-500/5 to-green-600/10"></div>
-          <CardHeader className="pb-1 pt-2 relative">
+          <CardHeader className="pb-1 pt-1.5 px-3 relative">
             <div className="flex items-center justify-between">
-              <div className="flex items-center gap-2">
+              <div className="flex items-center gap-1.5">
                 <div className="p-1 bg-green-500 rounded-md shadow-sm group-hover:scale-110 transition-transform duration-200">
-                  <TrendingUp className="h-2.5 w-2.5 text-white" />
+                  <TrendingUp className="h-2 w-2 text-white" />
                 </div>
                 <div>
                   <CardTitle className="text-xs font-medium text-gray-600">Keywords Ranked</CardTitle>
-                  <div className="text-base font-bold text-gray-900 mt-0.5">{formatNumber(serpStats.totalKeywords)}</div>
+                  <div className="text-sm font-bold text-gray-900 mt-0.5">{formatNumber(serpStats.totalKeywords)}</div>
                 </div>
               </div>
             </div>
           </CardHeader>
-          <CardContent className="pt-0 pb-2 relative">
+          <CardContent className="pt-0 pb-1.5 px-3 relative">
             <div className="flex items-center gap-1">
-              <TrendingUp className="h-2 w-2 text-green-600" />
+              <TrendingUp className="h-1.5 w-1.5 text-green-600" />
               <span className="text-xs text-green-600 font-medium">+{serpStats.top10Keywords} in top 10</span>
             </div>
           </CardContent>
@@ -84,20 +84,20 @@ const SEOStatsCards = ({ serpStats, serpKeywords = [], selectedWebsite = '' }: S
 
         <Card className="relative overflow-hidden border-0 bg-white shadow-sm hover:shadow-md transition-all duration-300 group">
           <div className="absolute inset-0 bg-gradient-to-br from-amber-500/5 to-amber-600/10"></div>
-          <CardHeader className="pb-1 pt-2 relative">
+          <CardHeader className="pb-1 pt-1.5 px-3 relative">
             <div className="flex items-center justify-between">
-              <div className="flex items-center gap-2">
+              <div className="flex items-center gap-1.5">
                 <div className="p-1 bg-amber-500 rounded-md shadow-sm group-hover:scale-110 transition-transform duration-200">
-                  <Zap className="h-2.5 w-2.5 text-white" />
+                  <Zap className="h-2 w-2 text-white" />
                 </div>
                 <div>
                   <CardTitle className="text-xs font-medium text-gray-600">Average Position</CardTitle>
-                  <div className="text-base font-bold text-gray-900 mt-0.5">{serpStats.avgPosition}</div>
+                  <div className="text-sm font-bold text-gray-900 mt-0.5">{serpStats.avgPosition}</div>
                 </div>
               </div>
             </div>
           </CardHeader>
-          <CardContent className="pt-0 pb-2 relative">
+          <CardContent className="pt-0 pb-1.5 px-3 relative">
             <Badge variant="outline" className="text-xs bg-amber-50 text-amber-700 border-amber-200">
               Overall ranking
             </Badge>
@@ -106,22 +106,22 @@ const SEOStatsCards = ({ serpStats, serpKeywords = [], selectedWebsite = '' }: S
 
         <Card className="relative overflow-hidden border-0 bg-white shadow-sm hover:shadow-md transition-all duration-300 group">
           <div className="absolute inset-0 bg-gradient-to-br from-purple-500/5 to-purple-600/10"></div>
-          <CardHeader className="pb-1 pt-2 relative">
+          <CardHeader className="pb-1 pt-1.5 px-3 relative">
             <div className="flex items-center justify-between">
-              <div className="flex items-center gap-2">
+              <div className="flex items-center gap-1.5">
                 <div className="p-1 bg-purple-500 rounded-md shadow-sm group-hover:scale-110 transition-transform duration-200">
-                  <Eye className="h-2.5 w-2.5 text-white" />
+                  <Eye className="h-2 w-2 text-white" />
                 </div>
                 <div>
                   <CardTitle className="text-xs font-medium text-gray-600">Total Impressions</CardTitle>
-                  <div className="text-base font-bold text-gray-900 mt-0.5">{formatNumber(serpStats.totalImpressions)}</div>
+                  <div className="text-sm font-bold text-gray-900 mt-0.5">{formatNumber(serpStats.totalImpressions)}</div>
                 </div>
               </div>
             </div>
           </CardHeader>
-          <CardContent className="pt-0 pb-2 relative">
+          <CardContent className="pt-0 pb-1.5 px-3 relative">
             <div className="flex items-center gap-1">
-              <Eye className="h-2 w-2 text-purple-600" />
+              <Eye className="h-1.5 w-1.5 text-purple-600" />
               <span className="text-xs text-purple-600 font-medium">CTR: {serpStats.avgCTR.toFixed(1)}%</span>
             </div>
           </CardContent>
@@ -129,12 +129,14 @@ const SEOStatsCards = ({ serpStats, serpKeywords = [], selectedWebsite = '' }: S
       </div>
 
       {/* Charts Grid - More compact */}
-      <div className="grid grid-cols-1 xl:grid-cols-3 gap-3">
+      <div className="grid grid-cols-1 lg:grid-cols-5 gap-2">
         {/* Average Position Chart */}
-        <AveragePositionChart selectedWebsite={selectedWebsite} hasData={hasData} />
+        <div className="lg:col-span-2">
+          <AveragePositionChart selectedWebsite={selectedWebsite} hasData={Boolean(selectedWebsite && serpKeywords.length > 0)} />
+        </div>
         
         {/* Keyword Ranking Breakdown */}
-        <div className="xl:col-span-2 bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
+        <div className="lg:col-span-3 bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
           <KeywordRankingBreakdown keywords={serpKeywords} />
         </div>
       </div>
