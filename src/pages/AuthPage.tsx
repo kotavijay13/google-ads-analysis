@@ -6,9 +6,9 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { toast } from '@/components/ui/sonner';
+import { toast } from 'sonner';
 import { Label } from '@/components/ui/label';
-import { Loader2 } from 'lucide-react';
+import { Loader2, Brain } from 'lucide-react';
 import { useAuth } from '@/context/AuthContext';
 
 const AuthPage = () => {
@@ -22,12 +22,7 @@ const AuthPage = () => {
   // Check if user is already logged in
   useEffect(() => {
     if (user && !authLoading) {
-      // Add a small delay to prevent too quick redirect
-      const redirectTimer = setTimeout(() => {
-        navigate('/', { replace: true });
-      }, 100);
-      
-      return () => clearTimeout(redirectTimer);
+      navigate('/', { replace: true });
     }
   }, [user, authLoading, navigate]);
 
@@ -40,6 +35,9 @@ const AuthPage = () => {
       const { data, error } = await supabase.auth.signUp({
         email,
         password,
+        options: {
+          emailRedirectTo: `${window.location.origin}/`
+        }
       });
       
       if (error) {
@@ -74,7 +72,6 @@ const AuthPage = () => {
         toast.error(error.message);
       } else {
         toast.success('Signed in successfully!');
-        // No need to navigate here, the useEffect will handle it
       }
     } catch (error) {
       console.error('Signin error:', error);
@@ -99,21 +96,30 @@ const AuthPage = () => {
   // Only render the auth form if not logged in
   if (!user) {
     return (
-      <div className="flex items-center justify-center min-h-screen bg-gray-50 w-full p-4">
-        <Card className="w-full max-w-md shadow-lg">
-          <CardHeader className="text-center">
-            <CardTitle className="text-2xl">Merge Insights AI</CardTitle>
-            <CardDescription>Sign in or create an account</CardDescription>
+      <div className="flex items-center justify-center min-h-screen bg-gradient-to-br from-blue-50 via-white to-indigo-50 w-full p-4">
+        <Card className="w-full max-w-md shadow-lg border-0 bg-white/80 backdrop-blur-sm">
+          <CardHeader className="text-center space-y-4">
+            <div className="mx-auto bg-primary/10 p-3 rounded-full w-fit">
+              <Brain className="h-8 w-8 text-primary" />
+            </div>
+            <div>
+              <CardTitle className="text-3xl font-bold bg-gradient-to-r from-blue-600 to-indigo-600 bg-clip-text text-transparent">
+                AI Insights
+              </CardTitle>
+              <CardDescription className="text-lg mt-2">
+                Sign in to access your marketing dashboard
+              </CardDescription>
+            </div>
           </CardHeader>
           <Tabs defaultValue="signin" className="w-full">
-            <TabsList className="grid w-full grid-cols-2">
-              <TabsTrigger value="signin">Sign In</TabsTrigger>
-              <TabsTrigger value="signup">Sign Up</TabsTrigger>
+            <TabsList className="grid w-full grid-cols-2 mb-6">
+              <TabsTrigger value="signin" className="text-sm">Sign In</TabsTrigger>
+              <TabsTrigger value="signup" className="text-sm">Sign Up</TabsTrigger>
             </TabsList>
             
             <TabsContent value="signin">
               <form onSubmit={handleSignIn}>
-                <CardContent className="space-y-4 pt-4">
+                <CardContent className="space-y-4 pt-0">
                   {authError && (
                     <div className="p-3 bg-red-50 border border-red-200 text-red-700 rounded-md text-sm">
                       {authError}
@@ -124,10 +130,11 @@ const AuthPage = () => {
                     <Input 
                       id="signin-email"
                       type="email" 
-                      placeholder="Email"
+                      placeholder="Enter your email"
                       value={email}
                       onChange={(e) => setEmail(e.target.value)}
                       required
+                      className="h-11"
                     />
                   </div>
                   <div className="space-y-2">
@@ -135,17 +142,18 @@ const AuthPage = () => {
                     <Input 
                       id="signin-password"
                       type="password" 
-                      placeholder="Password"
+                      placeholder="Enter your password"
                       value={password}
                       onChange={(e) => setPassword(e.target.value)}
                       required
+                      className="h-11"
                     />
                   </div>
                 </CardContent>
-                <CardFooter>
+                <CardFooter className="pt-2">
                   <Button 
                     type="submit" 
-                    className="w-full bg-indigo-600 hover:bg-indigo-700 text-white" 
+                    className="w-full h-11 bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white font-medium" 
                     disabled={loading}
                   >
                     {loading ? (
@@ -161,7 +169,7 @@ const AuthPage = () => {
             
             <TabsContent value="signup">
               <form onSubmit={handleSignUp}>
-                <CardContent className="space-y-4 pt-4">
+                <CardContent className="space-y-4 pt-0">
                   {authError && (
                     <div className="p-3 bg-red-50 border border-red-200 text-red-700 rounded-md text-sm">
                       {authError}
@@ -172,10 +180,11 @@ const AuthPage = () => {
                     <Input 
                       id="signup-email"
                       type="email" 
-                      placeholder="Email"
+                      placeholder="Enter your email"
                       value={email}
                       onChange={(e) => setEmail(e.target.value)}
                       required
+                      className="h-11"
                     />
                   </div>
                   <div className="space-y-2">
@@ -188,16 +197,17 @@ const AuthPage = () => {
                       onChange={(e) => setPassword(e.target.value)}
                       required
                       minLength={6}
+                      className="h-11"
                     />
                   </div>
                   <p className="text-xs text-muted-foreground">
                     By signing up, you agree to our Terms of Service and Privacy Policy.
                   </p>
                 </CardContent>
-                <CardFooter>
+                <CardFooter className="pt-2">
                   <Button 
                     type="submit" 
-                    className="w-full bg-indigo-600 hover:bg-indigo-700 text-white" 
+                    className="w-full h-11 bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white font-medium" 
                     disabled={loading}
                   >
                     {loading ? (
