@@ -17,7 +17,7 @@ const Top5AIInsights = ({ onInsightCompleted }: Top5AIInsightsProps) => {
   useEffect(() => {
     if (selectedWebsite) {
       console.log(`Website changed to ${selectedWebsite}, refreshing AI insights...`);
-      handleRefresh();
+      handleRefresh(selectedWebsite);
     }
   }, [selectedWebsite, handleRefresh]);
 
@@ -25,6 +25,14 @@ const Top5AIInsights = ({ onInsightCompleted }: Top5AIInsightsProps) => {
     setCompletedInsights(prev => new Set([...prev, insightId]));
     onInsightCompleted?.(insightId);
     console.log(`Insight ${insightId} marked as completed`);
+  };
+
+  const handleManualRefresh = () => {
+    if (selectedWebsite) {
+      handleRefresh(selectedWebsite);
+    } else {
+      handleRefresh();
+    }
   };
 
   return (
@@ -44,7 +52,7 @@ const Top5AIInsights = ({ onInsightCompleted }: Top5AIInsightsProps) => {
         <Button 
           variant="outline" 
           size="sm" 
-          onClick={handleRefresh}
+          onClick={handleManualRefresh}
           disabled={isLoading}
           className="flex items-center space-x-1"
         >
@@ -62,10 +70,20 @@ const Top5AIInsights = ({ onInsightCompleted }: Top5AIInsightsProps) => {
             <div className="text-center">
               <Loader2 className="h-8 w-8 animate-spin mx-auto mb-2 text-primary" />
               <p className="text-sm text-muted-foreground">
-                Analyzing latest data from all channels
+                AI is analyzing your marketing data
                 {selectedWebsite && ` for ${selectedWebsite}`}...
               </p>
             </div>
+          </div>
+        ) : insights.length === 0 ? (
+          <div className="text-center py-8">
+            <Brain className="h-12 w-12 mx-auto mb-4 text-muted-foreground" />
+            <p className="text-muted-foreground mb-2">
+              {selectedWebsite 
+                ? `Select a website to generate AI insights for ${selectedWebsite}`
+                : 'Select a website from the dropdown above to generate AI insights'
+              }
+            </p>
           </div>
         ) : (
           insights.map((insight) => (

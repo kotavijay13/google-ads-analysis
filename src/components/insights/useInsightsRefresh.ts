@@ -1,54 +1,85 @@
-
-import { useState } from 'react';
-import { AIInsight } from './types';
-import { generateSEOInsights } from './seoInsightsGenerator';
+import { useState, useCallback } from 'react';
+import { useAIAnalysis } from '@/hooks/useAIAnalysis';
 import { useSEOContext } from '@/context/SEOContext';
-import { useGlobalWebsite } from '@/context/GlobalWebsiteContext';
 
-export const useInsightsRefresh = (initialInsights: AIInsight[]) => {
-  const [insights, setInsights] = useState<AIInsight[]>(initialInsights);
+export interface Insight {
+  id: string;
+  title: string;
+  description: string;
+  priority: 'high' | 'medium' | 'low';
+  channel: 'seo' | 'google-ads' | 'meta-ads' | 'leads' | 'cross-channel';
+  impact: string;
+  action: string;
+}
+
+export interface Top5AIInsightsProps {
+  onInsightCompleted?: (insightId: string) => void;
+}
+
+export const useInsightsRefresh = (initialInsights: any[]) => {
+  const [insights, setInsights] = useState(initialInsights);
   const [isLoading, setIsLoading] = useState(false);
+  const { generateInsights, insights: aiInsights, isAnalyzing } = useAIAnalysis();
   const { seoState } = useSEOContext();
-  const { selectedWebsite } = useGlobalWebsite();
 
-  const handleRefresh = async () => {
+  const handleRefresh = useCallback(async (website?: string) => {
     setIsLoading(true);
-    console.log('Refreshing AI insights with real data...');
     
-    // Simulate loading time
-    await new Promise(resolve => setTimeout(resolve, 2000));
-    
-    const newInsights: AIInsight[] = [];
-    
-    // Generate SEO insights from real data
-    if (selectedWebsite && seoState.serpKeywords.length > 0) {
-      const seoInsights = generateSEOInsights(
-        seoState.serpKeywords,
-        seoState.serpStats,
-        selectedWebsite
-      );
-      newInsights.push(...seoInsights);
+    try {
+      if (website && seoState.selectedWebsite) {
+        console.log('Generating AI insights for:', website);
+        
+        // Prepare data for AI analysis
+        const analysisData = {
+          seoData: {
+            totalKeywords: seoState.serpStats?.totalKeywords || 0,
+            avgPosition: seoState.serpStats?.avgPosition || '0.0',
+            totalClicks: seoState.serpStats?.totalClicks || 0,
+            totalImpressions: seoState.serpStats?.totalImpressions || 0,
+            avgCTR: seoState.serpStats?.avgCTR || 0,
+            top10Keywords: seoState.serpStats?.top10Keywords || 0
+          },
+          googleAdsData: {
+            totalSpend: 0, // Will be populated from actual Google Ads data
+            totalClicks: 0,
+            totalImpressions: 0,
+            conversionRate: 0,
+            avgCpc: 0
+          },
+          metaAdsData: {
+            totalSpend: 0, // Will be populated from actual Meta Ads data
+            totalReach: 0,
+            totalEngagement: 0,
+            costPerResult: 0,
+            roas: 0
+          },
+          leadsData: {
+            totalLeads: 0, // Will be populated from actual leads data
+            conversionRate: 0,
+            sources: []
+          }
+        };
+
+        await generateInsights(website, analysisData);
+      } else {
+        // Fallback to mock insights if no website selected
+        console.log('No website selected, using fallback insights');
+        setInsights(initialInsights);
+      }
+    } catch (error) {
+      console.error('Error refreshing insights:', error);
+      setInsights(initialInsights);
+    } finally {
+      setIsLoading(false);
     }
+  }, [generateInsights, seoState, initialInsights]);
 
-    // Add other non-campaign insights
-    const otherInsights = initialInsights.filter(insight => 
-      !insight.description.toLowerCase().includes('campaign') &&
-      !insight.description.toLowerCase().includes('ad spend') &&
-      !insight.description.toLowerCase().includes('roas')
-    );
-
-    // Combine SEO insights with other insights, prioritizing SEO
-    const combinedInsights = [...newInsights, ...otherInsights].slice(0, 5);
-    
-    setInsights(combinedInsights);
-    setIsLoading(false);
-    
-    console.log(`Generated ${newInsights.length} SEO insights for ${selectedWebsite}`);
-  };
+  // Use AI insights when available, otherwise use initial insights
+  const currentInsights = aiInsights.length > 0 ? aiInsights : insights;
 
   return {
-    insights,
-    isLoading,
+    insights: currentInsights,
+    isLoading: isLoading || isAnalyzing,
     handleRefresh
   };
 };
