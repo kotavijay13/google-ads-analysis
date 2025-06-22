@@ -1,6 +1,7 @@
+
 import { useState } from 'react';
 import { Button } from "@/components/ui/button";
-import { LineChart, Settings, User } from "lucide-react";
+import { Brain, Settings, User } from "lucide-react";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -66,7 +67,7 @@ const Header = ({ onRefresh, title, isLoading }: HeaderProps) => {
     <header className="flex flex-col md:flex-row justify-between items-center gap-4 mb-6">
       <div className="flex items-center gap-3">
         <div className="bg-primary/10 p-2 rounded-lg">
-          <LineChart size={24} className="text-primary" />
+          <Brain size={24} className="text-primary" />
         </div>
         <div>
           <h1 className="text-2xl font-bold flex items-center text-primary">

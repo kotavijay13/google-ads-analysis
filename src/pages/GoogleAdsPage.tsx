@@ -26,8 +26,9 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { useGoogleAdsIntegration } from '@/components/google-ads/useGoogleAdsIntegration';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { ExternalLink, AlertCircle } from 'lucide-react';
+import { ExternalLink, AlertCircle, Globe } from 'lucide-react';
 import { Alert, AlertDescription } from '@/components/ui/alert';
+import { useGlobalWebsite } from '@/context/GlobalWebsiteContext';
 
 const GoogleAdsPage = () => {
   const [dateRange, setDateRange] = useState<{ from: Date; to: Date }>({
@@ -35,11 +36,10 @@ const GoogleAdsPage = () => {
     to: new Date()
   });
   
-  // Use ref to track if data has been fetched to prevent infinite loops
+  const { selectedWebsite } = useGlobalWebsite();
   const hasFetchedData = useRef(false);
   const lastFetchKey = useRef<string>('');
   
-  // Use the Google Ads integration hook
   const { 
     accounts, 
     connected, 
@@ -49,7 +49,6 @@ const GoogleAdsPage = () => {
     refreshing
   } = useGoogleAdsIntegration();
   
-  // Use the API hook for data fetching
   const { 
     fetchData, 
     isLoading, 
@@ -59,14 +58,12 @@ const GoogleAdsPage = () => {
     metrics
   } = useGoogleAdsAPI();
 
-  // Fetch data when component mounts or when account/date changes
   useEffect(() => {
     if (selectedAccount && connected) {
       const fetchKey = `${selectedAccount}-${dateRange.from.toISOString()}-${dateRange.to.toISOString()}`;
       
-      // Only fetch if we haven't fetched this combination before
       if (!hasFetchedData.current || lastFetchKey.current !== fetchKey) {
-        console.log('Fetching data for key:', fetchKey);
+        console.log('Fetching Google Ads data for key:', fetchKey);
         hasFetchedData.current = true;
         lastFetchKey.current = fetchKey;
         fetchData(dateRange.from, dateRange.to);
@@ -75,13 +72,11 @@ const GoogleAdsPage = () => {
   }, [selectedAccount, connected, dateRange.from, dateRange.to, fetchData]);
 
   const handleRefresh = useCallback(() => {
-    // Reset the fetch tracking to force a new fetch
     hasFetchedData.current = false;
     lastFetchKey.current = '';
     
-    // Fetch fresh data from Google Ads API
     if (selectedAccount && connected) {
-      console.log('Manual refresh triggered');
+      console.log('Manual refresh triggered for Google Ads');
       fetchData(dateRange.from, dateRange.to);
     }
   }, [selectedAccount, connected, fetchData, dateRange.from, dateRange.to]);
@@ -89,12 +84,10 @@ const GoogleAdsPage = () => {
   const handleDateChange = useCallback((range: { from: Date; to: Date }) => {
     console.log('Date range changed:', range);
     setDateRange(range);
-    // Reset fetch tracking when date changes
     hasFetchedData.current = false;
     lastFetchKey.current = '';
   }, []);
 
-  // If not connected, show connection prompt
   if (!connected) {
     return (
       <div className="container mx-auto py-6 px-4 max-w-7xl">
@@ -120,7 +113,6 @@ const GoogleAdsPage = () => {
     );
   }
 
-  // Create metrics for overview component in the correct format
   const overviewMetrics = metrics ? {
     totalSpend: metrics.totalSpend || 0,
     totalClicks: metrics.totalClicks || 0,
@@ -144,6 +136,18 @@ const GoogleAdsPage = () => {
   return (
     <div className="container mx-auto py-6 px-4 max-w-7xl">
       <Header onRefresh={handleRefresh} title="Google Ads Dashboard" isLoading={isLoading} />
+      
+      {selectedWebsite && (
+        <Card className="mb-6 border-primary/20 bg-gradient-to-r from-blue-50 to-indigo-50">
+          <CardContent className="pt-4">
+            <div className="flex items-center gap-2">
+              <Globe className="h-4 w-4 text-primary" />
+              <span className="text-sm text-muted-foreground">Analyzing Google Ads data for:</span>
+              <span className="font-semibold text-primary">{selectedWebsite}</span>
+            </div>
+          </CardContent>
+        </Card>
+      )}
       
       <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-6 gap-4">
         <div className="flex flex-col lg:flex-row items-start lg:items-center gap-4">

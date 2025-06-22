@@ -6,12 +6,14 @@ import ChannelMetricsOverview from '@/components/ChannelMetricsOverview';
 import MetaAdsOverview from '@/components/meta-ads/MetaAdsOverview';
 import MetaAdsTabs from '@/components/meta-ads/MetaAdsTabs';
 import { MetaAdsAccount } from '@/components/meta-ads/types';
+import { Card, CardContent } from '@/components/ui/card';
+import { Globe } from 'lucide-react';
+import { useGlobalWebsite } from '@/context/GlobalWebsiteContext';
 import { 
   dailyPerformance, 
   getOverviewMetrics
 } from '@/data/mockData';
 
-// Mock data for Meta Ads accounts with comprehensive data
 const mockMetaAccounts: MetaAdsAccount[] = [
   {
     id: "meta-1",
@@ -53,7 +55,6 @@ const mockMetaAccounts: MetaAdsAccount[] = [
     costPerConversion: 3.95,
     leads: 28,
     initiatedCheckout: 198,
-    // Ad level data
     adCreative: "Video + Text",
     format: "Single Video",
     callToAction: "Shop Now",
@@ -91,7 +92,6 @@ const mockMetaAccounts: MetaAdsAccount[] = [
     landingPageViews: 18970,
     linkClicks: 22670,
     saves: 234,
-    // Ad Set level data
     delivery: "Active",
     optimizationGoal: "Link Clicks",
     bidStrategy: "Lowest Cost",
@@ -105,7 +105,6 @@ const mockMetaAccounts: MetaAdsAccount[] = [
     costPerConversion: 3.20,
     leads: 45,
     initiatedCheckout: 324,
-    // Ad level data
     adCreative: "Image + Text",
     format: "Single Image",
     callToAction: "Learn More",
@@ -143,7 +142,6 @@ const mockMetaAccounts: MetaAdsAccount[] = [
     landingPageViews: 15680,
     linkClicks: 18970,
     saves: 312,
-    // Ad Set level data
     delivery: "Active",
     optimizationGoal: "Conversions",
     bidStrategy: "Cost Cap",
@@ -157,7 +155,6 @@ const mockMetaAccounts: MetaAdsAccount[] = [
     costPerConversion: 2.14,
     leads: 67,
     initiatedCheckout: 398,
-    // Ad level data
     adCreative: "Carousel",
     format: "Carousel",
     callToAction: "Shop Now",
@@ -180,10 +177,10 @@ const MetaAdsPage = () => {
   
   const [isLoading, setIsLoading] = useState(false);
   const [selectedAccount, setSelectedAccount] = useState<MetaAdsAccount | null>(null);
+  const { selectedWebsite } = useGlobalWebsite();
   
   const handleRefresh = () => {
     setIsLoading(true);
-    // Simulate API call
     setTimeout(() => {
       setIsLoading(false);
       console.log('Refreshing Meta Ads data...');
@@ -201,12 +198,10 @@ const MetaAdsPage = () => {
     console.log('Selected account:', account);
   };
 
-  // Initial data fetch when component mounts
   useEffect(() => {
     console.log('Initial Meta Ads data fetch with date range:', dateRange);
   }, []);
 
-  // Calculate revenue data
   const totalRevenue = mockMetaAccounts.reduce((total, account) => {
     return total + (account.purchaseValue || 0);
   }, 0);
@@ -214,6 +209,18 @@ const MetaAdsPage = () => {
   return (
     <div className="container mx-auto py-6 px-4 max-w-7xl">
       <Header onRefresh={handleRefresh} title="Meta Ads Dashboard" />
+      
+      {selectedWebsite && (
+        <Card className="mb-6 border-primary/20 bg-gradient-to-r from-blue-50 to-indigo-50">
+          <CardContent className="pt-4">
+            <div className="flex items-center gap-2">
+              <Globe className="h-4 w-4 text-primary" />
+              <span className="text-sm text-muted-foreground">Analyzing Meta Ads data for:</span>
+              <span className="font-semibold text-primary">{selectedWebsite}</span>
+            </div>
+          </CardContent>
+        </Card>
+      )}
       
       <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-6 gap-4">
         <h2 className="text-lg font-medium">Meta Ads Overview</h2>

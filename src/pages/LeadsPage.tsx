@@ -7,10 +7,14 @@ import LeadsTabsContent from '@/components/leads/LeadsTabsContent';
 import { useLeadsData } from '@/components/leads/hooks/useLeadsData';
 import { useAuth } from '@/context/AuthContext';
 import { useConnectedForms } from '@/hooks/useConnectedForms';
+import { Card, CardContent } from '@/components/ui/card';
+import { Globe } from 'lucide-react';
+import { useGlobalWebsite } from '@/context/GlobalWebsiteContext';
 
 const LeadsPage = () => {
   const { user } = useAuth();
   const { connectedForms } = useConnectedForms();
+  const { selectedWebsite } = useGlobalWebsite();
   const [dateRange, setDateRange] = useState({
     from: new Date(Date.now() - 30 * 24 * 60 * 60 * 1000),
     to: new Date()
@@ -41,7 +45,6 @@ const LeadsPage = () => {
     { key: 'remarks', label: 'Remarks' },
   ];
 
-  // Get unique sources from connected forms and add social media sources
   const availableSources = [
     'All',
     ...Array.from(new Set(connectedForms.map(form => form.website_url))),
@@ -109,7 +112,6 @@ const LeadsPage = () => {
     });
   };
 
-  // Prepare data for export
   const exportData = augmentedLeads.map(lead => ({
     Name: lead.name || `${lead.first_name || ''} ${lead.last_name || ''}`.trim() || '-',
     Email: lead.email || '-',
@@ -140,6 +142,18 @@ const LeadsPage = () => {
     <div className="w-full min-h-screen bg-gray-50 p-4 lg:p-6">
       <div className="max-w-7xl mx-auto space-y-4">
         <Header onRefresh={handleRefresh} title="Leads Dashboard" />
+
+        {selectedWebsite && (
+          <Card className="border-primary/20 bg-gradient-to-r from-blue-50 to-indigo-50">
+            <CardContent className="pt-4">
+              <div className="flex items-center gap-2">
+                <Globe className="h-4 w-4 text-primary" />
+                <span className="text-sm text-muted-foreground">Analyzing leads data for:</span>
+                <span className="font-semibold text-primary">{selectedWebsite}</span>
+              </div>
+            </CardContent>
+          </Card>
+        )}
 
         <LeadFilters
           onStatusFilter={handleStatusFilter}
