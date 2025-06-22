@@ -1,46 +1,54 @@
 
 import { useState } from 'react';
-import { TrendingUp, AlertTriangle } from 'lucide-react';
 import { AIInsight } from './types';
+import { generateSEOInsights } from './seoInsightsGenerator';
+import { useSEOContext } from '@/context/SEOContext';
+import { useGlobalWebsite } from '@/context/GlobalWebsiteContext';
 
 export const useInsightsRefresh = (initialInsights: AIInsight[]) => {
-  const [isLoading, setIsLoading] = useState(false);
   const [insights, setInsights] = useState<AIInsight[]>(initialInsights);
+  const [isLoading, setIsLoading] = useState(false);
+  const { seoState } = useSEOContext();
+  const { selectedWebsite } = useGlobalWebsite();
 
   const handleRefresh = async () => {
     setIsLoading(true);
+    console.log('Refreshing AI insights with real data...');
     
-    // Simulate AI analysis
-    setTimeout(() => {
-      console.log('Refreshing AI insights with latest data from all channels...');
-      
-      // Simulate new insights based on fresh data analysis
-      const newInsights: AIInsight[] = [
-        {
-          id: Math.random().toString(),
-          title: "Boost budget for high-performing Summer Sale campaign",
-          description: "ROI increased 23% this week, scale opportunity detected",
-          impact: 'High Impact',
-          source: 'Google Ads',
-          icon: TrendingUp,
-          actionable: true
-        },
-        {
-          id: Math.random().toString(),
-          title: "Update ad copy for mobile users",
-          description: "Mobile CTR 15% lower than desktop, creative refresh needed",
-          impact: 'Medium Impact',
-          source: 'Meta Ads',
-          icon: AlertTriangle,
-          actionable: true
-        },
-        ...insights.slice(2, 5)
-      ];
-      
-      setInsights(newInsights);
-      setIsLoading(false);
-    }, 2000);
+    // Simulate loading time
+    await new Promise(resolve => setTimeout(resolve, 2000));
+    
+    const newInsights: AIInsight[] = [];
+    
+    // Generate SEO insights from real data
+    if (selectedWebsite && seoState.serpKeywords.length > 0) {
+      const seoInsights = generateSEOInsights(
+        seoState.serpKeywords,
+        seoState.serpStats,
+        selectedWebsite
+      );
+      newInsights.push(...seoInsights);
+    }
+
+    // Add other non-campaign insights
+    const otherInsights = initialInsights.filter(insight => 
+      !insight.description.toLowerCase().includes('campaign') &&
+      !insight.description.toLowerCase().includes('ad spend') &&
+      !insight.description.toLowerCase().includes('roas')
+    );
+
+    // Combine SEO insights with other insights, prioritizing SEO
+    const combinedInsights = [...newInsights, ...otherInsights].slice(0, 5);
+    
+    setInsights(combinedInsights);
+    setIsLoading(false);
+    
+    console.log(`Generated ${newInsights.length} SEO insights for ${selectedWebsite}`);
   };
 
-  return { insights, isLoading, handleRefresh };
+  return {
+    insights,
+    isLoading,
+    handleRefresh
+  };
 };

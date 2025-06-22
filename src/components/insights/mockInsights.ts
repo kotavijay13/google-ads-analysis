@@ -1,51 +1,51 @@
 
-import { TrendingUp, AlertTriangle, Target, Users, Search } from 'lucide-react';
 import { AIInsight } from './types';
+import { TrendingUp, Users, MessageSquare, Target, AlertCircle } from 'lucide-react';
 
 export const initialInsights: AIInsight[] = [
   {
-    id: '1',
-    title: "Increase bid for 'digital marketing' keyword",
-    description: "Currently underperforming with high potential ROI",
+    id: 'lead-conversion',
+    title: 'Improve Lead Conversion Rate',
+    description: 'Your lead conversion rate dropped by 15% this week. Consider reviewing your lead qualification process and follow-up timing.',
     impact: 'High Impact',
-    source: 'Google Ads',
+    source: 'Leads',
     icon: TrendingUp,
     actionable: true
   },
   {
-    id: '2',
-    title: "Optimize meta descriptions for top 5 landing pages",
-    description: "Current CTR is below average",
+    id: 'chat-response',
+    title: 'Reduce Chat Response Time',
+    description: 'Average chat response time is 4.2 minutes. Faster responses could improve customer satisfaction by 25%.',
     impact: 'Medium Impact',
-    source: 'SEO',
-    icon: Search,
+    source: 'Competition',
+    icon: MessageSquare,
     actionable: true
   },
   {
-    id: '3',
-    title: "Refresh creative for Instagram Story campaign",
-    description: "Engagement dropping over the past week",
+    id: 'audience-expansion',
+    title: 'Expand Target Audience',
+    description: 'Similar audience segments show 40% higher engagement rates. Consider testing broader targeting options.',
+    impact: 'Medium Impact',
+    source: 'Competition',
+    icon: Users,
+    actionable: true
+  },
+  {
+    id: 'competitor-analysis',
+    title: 'Competitor Price Advantage',
+    description: 'Main competitors are offering 20% lower prices on similar services. Consider adjusting your value proposition.',
     impact: 'High Impact',
-    source: 'Meta Ads',
-    icon: AlertTriangle,
-    actionable: true
-  },
-  {
-    id: '4',
-    title: "Target competitor keyword 'marketing automation'",
-    description: "Competitor ranking dropped, opportunity to gain position",
-    impact: 'Medium Impact',
     source: 'Competition',
     icon: Target,
     actionable: true
   },
   {
-    id: '5',
-    title: "Follow up with 12 high-value leads",
-    description: "Leads from last week's campaign waiting for response",
-    impact: 'High Impact',
+    id: 'form-optimization',
+    title: 'Optimize Contact Forms',
+    description: 'Contact form completion rate is 12% below industry average. Simplifying forms could increase submissions.',
+    impact: 'Medium Impact',
     source: 'Leads',
-    icon: Users,
+    icon: AlertCircle,
     actionable: true
   }
 ];

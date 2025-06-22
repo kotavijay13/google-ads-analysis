@@ -2,6 +2,7 @@ import { BrowserRouter as Router, Routes, Route, useLocation } from 'react-route
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { Toaster } from '@/components/ui/sonner';
 import { AuthProvider } from '@/context/AuthContext';
+import { GlobalWebsiteProvider } from '@/context/GlobalWebsiteContext';
 import { SEOProvider } from '@/context/SEOContext';
 import ProtectedRoute from '@/components/ProtectedRoute';
 import Sidebar from '@/components/Sidebar';
@@ -66,12 +67,14 @@ function App() {
   return (
     <QueryClientProvider client={queryClient}>
       <AuthProvider>
-        <SEOProvider>
-          <Router>
-            <AppLayout />
-            <Toaster />
-          </Router>
-        </SEOProvider>
+        <GlobalWebsiteProvider>
+          <SEOProvider>
+            <Router>
+              <AppLayout />
+              <Toaster />
+            </Router>
+          </SEOProvider>
+        </GlobalWebsiteProvider>
       </AuthProvider>
     </QueryClientProvider>
   );

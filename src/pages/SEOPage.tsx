@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from 'react';
 import WebsiteSelector from '@/components/seo/WebsiteSelector';
 import SEOStatsCards from '@/components/seo/SEOStatsCards';
@@ -6,11 +5,13 @@ import SEOHeader from '@/components/seo/SEOHeader';
 import SEOTabsContent from '@/components/seo/SEOTabsContent';
 import { useSEOData } from '@/hooks/useSEOData';
 import { useSEOContext } from '@/context/SEOContext';
+import { useGlobalWebsite } from '@/context/GlobalWebsiteContext';
 
 const SEOPage = () => {
   const [activeTab, setActiveTab] = useState('keywords');
 
   const { seoState, updateSEOState } = useSEOContext();
+  const { selectedWebsite, setSelectedWebsite } = useGlobalWebsite();
   
   const {
     isRefreshing,
@@ -27,6 +28,13 @@ const SEOPage = () => {
     }
   }, [seoState]);
 
+  // Sync global website selection with SEO state
+  useEffect(() => {
+    if (selectedWebsite && selectedWebsite !== seoState.selectedWebsite) {
+      updateSEOState({ selectedWebsite });
+    }
+  }, [selectedWebsite, seoState.selectedWebsite, updateSEOState]);
+
   const connected = availableWebsites.length > 0;
   const gscLoading = false;
 
@@ -35,6 +43,7 @@ const SEOPage = () => {
   };
 
   const handleWebsiteSelection = async (website: string) => {
+    setSelectedWebsite(website); // Update global context
     updateSEOState({ selectedWebsite: website });
     await handleWebsiteChange(website);
   };
@@ -54,7 +63,7 @@ const SEOPage = () => {
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 items-end">
               <div className="h-fit">
                 <WebsiteSelector
-                  selectedWebsite={seoState.selectedWebsite}
+                  selectedWebsite={selectedWebsite}
                   availableWebsites={availableWebsites}
                   connected={connected}
                   gscLoading={gscLoading}
@@ -68,7 +77,7 @@ const SEOPage = () => {
                 <SEOStatsCards 
                   serpStats={seoState.serpStats} 
                   serpKeywords={seoState.serpKeywords}
-                  selectedWebsite={seoState.selectedWebsite}
+                  selectedWebsite={selectedWebsite}
                   showOnlyAveragePosition={true}
                 />
               </div>
@@ -81,7 +90,7 @@ const SEOPage = () => {
                 <SEOStatsCards 
                   serpStats={seoState.serpStats} 
                   serpKeywords={seoState.serpKeywords}
-                  selectedWebsite={seoState.selectedWebsite}
+                  selectedWebsite={selectedWebsite}
                   showOnlyStatsCards={true}
                 />
               </div>
@@ -92,7 +101,7 @@ const SEOPage = () => {
                   <SEOStatsCards 
                     serpStats={seoState.serpStats} 
                     serpKeywords={seoState.serpKeywords}
-                    selectedWebsite={seoState.selectedWebsite}
+                    selectedWebsite={selectedWebsite}
                     showOnlyRankingBreakdown={true}
                   />
                 </div>
@@ -107,7 +116,7 @@ const SEOPage = () => {
             pages={seoState.pages}
             urlMetaData={seoState.urlMetaData}
             sitePerformance={seoState.sitePerformance}
-            selectedWebsite={seoState.selectedWebsite}
+            selectedWebsite={selectedWebsite}
           />
         </div>
       </div>
