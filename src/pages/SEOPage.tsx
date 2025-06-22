@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from 'react';
 import WebsiteSelector from '@/components/seo/WebsiteSelector';
 import SEOStatsCards from '@/components/seo/SEOStatsCards';
@@ -28,12 +29,23 @@ const SEOPage = () => {
     }
   }, [seoState]);
 
-  // Sync global website selection with SEO state
+  // Sync global website selection with SEO state and automatically refresh data
   useEffect(() => {
     if (selectedWebsite && selectedWebsite !== seoState.selectedWebsite) {
+      console.log(`Global website changed to: ${selectedWebsite}, updating SEO state and fetching data`);
       updateSEOState({ selectedWebsite });
+      // Automatically trigger data fetch when website changes
+      handleWebsiteChange(selectedWebsite);
     }
-  }, [selectedWebsite, seoState.selectedWebsite, updateSEOState]);
+  }, [selectedWebsite, seoState.selectedWebsite, updateSEOState, handleWebsiteChange]);
+
+  // Also refresh data when navigating to SEO page with a selected website but no data
+  useEffect(() => {
+    if (selectedWebsite && !seoState.isDataLoaded && !isRefreshing) {
+      console.log(`SEO page loaded with website ${selectedWebsite} but no data, fetching data`);
+      handleWebsiteChange(selectedWebsite);
+    }
+  }, [selectedWebsite, seoState.isDataLoaded, isRefreshing, handleWebsiteChange]);
 
   const connected = availableWebsites.length > 0;
   const gscLoading = false;
