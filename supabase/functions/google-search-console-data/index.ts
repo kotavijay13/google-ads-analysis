@@ -206,9 +206,9 @@ serve(async (req) => {
       console.error(`Pages API error (${pagesResponse.status}):`, errorText);
     }
 
-    // 3. Fetch URL Meta Data for top 200 pages instead of 50
+    // 3. Fetch URL Meta Data for top 500 pages instead of 200
     let urlMetaData = [];
-    const topPages = pages.slice(0, 200); // Increased from 50 to 200 pages
+    const topPages = pages.slice(0, 500); // Increased from 200 to 500 pages
     
     console.log(`Inspecting ${topPages.length} URLs for meta data...`);
     for (const page of topPages) {
