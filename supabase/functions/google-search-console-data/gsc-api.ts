@@ -95,7 +95,7 @@ export const fetchUrlMetaData = async (
   accessToken: string
 ): Promise<UrlMetaData[]> => {
   let urlMetaData: UrlMetaData[] = [];
-  const topPages = pages.slice(0, 500); // Increased from 200 to 500 pages
+  const topPages = pages.slice(0, 500); // Changed from 200 to 500 pages
   
   console.log(`Inspecting ${topPages.length} URLs for meta data...`);
   for (const page of topPages) {

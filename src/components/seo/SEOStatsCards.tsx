@@ -49,7 +49,8 @@ const SEOStatsCards = ({
       <div className="h-full">
         <AveragePositionChart 
           selectedWebsite={selectedWebsite} 
-          hasData={hasData} 
+          hasData={hasData}
+          avgPosition={serpStats.avgPosition}
         />
       </div>
     );
