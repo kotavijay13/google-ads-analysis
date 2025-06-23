@@ -21,10 +21,10 @@ const ProtectedRoute = ({ children }: ProtectedRouteProps) => {
     }
   }, [user, loading, navigate, location.pathname]);
 
+  // Show loading only when actually loading
   if (loading) {
-    // Full-screen centered loading indicator
     return (
-      <div className="fixed inset-0 flex justify-center items-center bg-white/80 z-50 w-full">
+      <div className="min-h-screen flex justify-center items-center bg-gray-50">
         <div className="bg-white rounded-lg shadow-lg p-8 text-center">
           <Loader2 className="h-12 w-12 animate-spin text-primary mx-auto" />
           <span className="mt-4 block text-lg font-medium">Loading dashboard...</span>
@@ -33,9 +33,13 @@ const ProtectedRoute = ({ children }: ProtectedRouteProps) => {
     );
   }
 
-  // Only render children if user is authenticated
-  // This prevents flashing content before redirect
-  return user ? <>{children}</> : null;
+  // If not loading and no user, show nothing (redirect will happen)
+  if (!user) {
+    return null;
+  }
+
+  // User is authenticated, render children
+  return <>{children}</>;
 };
 
 export default ProtectedRoute;
