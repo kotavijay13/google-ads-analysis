@@ -2,19 +2,17 @@
 import { useState } from 'react';
 import Header from '@/components/Header';
 import MetricsOverview from '@/components/MetricsOverview';
-import CampaignTable from '@/components/CampaignTable';
 import Top5AIInsights from '@/components/Top5AIInsights';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Globe } from 'lucide-react';
 import { useGlobalWebsite } from '@/context/GlobalWebsiteContext';
 import { useSEOData } from '@/hooks/useSEOData';
-import { getOverviewMetrics, getDailyPerformance, getCampaigns } from '@/data/mockData';
+import { getOverviewMetrics, getDailyPerformance } from '@/data/mockData';
 
 const Index = () => {
   const metrics = getOverviewMetrics();
   const dailyPerformance = getDailyPerformance();
-  const campaigns = getCampaigns();
   const { selectedWebsite, setSelectedWebsite } = useGlobalWebsite();
   const { availableWebsites } = useSEOData();
 
@@ -79,8 +77,6 @@ const Index = () => {
           <div className="w-full">
             <Top5AIInsights onInsightCompleted={handleInsightCompleted} />
           </div>
-          
-          <CampaignTable campaigns={campaigns} />
         </div>
       </main>
     </div>
