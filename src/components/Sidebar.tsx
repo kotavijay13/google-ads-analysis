@@ -1,3 +1,4 @@
+
 import { useState } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { 
@@ -64,7 +65,7 @@ export default function Sidebar() {
           variant="ghost"
           size="sm"
           onClick={toggleSidebar}
-          className="fixed top-4 left-4 z-50 lg:hidden bg-blue-600 text-white hover:bg-blue-700"
+          className="fixed top-4 left-4 z-50 lg:hidden bg-green-600 text-white hover:bg-green-700"
         >
           {isMobileOpen ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
         </Button>
@@ -80,7 +81,7 @@ export default function Sidebar() {
 
       {/* Sidebar */}
       <div className={cn(
-        "bg-blue-600 shadow-lg transition-all duration-300 ease-in-out flex flex-col h-screen z-40",
+        "bg-green-600 shadow-lg transition-all duration-300 ease-in-out flex flex-col h-screen z-40",
         // Desktop styles
         "hidden lg:flex lg:fixed lg:left-0 lg:top-0",
         isCollapsed ? "lg:w-16" : "lg:w-64",
@@ -91,10 +92,10 @@ export default function Sidebar() {
             : "hidden"
         ) : ""
       )}>
-        <div className="flex items-center justify-between p-4 border-b border-blue-500">
+        <div className="flex items-center justify-between p-4 border-b border-green-500">
           {(!isCollapsed || isMobile) && (
             <h1 className="text-lg lg:text-xl font-bold text-white truncate">
-              Merge Insights AI
+              MyGGAI Insights
             </h1>
           )}
           {!isMobile && (
@@ -102,7 +103,7 @@ export default function Sidebar() {
               variant="ghost"
               size="sm"
               onClick={toggleSidebar}
-              className="p-1.5 text-white hover:bg-blue-500 hover:text-white"
+              className="p-1.5 text-white hover:bg-green-500 hover:text-white"
             >
               {isCollapsed ? <ChevronRight className="h-4 w-4" /> : <ChevronLeft className="h-4 w-4" />}
             </Button>
@@ -120,15 +121,15 @@ export default function Sidebar() {
                 className={cn(
                   'group flex items-center px-2 py-2 text-sm font-medium rounded-md transition-colors',
                   isActive
-                    ? 'bg-blue-700 text-white font-semibold'
-                    : 'text-blue-100 hover:bg-blue-500 hover:text-white'
+                    ? 'bg-green-700 text-white font-semibold'
+                    : 'text-green-100 hover:bg-green-500 hover:text-white'
                 )}
                 title={isCollapsed && !isMobile ? item.name : undefined}
               >
                 <item.icon
                   className={cn(
                     'flex-shrink-0 h-5 w-5',
-                    isActive ? 'text-white' : 'text-blue-200 group-hover:text-white',
+                    isActive ? 'text-white' : 'text-green-200 group-hover:text-white',
                     (isCollapsed && !isMobile) ? 'mx-auto' : 'mr-3'
                   )}
                   aria-hidden="true"
