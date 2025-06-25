@@ -71,7 +71,7 @@ const Header = ({ onRefresh, title, isLoading }: HeaderProps) => {
         </div>
         <div>
           <h1 className="text-2xl font-bold flex items-center text-primary">
-            {title}
+            MyGGAI {title}
           </h1>
           <p className="text-muted-foreground text-sm">
             Last updated: {lastUpdated.toLocaleString()}
