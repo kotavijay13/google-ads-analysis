@@ -8,12 +8,13 @@ import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle }
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { toast } from 'sonner';
 import { Label } from '@/components/ui/label';
-import { Loader2, Brain } from 'lucide-react';
+import { Loader2, Brain, Eye, EyeOff } from 'lucide-react';
 import { useAuth } from '@/context/AuthContext';
 
 const AuthPage = () => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const [showPassword, setShowPassword] = useState(false);
   const [loading, setLoading] = useState(false);
   const [authError, setAuthError] = useState<string | null>(null);
   const navigate = useNavigate();
@@ -99,12 +100,12 @@ const AuthPage = () => {
       <div className="flex items-center justify-center min-h-screen bg-gradient-to-br from-blue-50 via-white to-indigo-50 w-full p-4">
         <Card className="w-full max-w-md shadow-lg border-0 bg-white/80 backdrop-blur-sm">
           <CardHeader className="text-center space-y-4">
-            <div className="mx-auto bg-primary/10 p-3 rounded-full w-fit">
-              <Brain className="h-8 w-8 text-primary" />
+            <div className="mx-auto bg-green-600 p-3 rounded-full w-fit">
+              <Brain className="h-8 w-8 text-white" />
             </div>
             <div>
-              <CardTitle className="text-3xl font-bold bg-gradient-to-r from-blue-600 to-indigo-600 bg-clip-text text-transparent">
-                AI Insights
+              <CardTitle className="text-3xl font-bold bg-gradient-to-r from-green-600 to-green-800 bg-clip-text text-transparent">
+                MyGGAI Insights
               </CardTitle>
               <CardDescription className="text-lg mt-2">
                 Sign in to access your marketing dashboard
@@ -139,21 +140,36 @@ const AuthPage = () => {
                   </div>
                   <div className="space-y-2">
                     <Label htmlFor="signin-password">Password</Label>
-                    <Input 
-                      id="signin-password"
-                      type="password" 
-                      placeholder="Enter your password"
-                      value={password}
-                      onChange={(e) => setPassword(e.target.value)}
-                      required
-                      className="h-11"
-                    />
+                    <div className="relative">
+                      <Input 
+                        id="signin-password"
+                        type={showPassword ? "text" : "password"}
+                        placeholder="Enter your password"
+                        value={password}
+                        onChange={(e) => setPassword(e.target.value)}
+                        required
+                        className="h-11 pr-10"
+                      />
+                      <Button
+                        type="button"
+                        variant="ghost"
+                        size="sm"
+                        className="absolute right-0 top-0 h-full px-3 py-2 hover:bg-transparent"
+                        onClick={() => setShowPassword(!showPassword)}
+                      >
+                        {showPassword ? (
+                          <EyeOff className="h-4 w-4 text-green-600" />
+                        ) : (
+                          <Eye className="h-4 w-4 text-green-600" />
+                        )}
+                      </Button>
+                    </div>
                   </div>
                 </CardContent>
                 <CardFooter className="pt-2">
                   <Button 
                     type="submit" 
-                    className="w-full h-11 bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white font-medium" 
+                    className="w-full h-11 bg-gradient-to-r from-green-600 to-green-700 hover:from-green-700 hover:to-green-800 text-white font-medium" 
                     disabled={loading}
                   >
                     {loading ? (
@@ -189,16 +205,31 @@ const AuthPage = () => {
                   </div>
                   <div className="space-y-2">
                     <Label htmlFor="signup-password">Password</Label>
-                    <Input 
-                      id="signup-password"
-                      type="password" 
-                      placeholder="Password (min 6 characters)"
-                      value={password}
-                      onChange={(e) => setPassword(e.target.value)}
-                      required
-                      minLength={6}
-                      className="h-11"
-                    />
+                    <div className="relative">
+                      <Input 
+                        id="signup-password"
+                        type={showPassword ? "text" : "password"}
+                        placeholder="Password (min 6 characters)"
+                        value={password}
+                        onChange={(e) => setPassword(e.target.value)}
+                        required
+                        minLength={6}
+                        className="h-11 pr-10"
+                      />
+                      <Button
+                        type="button"
+                        variant="ghost"
+                        size="sm"
+                        className="absolute right-0 top-0 h-full px-3 py-2 hover:bg-transparent"
+                        onClick={() => setShowPassword(!showPassword)}
+                      >
+                        {showPassword ? (
+                          <EyeOff className="h-4 w-4 text-green-600" />
+                        ) : (
+                          <Eye className="h-4 w-4 text-green-600" />
+                        )}
+                      </Button>
+                    </div>
                   </div>
                   <p className="text-xs text-muted-foreground">
                     By signing up, you agree to our Terms of Service and Privacy Policy.
@@ -207,7 +238,7 @@ const AuthPage = () => {
                 <CardFooter className="pt-2">
                   <Button 
                     type="submit" 
-                    className="w-full h-11 bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white font-medium" 
+                    className="w-full h-11 bg-gradient-to-r from-green-600 to-green-700 hover:from-green-700 hover:to-green-800 text-white font-medium" 
                     disabled={loading}
                   >
                     {loading ? (

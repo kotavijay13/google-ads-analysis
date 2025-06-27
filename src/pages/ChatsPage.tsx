@@ -4,7 +4,7 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Badge } from '@/components/ui/badge';
-import { Instagram, Facebook, MessageSquare as WhatsAppIcon, Loader2 } from 'lucide-react';
+import { Instagram, Facebook, MessageSquare as WhatsAppIcon, Loader2, Globe } from 'lucide-react';
 import { useSocialMediaIntegration } from '@/hooks/useSocialMediaIntegration';
 
 const platforms = [
@@ -12,7 +12,7 @@ const platforms = [
     value: 'whatsapp',
     name: 'WhatsApp',
     icon: <WhatsAppIcon className="h-5 w-5" />,
-    description: "Connect your WhatsApp Business account to manage conversations directly from Merge Insights AI.",
+    description: "Connect your WhatsApp Business account to manage conversations directly from MyGGAI Insights.",
     color: 'bg-green-500 hover:bg-green-600 text-white',
   },
   {
@@ -28,6 +28,13 @@ const platforms = [
     icon: <Facebook className="h-5 w-5" />,
     description: "Integrate Facebook Messenger to handle all your customer messages in one place.",
     color: 'bg-blue-600 hover:bg-blue-700 text-white',
+  },
+  {
+    value: 'website',
+    name: 'Website Chats',
+    icon: <Globe className="h-5 w-5" />,
+    description: "Connect your website chatbot to capture leads and manage conversations from your website visitors.",
+    color: 'bg-green-600 hover:bg-green-700 text-white',
   },
 ];
 
@@ -61,6 +68,10 @@ const ChatsPage = () => {
       case 'whatsapp':
         connectWhatsApp();
         break;
+      case 'website':
+        // Handle website chat connection
+        console.log('Connecting website chats...');
+        break;
       default:
         console.error('Unknown platform:', platform);
     }
@@ -82,15 +93,15 @@ const ChatsPage = () => {
       </p>
 
       <Tabs defaultValue="whatsapp" className="w-full">
-        <TabsList className="grid w-full grid-cols-3">
+        <TabsList className="grid w-full grid-cols-4">
           {platforms.map((platform) => (
             <TabsTrigger 
               key={platform.value} 
               value={platform.value} 
-              className="flex items-center gap-2 data-[state=active]:bg-blue-600 data-[state=active]:text-white"
+              className="flex items-center gap-2 data-[state=active]:bg-green-600 data-[state=active]:text-white"
             >
               {platform.icon}
-              <span>{platform.name}</span>
+              <span className="hidden sm:inline">{platform.name}</span>
               {isConnected(platform.value) && (
                 <Badge className="ml-2 bg-green-500 text-white text-xs">Connected</Badge>
               )}
@@ -119,7 +130,10 @@ const ChatsPage = () => {
                   {!isConnected(platform.value) ? (
                     <>
                       <p className="text-sm text-muted-foreground">
-                        Once connected, you will be able to view and reply to your {platform.name} messages here.
+                        {platform.value === 'website' 
+                          ? "Once connected, you will be able to view and manage leads generated from your website chatbot here."
+                          : `Once connected, you will be able to view and reply to your ${platform.name} messages here.`
+                        }
                       </p>
                       <Button 
                         className={platform.color}
@@ -135,6 +149,14 @@ const ChatsPage = () => {
                           <>Connect {platform.name}</>
                         )}
                       </Button>
+                      {platform.value === 'website' && (
+                        <div className="mt-4 p-4 bg-green-50 border border-green-200 rounded-lg">
+                          <h4 className="font-semibold text-green-800 mb-2">Integration Instructions:</h4>
+                          <p className="text-sm text-green-700">
+                            To connect your chatbot app with this dashboard, you'll need to configure the webhook URL in your chatbot application to send lead data to this platform.
+                          </p>
+                        </div>
+                      )}
                     </>
                   ) : (
                     <>
