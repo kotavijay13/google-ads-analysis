@@ -15,7 +15,7 @@ export const useLeadFiltering = (leads: Lead[], filters: Filters) => {
     console.log('Starting filter process with', filtered.length, 'leads');
     console.log('Current filters:', filters);
 
-    // Apply source filter
+    // Apply source filter first
     if (filters.source && filters.source !== 'All') {
       if (filters.source === 'Instagram' || filters.source === 'Facebook Messenger' || filters.source === 'WhatsApp') {
         // Filter by social media sources
@@ -32,7 +32,6 @@ export const useLeadFiltering = (leads: Lead[], filters: Filters) => {
           
           if (formsError) {
             console.error('Error fetching forms for source:', formsError);
-            filtered = [];
           } else {
             const formIds = forms ? forms.map(f => f.form_id) : [];
             console.log('Form IDs for source', filters.source, ':', formIds);
@@ -49,19 +48,18 @@ export const useLeadFiltering = (leads: Lead[], filters: Filters) => {
           }
         } catch (error) {
           console.error('Error filtering by source:', error);
-          filtered = [];
         }
       }
     }
 
     // Apply status filter
-    if (filters.status !== 'All') {
+    if (filters.status && filters.status !== 'All') {
       filtered = filtered.filter(lead => lead.status === filters.status);
       console.log('After status filter:', filtered.length, 'leads');
     }
 
     // Apply assigned to filter
-    if (filters.assignedTo !== 'All') {
+    if (filters.assignedTo && filters.assignedTo !== 'All') {
       if (filters.assignedTo === 'Unassigned') {
         filtered = filtered.filter(lead => !lead.assigned_to);
       } else {

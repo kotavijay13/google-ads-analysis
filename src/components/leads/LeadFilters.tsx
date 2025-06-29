@@ -32,6 +32,7 @@ const LeadFilters = ({
   const assignedToOptions = ['All', 'Unassigned', 'John Smith', 'Sarah Johnson', 'Mike Wilson', 'Emily Davis', 'David Brown'];
 
   const handleApply = () => {
+    console.log('Applying filters:', tempFilters);
     onStatusFilter(tempFilters.status);
     onAssignedToFilter(tempFilters.assignedTo);
     onSourceFilter(tempFilters.source);
@@ -39,12 +40,27 @@ const LeadFilters = ({
   };
 
   const handleReset = () => {
-    setTempFilters({
+    const resetFilters = {
       status: 'All',
       assignedTo: 'All',
       source: 'All'
-    });
+    };
+    setTempFilters(resetFilters);
+    onStatusFilter('All');
+    onAssignedToFilter('All');
+    onSourceFilter('All');
     onReset();
+  };
+
+  const getDisplayValue = (value: string, type: 'status' | 'assignedTo' | 'source') => {
+    if (value === 'All') {
+      switch (type) {
+        case 'status': return 'Filter by Status';
+        case 'assignedTo': return 'Filter by Assigned';
+        case 'source': return 'Filter by Source';
+      }
+    }
+    return value;
   };
 
   return (
@@ -60,9 +76,9 @@ const LeadFilters = ({
             {/* Status Filter */}
             <Select value={tempFilters.status} onValueChange={(value) => setTempFilters(prev => ({ ...prev, status: value }))}>
               <SelectTrigger className="w-full h-9 text-sm border-blue-300 focus:border-blue-600 focus:ring-blue-600">
-                <SelectValue placeholder="Filter by Status" />
+                <SelectValue>{getDisplayValue(tempFilters.status, 'status')}</SelectValue>
               </SelectTrigger>
-              <SelectContent className="z-50">
+              <SelectContent className="z-50 bg-white">
                 {statusOptions.map((status) => (
                   <SelectItem key={status} value={status} className="text-sm">
                     {status}
@@ -74,9 +90,9 @@ const LeadFilters = ({
             {/* Assigned To Filter */}
             <Select value={tempFilters.assignedTo} onValueChange={(value) => setTempFilters(prev => ({ ...prev, assignedTo: value }))}>
               <SelectTrigger className="w-full h-9 text-sm border-blue-300 focus:border-blue-600 focus:ring-blue-600">
-                <SelectValue placeholder="Filter by Assigned" />
+                <SelectValue>{getDisplayValue(tempFilters.assignedTo, 'assignedTo')}</SelectValue>
               </SelectTrigger>
-              <SelectContent className="z-50">
+              <SelectContent className="z-50 bg-white">
                 {assignedToOptions.map((person) => (
                   <SelectItem key={person} value={person} className="text-sm">
                     {person}
@@ -88,12 +104,12 @@ const LeadFilters = ({
             {/* Source Filter */}
             <Select value={tempFilters.source} onValueChange={(value) => setTempFilters(prev => ({ ...prev, source: value }))}>
               <SelectTrigger className="w-full h-9 text-sm border-blue-300 focus:border-blue-600 focus:ring-blue-600">
-                <SelectValue placeholder="Filter by Source" />
+                <SelectValue>{getDisplayValue(tempFilters.source, 'source')}</SelectValue>
               </SelectTrigger>
-              <SelectContent className="z-50">
+              <SelectContent className="z-50 bg-white">
                 {availableSources.map((source) => (
                   <SelectItem key={source} value={source} className="text-sm">
-                    {source}
+                    {source === 'All' ? 'All Sources' : source}
                   </SelectItem>
                 ))}
               </SelectContent>
