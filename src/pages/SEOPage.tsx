@@ -4,12 +4,17 @@ import WebsiteSelector from '@/components/seo/WebsiteSelector';
 import SEOStatsCards from '@/components/seo/SEOStatsCards';
 import SEOHeader from '@/components/seo/SEOHeader';
 import SEOTabsContent from '@/components/seo/SEOTabsContent';
+import DateRangePicker from '@/components/DateRangePicker';
 import { useSEOData } from '@/hooks/useSEOData';
 import { useSEOContext } from '@/context/SEOContext';
 import { useGlobalWebsite } from '@/context/GlobalWebsiteContext';
 
 const SEOPage = () => {
   const [activeTab, setActiveTab] = useState('keywords');
+  const [dateRange, setDateRange] = useState({
+    from: new Date(Date.now() - 28 * 24 * 60 * 60 * 1000), // Default to last 28 days
+    to: new Date()
+  });
 
   const { seoState, updateSEOState } = useSEOContext();
   const { selectedWebsite, setSelectedWebsite } = useGlobalWebsite();
@@ -35,17 +40,33 @@ const SEOPage = () => {
       console.log(`Global website changed to: ${selectedWebsite}, updating SEO state and fetching data`);
       updateSEOState({ selectedWebsite });
       // Automatically trigger data fetch when website changes
-      handleWebsiteChange(selectedWebsite);
+      handleWebsiteChangeWithDateRange(selectedWebsite);
     }
-  }, [selectedWebsite, seoState.selectedWebsite, updateSEOState, handleWebsiteChange]);
+  }, [selectedWebsite, seoState.selectedWebsite, updateSEOState]);
 
   // Also refresh data when navigating to SEO page with a selected website but no data
   useEffect(() => {
     if (selectedWebsite && !seoState.isDataLoaded && !isRefreshing) {
       console.log(`SEO page loaded with website ${selectedWebsite} but no data, fetching data`);
-      handleWebsiteChange(selectedWebsite);
+      handleWebsiteChangeWithDateRange(selectedWebsite);
     }
-  }, [selectedWebsite, seoState.isDataLoaded, isRefreshing, handleWebsiteChange]);
+  }, [selectedWebsite, seoState.isDataLoaded, isRefreshing]);
+
+  const handleWebsiteChangeWithDateRange = async (website: string) => {
+    const startDate = dateRange.from.toISOString().split('T')[0];
+    const endDate = dateRange.to.toISOString().split('T')[0];
+    await handleWebsiteChange(website);
+  };
+
+  const handleDateRangeChange = async (newDateRange: { from: Date; to: Date }) => {
+    setDateRange(newDateRange);
+    if (selectedWebsite) {
+      const startDate = newDateRange.from.toISOString().split('T')[0];
+      const endDate = newDateRange.to.toISOString().split('T')[0];
+      console.log(`Date range changed: ${startDate} to ${endDate}`);
+      await handleWebsiteChange(selectedWebsite);
+    }
+  };
 
   const connected = availableWebsites.length > 0;
   const gscLoading = false;
@@ -57,7 +78,7 @@ const SEOPage = () => {
   const handleWebsiteSelection = async (website: string) => {
     setSelectedWebsite(website); // Update global context
     updateSEOState({ selectedWebsite: website });
-    await handleWebsiteChange(website);
+    await handleWebsiteChangeWithDateRange(website);
   };
 
   const handleRefresh = async () => {
@@ -71,8 +92,8 @@ const SEOPage = () => {
           <SEOHeader />
 
           <div className="space-y-4 mb-4">
-            {/* Top Section: Website Details + Average Position */}
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 items-end">
+            {/* Top Section: Website Details + Date Range + Average Position */}
+            <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 items-end">
               <div className="h-fit">
                 <WebsiteSelector
                   selectedWebsite={selectedWebsite}
@@ -84,6 +105,14 @@ const SEOPage = () => {
                   onConnect={handleConnect}
                   onRefresh={handleRefresh}
                 />
+              </div>
+              <div className="h-fit">
+                <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-4">
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                    Select Date Range
+                  </label>
+                  <DateRangePicker onDateChange={handleDateRangeChange} />
+                </div>
               </div>
               <div className="h-fit">
                 <SEOStatsCards 

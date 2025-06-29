@@ -1,3 +1,4 @@
+
 import { useState } from 'react';
 import { KeywordData, PageData, UrlMetaData, SitePerformance, SerpStats } from './seo/types';
 import { initialKeywords, initialPages } from './seo/constants';
@@ -87,19 +88,24 @@ export const useSEOData = () => {
     await fetchDataWithDateRange(seoState.selectedWebsite, startDate, endDate);
   };
 
-  const handleWebsiteChange = async (website: string) => {
+  const handleWebsiteChange = async (website: string, customDateRange?: { from: Date; to: Date }) => {
     console.log(`Website change requested: "${website}"`);
     if (website && website.trim().length > 0) {
       updateSEOState({ selectedWebsite: website });
       console.log(`Selected website: ${website}`);
       
-      const startDate = dateRange.from.toISOString().split('T')[0];
-      const endDate = dateRange.to.toISOString().split('T')[0];
+      const dateRangeToUse = customDateRange || dateRange;
+      const startDate = dateRangeToUse.from.toISOString().split('T')[0];
+      const endDate = dateRangeToUse.to.toISOString().split('T')[0];
       
       await fetchDataWithDateRange(website, startDate, endDate);
     } else {
       console.warn('Empty website value received, ignoring');
     }
+  };
+
+  const updateDateRange = (newDateRange: { from: Date; to: Date }) => {
+    setDateRange(newDateRange);
   };
 
   return {
@@ -112,7 +118,9 @@ export const useSEOData = () => {
     sitePerformance: seoState.sitePerformance,
     serpStats: seoState.serpStats,
     googleAdsConnected,
+    dateRange,
     handleRefreshSerpData,
     handleWebsiteChange,
+    updateDateRange,
   };
 };

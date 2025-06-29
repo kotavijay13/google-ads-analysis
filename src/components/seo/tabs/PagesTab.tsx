@@ -10,20 +10,30 @@ interface PagesTabProps {
 }
 
 const PagesTab = ({ pages, selectedWebsite }: PagesTabProps) => {
+  // Sort pages by impressions (highest to lowest)
+  const sortedPages = [...pages].sort((a, b) => {
+    const aImpressions = a.impressions || 0;
+    const bImpressions = b.impressions || 0;
+    return bImpressions - aImpressions;
+  });
+
   return (
     <Card>
       <CardContent className="pt-6">
         <div className="flex justify-between items-center mb-4">
-          <h3 className="text-lg font-semibold">Top Performing Pages</h3>
+          <div>
+            <h3 className="text-lg font-semibold">Top Performing Pages</h3>
+            <p className="text-muted-foreground">Pages sorted by impressions for {selectedWebsite}</p>
+          </div>
           <DownloadButton 
-            data={pages}
+            data={sortedPages}
             filename={`pages-${selectedWebsite}`}
             title={`Pages Report - ${selectedWebsite}`}
           />
         </div>
-        {pages.length > 0 ? (
+        {sortedPages.length > 0 ? (
           <SortableTable 
-            data={pages} 
+            data={sortedPages} 
             columns={pagesColumns}
             className="overflow-x-auto"
           />
