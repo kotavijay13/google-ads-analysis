@@ -7,6 +7,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { toast } from '@/components/ui/sonner';
 import { Package, ShoppingCart, TrendingUp, DollarSign, Copy, Check, ExternalLink, Zap, Globe } from 'lucide-react';
+import DateRangePicker from '@/components/DateRangePicker';
 
 const ProductSalesPage = () => {
   const [activeTab, setActiveTab] = useState('overview');
@@ -16,6 +17,16 @@ const ProductSalesPage = () => {
   const [isConnectingCustom, setIsConnectingCustom] = useState(false);
   const [connectedWebsites, setConnectedWebsites] = useState<string[]>([]);
   const [copiedScript, setCopiedScript] = useState(false);
+  const [dateRange, setDateRange] = useState({
+    from: new Date(Date.now() - 30 * 24 * 60 * 60 * 1000), // Default to last 30 days
+    to: new Date()
+  });
+
+  const handleDateRangeChange = (newDateRange: { from: Date; to: Date }) => {
+    setDateRange(newDateRange);
+    console.log('Product Sales date range changed:', newDateRange);
+    // Here you would typically refresh your sales data based on the new date range
+  };
 
   const handleEcomConnect = async () => {
     if (!shopifyStoreUrl.trim()) {
@@ -105,16 +116,24 @@ const ProductSalesPage = () => {
 
   return (
     <div className="container mx-auto py-6 px-4 max-w-6xl">
-      <div className="mb-6">
-        <h1 className="text-2xl font-bold text-primary">Product Sales Analytics</h1>
-        <p className="text-muted-foreground">Track and analyze your product sales performance across all channels</p>
+      <div className="mb-6 flex justify-between items-start">
+        <div>
+          <h1 className="text-2xl font-bold text-primary">Product Sales Analytics</h1>
+          <p className="text-muted-foreground">Track and analyze your product sales performance across all channels</p>
+        </div>
+        <div className="flex flex-col items-end">
+          <label className="block text-sm font-medium text-gray-700 mb-2">
+            Sales Date Range
+          </label>
+          <DateRangePicker onDateChange={handleDateRangeChange} />
+        </div>
       </div>
 
       <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-4">
         <TabsList className="grid w-full grid-cols-3">
-          <TabsTrigger value="overview" className="data-[state=active]:bg-blue-600 data-[state=active]:text-white">Overview</TabsTrigger>
-          <TabsTrigger value="integrations" className="data-[state=active]:bg-blue-600 data-[state=active]:text-white">Integrations</TabsTrigger>
-          <TabsTrigger value="analytics" className="data-[state=active]:bg-blue-600 data-[state=active]:text-white">Analytics</TabsTrigger>
+          <TabsTrigger value="overview" className="data-[state=active]:bg-green-600 data-[state=active]:text-white">Overview</TabsTrigger>
+          <TabsTrigger value="integrations" className="data-[state=active]:bg-green-600 data-[state=active]:text-white">Integrations</TabsTrigger>
+          <TabsTrigger value="analytics" className="data-[state=active]:bg-green-600 data-[state=active]:text-white">Analytics</TabsTrigger>
         </TabsList>
 
         <TabsContent value="overview" className="space-y-4">
@@ -181,7 +200,7 @@ const ProductSalesPage = () => {
         <TabsContent value="integrations" className="space-y-6">
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
             {/* Shopify Integration Card */}
-            <Card className="border-2 hover:border-blue-200 transition-colors">
+            <Card className="border-2 hover:border-green-200 transition-colors">
               <CardHeader className="pb-3">
                 <div className="flex items-center gap-3">
                   <div className="w-10 h-10 bg-green-100 rounded-lg flex items-center justify-center">
@@ -230,11 +249,11 @@ const ProductSalesPage = () => {
             </Card>
 
             {/* Custom Website Integration Card */}
-            <Card className="border-2 hover:border-blue-200 transition-colors">
+            <Card className="border-2 hover:border-green-200 transition-colors">
               <CardHeader className="pb-3">
                 <div className="flex items-center gap-3">
-                  <div className="w-10 h-10 bg-blue-100 rounded-lg flex items-center justify-center">
-                    <Globe className="h-5 w-5 text-blue-600" />
+                  <div className="w-10 h-10 bg-green-100 rounded-lg flex items-center justify-center">
+                    <Globe className="h-5 w-5 text-green-600" />
                   </div>
                   <div>
                     <CardTitle className="text-lg">Custom Website</CardTitle>
@@ -257,11 +276,11 @@ const ProductSalesPage = () => {
                   onClick={handleCustomWebsiteConnect}
                   disabled={isConnectingCustom}
                   variant="outline"
-                  className="w-full h-10 border-blue-200 hover:bg-blue-50"
+                  className="w-full h-10 border-green-200 hover:bg-green-50"
                 >
                   {isConnectingCustom ? (
                     <>
-                      <div className="w-4 h-4 border-2 border-blue-600 border-t-transparent rounded-full animate-spin mr-2" />
+                      <div className="w-4 h-4 border-2 border-green-600 border-t-transparent rounded-full animate-spin mr-2" />
                       Connecting...
                     </>
                   ) : (
@@ -294,12 +313,12 @@ const ProductSalesPage = () => {
                 </p>
               </div>
 
-              <div className="bg-blue-50 p-4 rounded-lg border border-blue-200">
-                <h4 className="font-semibold text-blue-900 mb-3 flex items-center">
+              <div className="bg-green-50 p-4 rounded-lg border border-green-200">
+                <h4 className="font-semibold text-green-900 mb-3 flex items-center">
                   <Package className="w-5 h-5 mr-2" />
                   Integration Steps
                 </h4>
-                <ol className="list-decimal list-inside text-sm text-blue-800 space-y-2">
+                <ol className="list-decimal list-inside text-sm text-green-800 space-y-2">
                   <li><strong>Copy the tracking script below</strong> and paste it in your website's HTML head section</li>
                   <li><strong>Add product tracking</strong> on your product pages using the provided functions</li>
                   <li><strong>Set up purchase tracking</strong> on your checkout completion page</li>
@@ -369,21 +388,21 @@ const ProductSalesPage = () => {
                   To track sales from your custom website built with VS Code, you'll need to:
                 </p>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  <div className="bg-blue-50 p-4 rounded-lg">
-                    <h5 className="font-medium text-blue-900 mb-2">1. Add Tracking Script</h5>
-                    <p className="text-xs text-blue-700">Include our JavaScript tracking code in your website's HTML head section</p>
+                  <div className="bg-green-50 p-4 rounded-lg">
+                    <h5 className="font-medium text-green-900 mb-2">1. Add Tracking Script</h5>
+                    <p className="text-xs text-green-700">Include our JavaScript tracking code in your website's HTML head section</p>
                   </div>
                   <div className="bg-green-50 p-4 rounded-lg">
                     <h5 className="font-medium text-green-900 mb-2">2. Configure Events</h5>
                     <p className="text-xs text-green-700">Set up product view and purchase tracking events in your code</p>
                   </div>
-                  <div className="bg-purple-50 p-4 rounded-lg">
-                    <h5 className="font-medium text-purple-900 mb-2">3. Map Product Data</h5>
-                    <p className="text-xs text-purple-700">Connect your product information to our analytics system</p>
+                  <div className="bg-green-50 p-4 rounded-lg">
+                    <h5 className="font-medium text-green-900 mb-2">3. Map Product Data</h5>
+                    <p className="text-xs text-green-700">Connect your product information to our analytics system</p>
                   </div>
-                  <div className="bg-orange-50 p-4 rounded-lg">
-                    <h5 className="font-medium text-orange-900 mb-2">4. Test Integration</h5>
-                    <p className="text-xs text-orange-700">Verify tracking works correctly with test purchases</p>
+                  <div className="bg-green-50 p-4 rounded-lg">
+                    <h5 className="font-medium text-green-900 mb-2">4. Test Integration</h5>
+                    <p className="text-xs text-green-700">Verify tracking works correctly with test purchases</p>
                   </div>
                 </div>
               </CardContent>
