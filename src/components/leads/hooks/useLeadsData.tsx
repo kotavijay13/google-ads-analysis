@@ -6,17 +6,19 @@ import { toast } from '@/components/ui/sonner';
 import { Lead, Filters, UseLeadsDataReturn } from '../types/leadTypes';
 import { useLeadOperations } from './useLeadOperations';
 import { useLeadFiltering } from './useLeadFiltering';
+import { useGlobalWebsite } from '@/context/GlobalWebsiteContext';
 
 export const useLeadsData = (
   dateRange: { from: Date; to: Date },
   filters: Filters
 ): UseLeadsDataReturn => {
   const { user } = useAuth();
+  const { selectedWebsite } = useGlobalWebsite();
   const [leads, setLeads] = useState<Lead[]>([]);
   const [isLoading, setIsLoading] = useState(false);
 
   const { handleStatusChange: statusChange, handleAssignedToChange: assignedToChange } = useLeadOperations();
-  const { filteredLeads, applyFilters } = useLeadFiltering(leads, filters);
+  const { filteredLeads, applyFilters } = useLeadFiltering(leads, filters, selectedWebsite);
 
   const fetchLeadsData = useCallback(async () => {
     if (!user) return;

@@ -1,11 +1,12 @@
-
 import { useState, useEffect, useCallback } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/context/AuthContext';
+import { useConnectedForms } from '@/hooks/useConnectedForms';
 import { Lead, Filters } from '../types/leadTypes';
 
-export const useLeadFiltering = (leads: Lead[], filters: Filters) => {
+export const useLeadFiltering = (leads: Lead[], filters: Filters, selectedWebsite?: string) => {
   const { user } = useAuth();
+  const { connectedForms } = useConnectedForms();
   const [filteredLeads, setFilteredLeads] = useState<Lead[]>([]);
 
   const applyFilters = useCallback(async () => {
@@ -14,8 +15,19 @@ export const useLeadFiltering = (leads: Lead[], filters: Filters) => {
     let filtered = [...leads];
     console.log('Starting filter process with', filtered.length, 'leads');
     console.log('Current filters:', filters);
+    console.log('Selected website:', selectedWebsite);
 
-    // Apply source filter first
+    // Apply global website filter first
+    if (selectedWebsite && selectedWebsite !== 'All') {
+      filtered = filtered.filter(lead => {
+        const form = connectedForms.find(f => f.form_id === lead.form_id);
+        const leadWebsite = form?.website_url || lead.source;
+        return leadWebsite === selectedWebsite;
+      });
+      console.log('After global website filter:', filtered.length, 'leads');
+    }
+
+    // Apply source filter
     if (filters.source && filters.source !== 'All') {
       if (filters.source === 'Instagram' || filters.source === 'Facebook Messenger' || filters.source === 'WhatsApp') {
         // Filter by social media sources
@@ -70,7 +82,7 @@ export const useLeadFiltering = (leads: Lead[], filters: Filters) => {
 
     console.log('Final filtered leads:', filtered.length, 'from total:', leads.length);
     setFilteredLeads(filtered);
-  }, [leads, filters, user]);
+  }, [leads, filters, selectedWebsite, user, connectedForms]);
 
   useEffect(() => {
     applyFilters();

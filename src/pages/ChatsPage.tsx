@@ -5,6 +5,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Badge } from '@/components/ui/badge';
 import { Instagram, Facebook, MessageSquare as WhatsAppIcon, Loader2, Globe } from 'lucide-react';
+import { useGlobalWebsite } from '@/context/GlobalWebsiteContext';
 import { useSocialMediaIntegration } from '@/hooks/useSocialMediaIntegration';
 
 const platforms = [
@@ -39,6 +40,7 @@ const platforms = [
 ];
 
 const ChatsPage = () => {
+  const { selectedWebsite } = useGlobalWebsite();
   const {
     connectedAccounts,
     messages,
@@ -91,6 +93,18 @@ const ChatsPage = () => {
       <p className="text-muted-foreground mb-8">
         Unify your customer conversations. Connect your social media and messaging platforms to manage all chats from a single inbox.
       </p>
+
+      {selectedWebsite && (
+        <Card className="mb-6 border-primary/20 bg-gradient-to-r from-blue-50 to-indigo-50">
+          <CardContent className="pt-4">
+            <div className="flex items-center gap-2">
+              <Globe className="h-4 w-4 text-primary" />
+              <span className="text-sm text-muted-foreground">Managing chats for:</span>
+              <span className="font-semibold text-primary">{selectedWebsite}</span>
+            </div>
+          </CardContent>
+        </Card>
+      )}
 
       <Tabs defaultValue="whatsapp" className="w-full">
         <TabsList className="grid w-full grid-cols-4">

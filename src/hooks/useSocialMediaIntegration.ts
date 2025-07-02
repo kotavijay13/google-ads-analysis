@@ -2,6 +2,7 @@
 import { useState, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/context/AuthContext';
+import { useGlobalWebsite } from '@/context/GlobalWebsiteContext';
 import { toast } from '@/components/ui/sonner';
 
 interface SocialMediaAccount {
@@ -27,6 +28,7 @@ interface SocialMediaMessage {
 
 export const useSocialMediaIntegration = () => {
   const { user } = useAuth();
+  const { selectedWebsite } = useGlobalWebsite();
   const [connectedAccounts, setConnectedAccounts] = useState<SocialMediaAccount[]>([]);
   const [messages, setMessages] = useState<SocialMediaMessage[]>([]);
   const [isLoading, setIsLoading] = useState(false);
@@ -37,6 +39,12 @@ export const useSocialMediaIntegration = () => {
       fetchMessages();
     }
   }, [user]);
+
+  useEffect(() => {
+    if (user) {
+      fetchMessages();
+    }
+  }, [selectedWebsite]);
 
   const fetchConnectedAccounts = async () => {
     try {
@@ -69,7 +77,11 @@ export const useSocialMediaIntegration = () => {
 
   const fetchMessages = async () => {
     try {
+      // Filter messages based on selected website if available
+      // In a real implementation, you would fetch messages from your backend
+      // and filter them based on the selected website context
       setMessages([]);
+      console.log('Fetching messages for website:', selectedWebsite);
     } catch (error) {
       console.error('Error fetching messages:', error);
     }

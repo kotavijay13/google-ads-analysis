@@ -1,14 +1,17 @@
 
 import { useState } from 'react';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { Card, CardContent } from '@/components/ui/card';
 import { toast } from '@/components/ui/sonner';
-import { Zap, ExternalLink } from 'lucide-react';
+import { Globe } from 'lucide-react';
+import { useGlobalWebsite } from '@/context/GlobalWebsiteContext';
 import ProductSalesHeader from '@/components/product-sales/ProductSalesHeader';
 import OverviewTab from '@/components/product-sales/OverviewTab';
 import IntegrationsTab from '@/components/product-sales/IntegrationsTab';
 import AnalyticsTab from '@/components/product-sales/AnalyticsTab';
 
 const ProductSalesPage = () => {
+  const { selectedWebsite } = useGlobalWebsite();
   const [activeTab, setActiveTab] = useState('overview');
   const [shopifyStoreUrl, setShopifyStoreUrl] = useState('');
   const [isConnectingEcom, setIsConnectingEcom] = useState(false);
@@ -119,6 +122,18 @@ const ProductSalesPage = () => {
         dateRange={dateRange}
         onDateRangeChange={handleDateRangeChange}
       />
+
+      {selectedWebsite && (
+        <Card className="mb-6 border-primary/20 bg-gradient-to-r from-blue-50 to-indigo-50">
+          <CardContent className="pt-4">
+            <div className="flex items-center gap-2">
+              <Globe className="h-4 w-4 text-primary" />
+              <span className="text-sm text-muted-foreground">Analyzing sales data for:</span>
+              <span className="font-semibold text-primary">{selectedWebsite}</span>
+            </div>
+          </CardContent>
+        </Card>
+      )}
 
       <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-4">
         <TabsList className="grid w-full grid-cols-3">
