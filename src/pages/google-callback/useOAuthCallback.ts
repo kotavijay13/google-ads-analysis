@@ -13,6 +13,9 @@ export const useOAuthCallback = () => {
   const [authType, setAuthType] = useState<'search-console' | 'ads'>('search-console');
 
   useEffect(() => {
+    // Prevent multiple processing
+    if (processing === false) return;
+    
     const processCallback = async () => {
       console.log('Processing Google OAuth callback...');
       console.log('Current URL:', window.location.href);
@@ -20,13 +23,6 @@ export const useOAuthCallback = () => {
       
       if (!user) {
         console.log('No user found during callback, waiting for auth...');
-        // Wait a bit for auth to load
-        setTimeout(() => {
-          if (!user) {
-            console.log('Still no user, redirecting to auth');
-            navigate('/auth');
-          }
-        }, 2000);
         return;
       }
 
@@ -64,14 +60,10 @@ export const useOAuthCallback = () => {
           localStorage.removeItem('googleSearchConsoleOAuthState');
           console.log('Google Search Console OAuth flow detected');
         } else {
-          console.warn('No matching state found, checking for Google Ads state');
-          // If no state match, check if we have a Google Ads state and assume it's Google Ads
-          if (googleAdsState) {
-            currentAuthType = 'ads';
-            storedState = googleAdsState;
-            localStorage.removeItem('googleOAuthState');
-            console.log('Assuming Google Ads OAuth flow');
-          }
+          console.warn('No matching state found in stored states');
+          // Default to search console if no clear match
+          currentAuthType = 'search-console';
+          console.log('Defaulting to Google Search Console OAuth flow');
         }
         
         setAuthType(currentAuthType);
@@ -125,7 +117,7 @@ export const useOAuthCallback = () => {
         }
 
         const serviceName = currentAuthType === 'ads' ? 'Google Ads' : 'Google Search Console';
-        const targetPage = currentAuthType === 'ads' ? '/integrations' : '/search-console';
+        const targetPage = currentAuthType === 'ads' ? '/integrations' : '/seo';
         
         console.log(`Successfully connected to ${serviceName}`);
         toast.success(`Successfully connected to ${serviceName}`);
