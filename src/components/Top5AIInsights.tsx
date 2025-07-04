@@ -7,9 +7,10 @@ import { initialInsights } from './insights/mockInsights';
 import { useInsightsRefresh } from './insights/useInsightsRefresh';
 import InsightItem from './insights/InsightItem';
 import { useGlobalWebsite } from '@/context/GlobalWebsiteContext';
+import ErrorBoundary from './ErrorBoundary';
 
 const Top5AIInsights = ({ onInsightCompleted }: Top5AIInsightsProps) => {
-  const { insights, isLoading, handleRefresh } = useInsightsRefresh(initialInsights);
+  const { insights, isLoading, handleRefresh, error } = useInsightsRefresh(initialInsights);
   const [completedInsights, setCompletedInsights] = useState<Set<string>>(new Set());
   const { selectedWebsite } = useGlobalWebsite();
 
@@ -36,67 +37,80 @@ const Top5AIInsights = ({ onInsightCompleted }: Top5AIInsightsProps) => {
   };
 
   return (
-    <Card className="h-full">
-      <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-4">
-        <div className="flex items-center space-x-2">
-          <Brain className="h-5 w-5 text-primary" />
-          <CardTitle className="text-xl font-semibold">
-            Top 5 AI Insights for Today
-            {selectedWebsite && (
-              <span className="text-sm font-normal text-muted-foreground ml-2">
-                • {selectedWebsite}
-              </span>
+    <ErrorBoundary>
+      <Card className="h-full">
+        <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-4">
+          <div className="flex items-center space-x-2">
+            <Brain className="h-5 w-5 text-primary" />
+            <CardTitle className="text-xl font-semibold">
+              Top 5 AI Insights for Today
+              {selectedWebsite && (
+                <span className="text-sm font-normal text-muted-foreground ml-2">
+                  • {selectedWebsite}
+                </span>
+              )}
+            </CardTitle>
+          </div>
+          <Button 
+            variant="outline" 
+            size="sm" 
+            onClick={handleManualRefresh}
+            disabled={isLoading}
+            className="flex items-center space-x-1"
+          >
+            {isLoading ? (
+              <Loader2 className="h-4 w-4 animate-spin" />
+            ) : (
+              <RefreshCw className="h-4 w-4" />
             )}
-          </CardTitle>
-        </div>
-        <Button 
-          variant="outline" 
-          size="sm" 
-          onClick={handleManualRefresh}
-          disabled={isLoading}
-          className="flex items-center space-x-1"
-        >
-          {isLoading ? (
-            <Loader2 className="h-4 w-4 animate-spin" />
-          ) : (
-            <RefreshCw className="h-4 w-4" />
-          )}
-          <span>Refresh</span>
-        </Button>
-      </CardHeader>
-      <CardContent className="space-y-4">
-        {isLoading ? (
-          <div className="flex items-center justify-center py-8">
-            <div className="text-center">
-              <Loader2 className="h-8 w-8 animate-spin mx-auto mb-2 text-primary" />
-              <p className="text-sm text-muted-foreground">
-                AI is analyzing your marketing data
-                {selectedWebsite && ` for ${selectedWebsite}`}...
+            <span>Refresh</span>
+          </Button>
+        </CardHeader>
+        <CardContent className="space-y-4">
+          {error && (
+            <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-4 mb-4">
+              <p className="text-sm text-yellow-800">
+                <strong>AI Analysis Error:</strong> {error}
+              </p>
+              <p className="text-xs text-yellow-600 mt-1">
+                Using fallback insights instead. Please check your configuration or try again later.
               </p>
             </div>
-          </div>
-        ) : insights.length === 0 ? (
-          <div className="text-center py-8">
-            <Brain className="h-12 w-12 mx-auto mb-4 text-muted-foreground" />
-            <p className="text-muted-foreground mb-2">
-              {selectedWebsite 
-                ? `Select a website to generate AI insights for ${selectedWebsite}`
-                : 'Select a website from the dropdown above to generate AI insights'
-              }
-            </p>
-          </div>
-        ) : (
-          insights.map((insight) => (
-            <InsightItem
-              key={insight.id}
-              insight={insight}
-              isCompleted={completedInsights.has(insight.id)}
-              onMarkComplete={handleMarkComplete}
-            />
-          ))
-        )}
-      </CardContent>
-    </Card>
+          )}
+          
+          {isLoading ? (
+            <div className="flex items-center justify-center py-8">
+              <div className="text-center">
+                <Loader2 className="h-8 w-8 animate-spin mx-auto mb-2 text-primary" />
+                <p className="text-sm text-muted-foreground">
+                  AI is analyzing your marketing data
+                  {selectedWebsite && ` for ${selectedWebsite}`}...
+                </p>
+              </div>
+            </div>
+          ) : insights.length === 0 ? (
+            <div className="text-center py-8">
+              <Brain className="h-12 w-12 mx-auto mb-4 text-muted-foreground" />
+              <p className="text-muted-foreground mb-2">
+                {selectedWebsite 
+                  ? `Select a website to generate AI insights for ${selectedWebsite}`
+                  : 'Select a website from the dropdown above to generate AI insights'
+                }
+              </p>
+            </div>
+          ) : (
+            insights.map((insight) => (
+              <InsightItem
+                key={insight.id}
+                insight={insight}
+                isCompleted={completedInsights.has(insight.id)}
+                onMarkComplete={handleMarkComplete}
+              />
+            ))
+          )}
+        </CardContent>
+      </Card>
+    </ErrorBoundary>
   );
 };
 

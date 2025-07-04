@@ -19,10 +19,16 @@ export interface Top5AIInsightsProps {
 export const useInsightsRefresh = (initialInsights: any[]) => {
   const [insights, setInsights] = useState(initialInsights);
   const [isLoading, setIsLoading] = useState(false);
-  const { generateInsights, insights: aiInsights, isAnalyzing } = useAIAnalysis();
+  const { generateInsights, insights: aiInsights, isAnalyzing, error } = useAIAnalysis();
   const { seoState } = useSEOContext();
 
   const handleRefresh = useCallback(async (website?: string) => {
+    // Prevent multiple simultaneous calls
+    if (isLoading || isAnalyzing) {
+      console.log('AI insights already loading, skipping duplicate call');
+      return;
+    }
+
     setIsLoading(true);
     
     try {
@@ -72,7 +78,7 @@ export const useInsightsRefresh = (initialInsights: any[]) => {
     } finally {
       setIsLoading(false);
     }
-  }, [generateInsights, seoState, initialInsights]);
+  }, [generateInsights, seoState, initialInsights, isLoading, isAnalyzing]);
 
   // Use AI insights when available, otherwise use initial insights
   const currentInsights = aiInsights.length > 0 ? aiInsights : insights;
@@ -80,6 +86,7 @@ export const useInsightsRefresh = (initialInsights: any[]) => {
   return {
     insights: currentInsights,
     isLoading: isLoading || isAnalyzing,
-    handleRefresh
+    handleRefresh,
+    error
   };
 };

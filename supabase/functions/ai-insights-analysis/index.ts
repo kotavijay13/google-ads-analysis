@@ -20,6 +20,19 @@ serve(async (req) => {
   }
 
   try {
+    console.log('AI Insights Analysis function called');
+    
+    if (!openAIApiKey) {
+      console.error('OpenAI API key not found');
+      return new Response(JSON.stringify({ 
+        error: 'OpenAI API key not configured',
+        success: false 
+      }), {
+        status: 500,
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+      });
+    }
+
     const { website, seoData, googleAdsData, metaAdsData, leadsData } = await req.json();
 
     console.log(`Analyzing data for website: ${website}`);
@@ -87,7 +100,7 @@ serve(async (req) => {
         'Content-Type': 'application/json',
       },
       body: JSON.stringify({
-        model: 'gpt-4o-mini',
+        model: 'gpt-4.1-2025-04-14',
         messages: [
           { role: 'system', content: 'You are an expert digital marketing analyst specializing in SEO, Google Ads, Meta Ads, and lead generation optimization. Provide data-driven insights in the exact JSON format requested.' },
           { role: 'user', content: analysisPrompt }
@@ -96,6 +109,14 @@ serve(async (req) => {
         max_tokens: 2000,
       }),
     });
+
+    console.log('OpenAI API Response Status:', response.status);
+    
+    if (!response.ok) {
+      const errorText = await response.text();
+      console.error('OpenAI API Error:', errorText);
+      throw new Error(`OpenAI API error: ${response.status} ${errorText}`);
+    }
 
     const data = await response.json();
     
