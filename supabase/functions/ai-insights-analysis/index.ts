@@ -37,9 +37,9 @@ serve(async (req) => {
 
     console.log(`Analyzing data for website: ${website}`);
 
-    // Prepare comprehensive analysis prompt
+    // Prepare comprehensive analysis prompt with specific SEO recommendations
     const analysisPrompt = `
-    As an expert digital marketing analyst, analyze the following data for website: ${website}
+    As an expert SEO and digital marketing analyst, analyze the following data for website: ${website}
 
     SEO Data:
     - Total Keywords: ${seoData?.totalKeywords || 0}
@@ -68,29 +68,40 @@ serve(async (req) => {
     - Conversion Rate: ${leadsData?.conversionRate || 0}%
     - Lead Sources: ${leadsData?.sources?.join(', ') || 'N/A'}
 
-    Please provide exactly 5 specific, actionable insights in this JSON format:
+    Provide exactly 5 specific, actionable insights with detailed recommendations in this JSON format:
     {
       "insights": [
         {
           "id": "unique_id",
           "title": "Insight Title",
-          "description": "Detailed analysis and recommendation",
+          "description": "Detailed analysis and specific recommendations",
           "priority": "high|medium|low",
           "channel": "seo|google-ads|meta-ads|leads|cross-channel",
           "impact": "Description of expected impact",
-          "action": "Specific action to take"
+          "action": "Specific action to take",
+          "recommendations": {
+            "metaTitle": "Exact meta title recommendation (if applicable)",
+            "metaDescription": "Exact meta description recommendation (if applicable)",
+            "headerTags": ["H1: Exact H1 recommendation", "H2: Exact H2 recommendations"],
+            "keywordDensity": "Target keyword density percentage and keywords",
+            "internalLinks": ["Specific internal linking suggestions"],
+            "externalLinks": ["Specific external linking suggestions"],
+            "technicalSeo": ["Specific technical SEO improvements"]
+          }
         }
       ]
     }
 
-    Focus on:
-    1. Cross-channel optimization opportunities
-    2. Performance gaps and improvement areas
-    3. Budget allocation recommendations
-    4. Keyword and audience insights
-    5. Conversion optimization opportunities
+    For SEO insights, provide EXACT recommendations:
+    - Specific meta titles (50-60 characters)
+    - Specific meta descriptions (150-160 characters)
+    - Exact H1/H2/H3 tag suggestions
+    - Target keyword density percentages
+    - Specific internal linking opportunities
+    - Relevant external link suggestions
+    - Technical SEO improvements
 
-    Make insights specific to the actual data provided, not generic advice.
+    Focus on actionable, specific recommendations rather than generic advice. Use actual data from ${website} to make recommendations.
     `;
 
     const response = await fetch('https://api.openai.com/v1/chat/completions', {

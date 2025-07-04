@@ -5,10 +5,19 @@ export interface AIInsight {
   id: string;
   title: string;
   description: string;
-  impact: 'High Impact' | 'Medium Impact' | 'Low Impact';
-  source: 'Google Ads' | 'Meta Ads' | 'SEO' | 'Leads' | 'Competition';
-  icon: LucideIcon;
-  actionable: boolean;
+  priority: 'high' | 'medium' | 'low';
+  channel: 'seo' | 'google-ads' | 'meta-ads' | 'leads' | 'cross-channel';
+  impact: string;
+  action: string;
+  recommendations?: {
+    metaTitle?: string;
+    metaDescription?: string;
+    headerTags?: string[];
+    keywordDensity?: string;
+    internalLinks?: string[];
+    externalLinks?: string[];
+    technicalSeo?: string[];
+  };
 }
 
 export interface Top5AIInsightsProps {

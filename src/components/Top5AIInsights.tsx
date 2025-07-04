@@ -43,7 +43,7 @@ const Top5AIInsights = ({ onInsightCompleted }: Top5AIInsightsProps) => {
           <div className="flex items-center space-x-2">
             <Brain className="h-5 w-5 text-primary" />
             <CardTitle className="text-xl font-semibold">
-              Top 5 AI Insights for Today
+              AI Insights Analysis
               {selectedWebsite && (
                 <span className="text-sm font-normal text-muted-foreground ml-2">
                   • {selectedWebsite}
@@ -51,20 +51,36 @@ const Top5AIInsights = ({ onInsightCompleted }: Top5AIInsightsProps) => {
               )}
             </CardTitle>
           </div>
-          <Button 
-            variant="outline" 
-            size="sm" 
-            onClick={handleManualRefresh}
-            disabled={isLoading}
-            className="flex items-center space-x-1"
-          >
-            {isLoading ? (
-              <Loader2 className="h-4 w-4 animate-spin" />
-            ) : (
-              <RefreshCw className="h-4 w-4" />
-            )}
-            <span>Refresh</span>
-          </Button>
+          <div className="flex items-center space-x-2">
+            <Button 
+              variant="default" 
+              size="sm" 
+              onClick={handleManualRefresh}
+              disabled={isLoading}
+              className="flex items-center space-x-1"
+            >
+              {isLoading ? (
+                <Loader2 className="h-4 w-4 animate-spin" />
+              ) : (
+                <Brain className="h-4 w-4" />
+              )}
+              <span>Generate AI Insights</span>
+            </Button>
+            <Button 
+              variant="outline" 
+              size="sm" 
+              onClick={handleManualRefresh}
+              disabled={isLoading}
+              className="flex items-center space-x-1"
+            >
+              {isLoading ? (
+                <Loader2 className="h-4 w-4 animate-spin" />
+              ) : (
+                <RefreshCw className="h-4 w-4" />
+              )}
+              <span>Refresh</span>
+            </Button>
+          </div>
         </CardHeader>
         <CardContent className="space-y-4">
           {error && (
@@ -91,22 +107,33 @@ const Top5AIInsights = ({ onInsightCompleted }: Top5AIInsightsProps) => {
           ) : insights.length === 0 ? (
             <div className="text-center py-8">
               <Brain className="h-12 w-12 mx-auto mb-4 text-muted-foreground" />
-              <p className="text-muted-foreground mb-2">
+              <p className="text-muted-foreground mb-4">
                 {selectedWebsite 
-                  ? `Select a website to generate AI insights for ${selectedWebsite}`
-                  : 'Select a website from the dropdown above to generate AI insights'
+                  ? `Click "Generate AI Insights" to analyze SEO performance for ${selectedWebsite}`
+                  : 'Select a website and click "Generate AI Insights" to get personalized SEO recommendations'
                 }
               </p>
+              <Button 
+                variant="default" 
+                onClick={handleManualRefresh}
+                disabled={!selectedWebsite}
+                className="flex items-center space-x-2"
+              >
+                <Brain className="h-4 w-4" />
+                <span>Generate AI Insights</span>
+              </Button>
             </div>
           ) : (
-            insights.map((insight) => (
-              <InsightItem
-                key={insight.id}
-                insight={insight}
-                isCompleted={completedInsights.has(insight.id)}
-                onMarkComplete={handleMarkComplete}
-              />
-            ))
+            <div className="space-y-4">
+              {insights.map((insight) => (
+                <InsightItem
+                  key={insight.id}
+                  insight={insight}
+                  isCompleted={completedInsights.has(insight.id)}
+                  onMarkComplete={handleMarkComplete}
+                />
+              ))}
+            </div>
           )}
         </CardContent>
       </Card>

@@ -20,10 +20,10 @@ export const generateSEOInsights = (
       id: `seo-avg-position-${Date.now()}`,
       title: 'Improve Search Rankings',
       description: `Your average position is ${avgPosition.toFixed(1)}. Focus on optimizing your top ${Math.min(10, serpKeywords.length)} keywords to move into the first page of search results.`,
-      impact: 'High Impact',
-      source: 'SEO',
-      icon: TrendingUp,
-      actionable: true
+      priority: 'high',
+      channel: 'seo',
+      impact: 'Could increase organic traffic by 40-60%',
+      action: 'Optimize content and meta tags for underperforming keywords'
     });
   }
 
@@ -36,10 +36,10 @@ export const generateSEOInsights = (
       id: `seo-top-keywords-${Date.now()}`,
       title: 'Optimize Top 10 Keywords',
       description: `You have ${top10Keywords} keywords in top 10, but only ${top3Keywords} in top 3. Focus on improving content quality and user engagement for your top-ranking keywords.`,
-      impact: 'Medium Impact',
-      source: 'SEO',
-      icon: Target,
-      actionable: true
+      priority: 'medium',
+      channel: 'seo',
+      impact: 'Could increase click-through rate by 25-35%',
+      action: 'Enhance content depth and user experience for top-ranking pages'
     });
   }
 
@@ -50,10 +50,10 @@ export const generateSEOInsights = (
       id: `seo-ctr-${Date.now()}`,
       title: 'Improve Click-Through Rate',
       description: `Your average CTR is ${avgCTR.toFixed(1)}%. Optimize your meta titles and descriptions to be more compelling and include relevant keywords.`,
-      impact: 'High Impact',
-      source: 'SEO',
-      icon: Zap,
-      actionable: true
+      priority: 'high',
+      channel: 'seo',
+      impact: 'Could increase organic traffic by 20-30%',
+      action: 'Rewrite meta titles and descriptions with compelling copy'
     });
   }
 
@@ -67,10 +67,10 @@ export const generateSEOInsights = (
       id: `seo-opportunities-${Date.now()}`,
       title: 'Keyword Ranking Opportunities',
       description: `${lowPositionHighImpressions.length} keywords have high impressions but rank below position 10. These represent quick win opportunities for traffic growth.`,
-      impact: 'Medium Impact',
-      source: 'SEO',
-      icon: Search,
-      actionable: true
+      priority: 'medium',
+      channel: 'seo',
+      impact: 'Could capture additional 15-25% organic traffic',
+      action: 'Create targeted content optimization for high-impression keywords'
     });
   }
 
@@ -84,10 +84,10 @@ export const generateSEOInsights = (
       id: `seo-traffic-loss-${Date.now()}`,
       title: 'Significant Traffic Loss Opportunity',
       description: `You're potentially missing ${potentialClicks - totalClicks} clicks monthly. Focus on improving rankings for high-impression keywords and optimizing meta descriptions.`,
-      impact: 'High Impact',
-      source: 'SEO',
-      icon: AlertTriangle,
-      actionable: true
+      priority: 'high',
+      channel: 'seo',
+      impact: `Could recover ${potentialClicks - totalClicks} monthly clicks`,
+      action: 'Implement comprehensive on-page SEO optimization strategy'
     });
   }
 

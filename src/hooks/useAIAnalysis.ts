@@ -67,11 +67,11 @@ export const useAIAnalysis = () => {
         {
           id: `fallback_${Date.now()}`,
           title: "Analysis Pending",
-          description: `AI analysis for ${website} is being processed. Please try refreshing in a moment.`,
+          description: `AI analysis for ${website} encountered an issue. Please ensure you have sufficient SEO data and try again. Make sure your website has GSC data available.`,
           priority: "medium",
           channel: "cross-channel",
-          impact: "Comprehensive analysis will be available shortly",
-          action: "Click refresh to retry AI analysis"
+          impact: "Comprehensive analysis will be available once data is properly loaded",
+          action: "Check your Google Search Console connection and data availability, then retry AI analysis"
         }
       ]);
     } finally {
