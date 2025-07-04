@@ -1,6 +1,7 @@
 import { useState, useCallback } from 'react';
 import { useAIAnalysis } from '@/hooks/useAIAnalysis';
 import { useSEOContext } from '@/context/SEOContext';
+import { AIInsight } from './types';
 
 export interface Insight {
   id: string;
@@ -10,6 +11,15 @@ export interface Insight {
   channel: 'seo' | 'google-ads' | 'meta-ads' | 'leads' | 'cross-channel';
   impact: string;
   action: string;
+  recommendations?: {
+    metaTitle?: string;
+    metaDescription?: string;
+    headerTags?: string[];
+    keywordDensity?: string;
+    internalLinks?: string[];
+    externalLinks?: string[];
+    technicalSeo?: string[];
+  };
 }
 
 export interface Top5AIInsightsProps {
@@ -81,7 +91,18 @@ export const useInsightsRefresh = (initialInsights: any[]) => {
   }, [generateInsights, seoState, initialInsights, isLoading, isAnalyzing]);
 
   // Use AI insights when available, otherwise use initial insights
-  const currentInsights = aiInsights.length > 0 ? aiInsights : insights;
+  const currentInsights = aiInsights.length > 0 ? aiInsights.map((insight: AIInsight) => ({
+    ...insight,
+    // Ensure all required properties exist
+    id: insight.id || `insight_${Date.now()}`,
+    title: insight.title || 'AI Insight',
+    description: insight.description || 'Analysis available',
+    priority: insight.priority || 'medium',
+    channel: insight.channel || 'cross-channel',
+    impact: insight.impact || 'Impact analysis available',
+    action: insight.action || 'Review recommendation',
+    recommendations: insight.recommendations || {}
+  })) : insights;
 
   return {
     insights: currentInsights,
