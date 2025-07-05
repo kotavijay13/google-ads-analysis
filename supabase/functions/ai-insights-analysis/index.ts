@@ -42,38 +42,49 @@ serve(async (req) => {
 
     console.log(`Analyzing data for website: ${website}`);
 
-    // Prepare comprehensive analysis prompt with specific SEO recommendations
-    const analysisPrompt = `
-    As an expert SEO and digital marketing analyst, analyze the following data for website: ${website}
+    // Analyze the rich GSC data to provide specific insights
+    const keywordsData = seoData?.keywords || [];
+    const pagesData = seoData?.pages || [];
+    const urlMetaData = seoData?.urlMetaData || [];
+    
+    console.log(`Analyzing rich GSC data: ${keywordsData.length} keywords, ${pagesData.length} pages, ${urlMetaData.length} meta entries`);
 
-    SEO Data:
+    // Prepare comprehensive analysis prompt with actual GSC data
+    const analysisPrompt = `
+    As an expert SEO analyst, analyze the following REAL Google Search Console data for website: ${website}
+
+    KEYWORD ANALYSIS (${keywordsData.length} total keywords):
+    ${keywordsData.slice(0, 20).map(k => 
+      `- "${k.keyword}": Position ${k.position}, ${k.clicks} clicks, ${k.impressions} impressions, CTR ${k.ctr}%`
+    ).join('\n')}
+
+    PAGE PERFORMANCE (${pagesData.length} total pages):
+    ${pagesData.slice(0, 15).map(p => 
+      `- ${p.url}: ${p.clicks} clicks, ${p.impressions} impressions, Position ${p.position}, CTR ${p.ctr}%`
+    ).join('\n')}
+
+    META DATA ANALYSIS (${urlMetaData.length} pages analyzed):
+    ${urlMetaData.slice(0, 10).map(u => 
+      `- ${u.url}: Title: "${u.metaTitle || 'Missing'}", Description: "${u.metaDescription || 'Missing'}", Images: ${u.imageCount || 0} (${u.imagesWithoutAlt || 0} without alt)`
+    ).join('\n')}
+
+    SUMMARY STATS:
     - Total Keywords: ${seoData?.totalKeywords || 0}
     - Average Position: ${seoData?.avgPosition || 'N/A'}
     - Total Clicks: ${seoData?.totalClicks || 0}
     - Total Impressions: ${seoData?.totalImpressions || 0}
     - Click-through Rate: ${seoData?.avgCTR || 0}%
     - Top 10 Keywords: ${seoData?.top10Keywords || 0}
+    - Top 3 Keywords: ${seoData?.top3Keywords || 0}
 
-    Google Ads Data:
-    - Total Spend: $${googleAdsData?.totalSpend || 0}
-    - Total Clicks: ${googleAdsData?.totalClicks || 0}
-    - Total Impressions: ${googleAdsData?.totalImpressions || 0}
-    - Conversion Rate: ${googleAdsData?.conversionRate || 0}%
-    - Cost Per Click: $${googleAdsData?.avgCpc || 0}
+    Analyze this data and provide exactly 4-5 specific, actionable insights covering these categories:
+    1. KEYWORD OPPORTUNITIES: Find underperforming keywords with high potential
+    2. PAGE OPTIMIZATION: Identify top pages that need improvement or scaling
+    3. META DATA ISSUES: Find missing or poorly optimized titles/descriptions
+    4. TECHNICAL SEO: Identify image, crawling, or indexing issues
+    5. CONTENT STRATEGY: Suggest content improvements based on performance
 
-    Meta Ads Data:
-    - Total Spend: $${metaAdsData?.totalSpend || 0}
-    - Total Reach: ${metaAdsData?.totalReach || 0}
-    - Total Engagement: ${metaAdsData?.totalEngagement || 0}
-    - Cost Per Result: $${metaAdsData?.costPerResult || 0}
-    - ROAS: ${metaAdsData?.roas || 0}
-
-    Leads Data:
-    - Total Leads: ${leadsData?.totalLeads || 0}
-    - Conversion Rate: ${leadsData?.conversionRate || 0}%
-    - Lead Sources: ${leadsData?.sources?.join(', ') || 'N/A'}
-
-    Provide exactly 5 specific, actionable insights with detailed recommendations in this JSON format:
+    Return insights in this JSON format:
     {
       "insights": [
         {
@@ -118,7 +129,7 @@ serve(async (req) => {
         'Content-Type': 'application/json',
       },
       body: JSON.stringify({
-        model: 'gpt-4o-mini',
+        model: 'gpt-4.1-2025-04-14',
         messages: [
           { role: 'system', content: 'You are an expert digital marketing analyst specializing in SEO, Google Ads, Meta Ads, and lead generation optimization. Provide data-driven insights in the exact JSON format requested.' },
           { role: 'user', content: analysisPrompt }

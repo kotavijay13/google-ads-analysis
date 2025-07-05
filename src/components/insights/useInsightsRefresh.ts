@@ -45,15 +45,22 @@ export const useInsightsRefresh = (initialInsights: any[]) => {
       if (website && seoState.selectedWebsite) {
         console.log('Generating AI insights for:', website);
         
-        // Prepare data for AI analysis
+        // Prepare comprehensive GSC data for AI analysis
         const analysisData = {
           seoData: {
+            // Stats
             totalKeywords: seoState.serpStats?.totalKeywords || 0,
             avgPosition: seoState.serpStats?.avgPosition || '0.0',
             totalClicks: seoState.serpStats?.totalClicks || 0,
             totalImpressions: seoState.serpStats?.totalImpressions || 0,
             avgCTR: seoState.serpStats?.avgCTR || 0,
-            top10Keywords: seoState.serpStats?.top10Keywords || 0
+            top10Keywords: seoState.serpStats?.top10Keywords || 0,
+            top3Keywords: seoState.serpStats?.top3Keywords || 0,
+            // Rich data for analysis
+            keywords: seoState.serpKeywords || [],
+            pages: seoState.pages || [],
+            urlMetaData: seoState.urlMetaData || [],
+            sitePerformance: seoState.sitePerformance || {}
           },
           googleAdsData: {
             totalSpend: 0, // Will be populated from actual Google Ads data
