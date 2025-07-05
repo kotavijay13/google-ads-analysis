@@ -11,7 +11,7 @@ interface KeywordTableProps {
 }
 
 type SortDirection = 'asc' | 'desc' | null;
-type SortField = 'keyword' | 'position' | 'change' | 'searchVolume' | 'estimatedVisits' | 'difficulty';
+type SortField = 'keyword' | 'position' | 'change' | 'impressions' | 'estimatedVisits' | 'difficulty';
 
 const KeywordTable = ({ keywords, selectedWebsite }: KeywordTableProps) => {
   const [sortField, setSortField] = useState<SortField | null>(null);
@@ -107,7 +107,7 @@ const KeywordTable = ({ keywords, selectedWebsite }: KeywordTableProps) => {
               <SortableHeader field="change">Change</SortableHeader>
             </TableHead>
             <TableHead className="text-right">
-              <SortableHeader field="searchVolume">Search Volume</SortableHeader>
+              <SortableHeader field="impressions">Impressions</SortableHeader>
             </TableHead>
             <TableHead className="text-right">
               <SortableHeader field="estimatedVisits">Est. Visits</SortableHeader>
@@ -151,7 +151,7 @@ const KeywordTable = ({ keywords, selectedWebsite }: KeywordTableProps) => {
                   </div>
                 )}
               </TableCell>
-              <TableCell className="text-right">{keyword.searchVolume?.toLocaleString() || 0}</TableCell>
+              <TableCell className="text-right">{keyword.impressions?.toLocaleString() || 0}</TableCell>
               <TableCell className="text-right">{keyword.estimatedVisits?.toLocaleString() || 0}</TableCell>
               <TableCell className="text-right">
                 <Badge className={`px-2 py-1 text-xs ${getDifficultyColor(keyword.difficulty || 0)}`}>
