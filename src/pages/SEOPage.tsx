@@ -92,8 +92,8 @@ const SEOPage = () => {
           <SEOHeader />
 
           <div className="space-y-4 mb-4">
-            {/* Top Section: Website Details + Date Range + Average Position */}
-            <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 items-end">
+            {/* Top Section: Website Details + Date Range in Top Right + Average Position */}
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 items-start">
               <div className="h-fit">
                 <WebsiteSelector
                   selectedWebsite={selectedWebsite}
@@ -106,46 +106,45 @@ const SEOPage = () => {
                   onRefresh={handleRefresh}
                 />
               </div>
-              <div className="h-fit">
-                <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-4">
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
-                    Select Date Range
-                  </label>
-                  <DateRangePicker onDateChange={handleDateRangeChange} />
+              <div className="flex gap-4 justify-end">
+                <div className="h-fit">
+                  <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-4">
+                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                      Select Date Range
+                    </label>
+                    <DateRangePicker onDateChange={handleDateRangeChange} />
+                  </div>
                 </div>
-              </div>
-              <div className="h-fit">
-                <SEOStatsCards 
-                  serpStats={seoState.serpStats} 
-                  serpKeywords={seoState.serpKeywords}
-                  selectedWebsite={selectedWebsite}
-                  showOnlyAveragePosition={true}
-                />
-              </div>
-            </div>
-
-            {/* Bottom Section: Stats Cards + Ranking Breakdown */}
-            <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 items-end">
-              {/* Stats Cards - Left Side */}
-              <div className="lg:col-span-1 h-fit">
-                <SEOStatsCards 
-                  serpStats={seoState.serpStats} 
-                  serpKeywords={seoState.serpKeywords}
-                  selectedWebsite={selectedWebsite}
-                  showOnlyStatsCards={true}
-                />
-              </div>
-              
-              {/* Keyword Ranking Breakdown - Right Side */}
-              <div className="lg:col-span-2 h-fit">
-                <div className="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
+                <div className="h-fit">
                   <SEOStatsCards 
                     serpStats={seoState.serpStats} 
                     serpKeywords={seoState.serpKeywords}
                     selectedWebsite={selectedWebsite}
-                    showOnlyRankingBreakdown={true}
+                    showOnlyAveragePosition={true}
                   />
                 </div>
+              </div>
+            </div>
+
+            {/* Stats Cards Section */}
+            <div className="h-fit">
+              <SEOStatsCards 
+                serpStats={seoState.serpStats} 
+                serpKeywords={seoState.serpKeywords}
+                selectedWebsite={selectedWebsite}
+                showOnlyStatsCards={true}
+              />
+            </div>
+            
+            {/* Current Search Results Ranking - Full Width */}
+            <div className="w-full">
+              <div className="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
+                <SEOStatsCards 
+                  serpStats={seoState.serpStats} 
+                  serpKeywords={seoState.serpKeywords}
+                  selectedWebsite={selectedWebsite}
+                  showOnlyRankingBreakdown={true}
+                />
               </div>
             </div>
           </div>
