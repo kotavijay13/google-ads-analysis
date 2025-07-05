@@ -104,6 +104,8 @@ serve(async (req) => {
     Focus on actionable, specific recommendations rather than generic advice. Use actual data from ${website} to make recommendations.
     `;
 
+    console.log('Making OpenAI API call...');
+    
     const response = await fetch('https://api.openai.com/v1/chat/completions', {
       method: 'POST',
       headers: {
@@ -111,7 +113,7 @@ serve(async (req) => {
         'Content-Type': 'application/json',
       },
       body: JSON.stringify({
-        model: 'gpt-4.1-2025-04-14',
+        model: 'gpt-4o-mini',
         messages: [
           { role: 'system', content: 'You are an expert digital marketing analyst specializing in SEO, Google Ads, Meta Ads, and lead generation optimization. Provide data-driven insights in the exact JSON format requested.' },
           { role: 'user', content: analysisPrompt }
