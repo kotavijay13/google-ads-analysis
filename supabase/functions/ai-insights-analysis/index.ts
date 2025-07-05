@@ -15,23 +15,28 @@ const corsHeaders = {
 const supabase = createClient(supabaseUrl, supabaseKey);
 
 serve(async (req) => {
+  console.log('AI Insights Analysis function called, method:', req.method);
+  
   if (req.method === 'OPTIONS') {
+    console.log('Handling CORS preflight request');
     return new Response(null, { headers: corsHeaders });
   }
 
   try {
-    console.log('AI Insights Analysis function called');
+    console.log('Starting AI insights analysis...');
     
     if (!openAIApiKey) {
-      console.error('OpenAI API key not found');
+      console.error('OpenAI API key not found in environment');
       return new Response(JSON.stringify({ 
-        error: 'OpenAI API key not configured',
+        error: 'OpenAI API key not configured. Please check your environment variables.',
         success: false 
       }), {
         status: 500,
         headers: { ...corsHeaders, 'Content-Type': 'application/json' },
       });
     }
+
+    console.log('OpenAI API key found, proceeding...');
 
     const { website, seoData, googleAdsData, metaAdsData, leadsData } = await req.json();
 
