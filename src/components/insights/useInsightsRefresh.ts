@@ -88,7 +88,7 @@ export const useInsightsRefresh = (initialInsights: any[]) => {
     } finally {
       setIsLoading(false);
     }
-  }, [generateInsights, seoState.selectedWebsite, seoState.serpStats, initialInsights, isLoading, isAnalyzing]);
+  }, [generateInsights, isLoading, isAnalyzing, seoState.selectedWebsite, initialInsights]);
 
   // Use AI insights when available, otherwise use initial insights
   const currentInsights = aiInsights.length > 0 ? aiInsights.map((insight: AIInsight) => ({

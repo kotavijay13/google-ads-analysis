@@ -16,7 +16,7 @@ const Top5AIInsights = ({ onInsightCompleted }: Top5AIInsightsProps) => {
 
   // Auto-refresh insights when website changes
   useEffect(() => {
-    if (selectedWebsite) {
+    if (selectedWebsite && !isLoading) {
       console.log(`Website changed to ${selectedWebsite}, refreshing AI insights...`);
       handleRefresh(selectedWebsite);
     }
