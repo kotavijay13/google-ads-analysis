@@ -20,7 +20,7 @@ const Top5AIInsights = ({ onInsightCompleted }: Top5AIInsightsProps) => {
       console.log(`Website changed to ${selectedWebsite}, refreshing AI insights...`);
       handleRefresh(selectedWebsite);
     }
-  }, [selectedWebsite, handleRefresh]);
+  }, [selectedWebsite]); // Remove handleRefresh from dependencies to prevent infinite loops
 
   const handleMarkComplete = (insightId: string) => {
     setCompletedInsights(prev => new Set([...prev, insightId]));
