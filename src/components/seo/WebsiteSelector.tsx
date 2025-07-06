@@ -3,6 +3,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Globe, ExternalLink, RefreshCw, Loader2, LinkIcon, CheckCircle2 } from 'lucide-react';
+import DateRangePicker from '@/components/DateRangePicker';
 
 interface WebsiteSelectorProps {
   selectedWebsite: string;
@@ -13,6 +14,8 @@ interface WebsiteSelectorProps {
   onWebsiteChange: (website: string) => void;
   onConnect: () => void;
   onRefresh: () => void;
+  dateRange: { from: Date; to: Date };
+  onDateRangeChange: (dateRange: { from: Date; to: Date }) => Promise<void> | void;
 }
 
 const WebsiteSelector = ({
@@ -23,7 +26,9 @@ const WebsiteSelector = ({
   isRefreshing,
   onWebsiteChange,
   onConnect,
-  onRefresh
+  onRefresh,
+  dateRange,
+  onDateRangeChange
 }: WebsiteSelectorProps) => {
   // Filter out empty, null, or undefined websites
   const validWebsites = availableWebsites.filter(website => 
@@ -33,12 +38,20 @@ const WebsiteSelector = ({
   return (
     <Card className="border-0 shadow-md hover:shadow-lg transition-shadow duration-300 h-fit">
       <CardHeader className="pb-2 pt-3">
-        <CardTitle className="text-sm flex items-center gap-2">
-          <div className="p-1.5 bg-blue-100 rounded-lg">
-            <Globe className="h-3 w-3 text-blue-600" />
+        <div className="flex items-center justify-between">
+          <CardTitle className="text-sm flex items-center gap-2">
+            <div className="p-1.5 bg-blue-100 rounded-lg">
+              <Globe className="h-3 w-3 text-blue-600" />
+            </div>
+            Website Details
+          </CardTitle>
+          <div className="text-right">
+            <label className="block text-xs font-medium text-gray-700 mb-1">
+              Select Date Range
+            </label>
+            <DateRangePicker onDateChange={onDateRangeChange} />
           </div>
-          Website Details
-        </CardTitle>
+        </div>
       </CardHeader>
       <CardContent className="space-y-3 px-4 pb-4">
         <div>

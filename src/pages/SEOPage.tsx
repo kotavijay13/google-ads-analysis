@@ -92,7 +92,7 @@ const SEOPage = () => {
           <SEOHeader />
 
           <div className="space-y-4 mb-4">
-            {/* Top Section: Website Details + Date Range in Top Right + Average Position */}
+            {/* Top Section: Website Details + Average Position */}
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 items-start">
               <div className="h-fit">
                 <WebsiteSelector
@@ -104,25 +104,17 @@ const SEOPage = () => {
                   onWebsiteChange={handleWebsiteSelection}
                   onConnect={handleConnect}
                   onRefresh={handleRefresh}
+                  dateRange={dateRange}
+                  onDateRangeChange={handleDateRangeChange}
                 />
               </div>
-              <div className="flex gap-4 justify-end">
-                <div className="h-fit">
-                  <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-4">
-                    <label className="block text-sm font-medium text-gray-700 mb-2">
-                      Select Date Range
-                    </label>
-                    <DateRangePicker onDateChange={handleDateRangeChange} />
-                  </div>
-                </div>
-                <div className="h-fit">
-                  <SEOStatsCards 
-                    serpStats={seoState.serpStats} 
-                    serpKeywords={seoState.serpKeywords}
-                    selectedWebsite={selectedWebsite}
-                    showOnlyAveragePosition={true}
-                  />
-                </div>
+              <div className="h-fit flex-1">
+                <SEOStatsCards 
+                  serpStats={seoState.serpStats} 
+                  serpKeywords={seoState.serpKeywords}
+                  selectedWebsite={selectedWebsite}
+                  showOnlyAveragePosition={true}
+                />
               </div>
             </div>
 
