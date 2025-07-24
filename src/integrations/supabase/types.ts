@@ -7,223 +7,159 @@ export type Json =
   | Json[]
 
 export type Database = {
+  // Allows to automatically instanciate createClient with right options
+  // instead of createClient<Database, { PostgrestVersion: 'XX' }>(URL, KEY)
+  __InternalSupabase: {
+    PostgrestVersion: "12.2.3 (519615d)"
+  }
   public: {
     Tables: {
-      ad_accounts: {
+      chatbots: {
         Row: {
-          account_id: string
-          account_name: string | null
+          chatbot_type: string
           created_at: string | null
+          edges: Json | null
           id: string
-          platform: string
+          is_published: boolean | null
+          name: string
+          nodes: Json | null
           updated_at: string | null
           user_id: string
+          website_urls: string[] | null
         }
         Insert: {
-          account_id: string
-          account_name?: string | null
+          chatbot_type?: string
           created_at?: string | null
+          edges?: Json | null
           id?: string
-          platform: string
+          is_published?: boolean | null
+          name: string
+          nodes?: Json | null
           updated_at?: string | null
           user_id: string
+          website_urls?: string[] | null
         }
         Update: {
-          account_id?: string
-          account_name?: string | null
+          chatbot_type?: string
           created_at?: string | null
+          edges?: Json | null
           id?: string
-          platform?: string
+          is_published?: boolean | null
+          name?: string
+          nodes?: Json | null
           updated_at?: string | null
           user_id?: string
+          website_urls?: string[] | null
         }
         Relationships: []
       }
-      api_tokens: {
+      conversations: {
         Row: {
-          access_token: string
+          assigned_to: string | null
+          chatbot_id: string
+          contact_email: string | null
+          contact_name: string
+          contact_phone: string | null
           created_at: string | null
-          expires_at: string | null
           id: string
-          provider: string
-          refresh_token: string | null
+          last_message_at: string | null
+          last_message_preview: string | null
+          platform: string | null
+          status: string | null
           updated_at: string | null
-          user_id: string
         }
         Insert: {
-          access_token: string
+          assigned_to?: string | null
+          chatbot_id: string
+          contact_email?: string | null
+          contact_name: string
+          contact_phone?: string | null
           created_at?: string | null
-          expires_at?: string | null
           id?: string
-          provider: string
-          refresh_token?: string | null
+          last_message_at?: string | null
+          last_message_preview?: string | null
+          platform?: string | null
+          status?: string | null
           updated_at?: string | null
-          user_id: string
         }
         Update: {
-          access_token?: string
+          assigned_to?: string | null
+          chatbot_id?: string
+          contact_email?: string | null
+          contact_name?: string
+          contact_phone?: string | null
           created_at?: string | null
-          expires_at?: string | null
           id?: string
-          provider?: string
-          refresh_token?: string | null
+          last_message_at?: string | null
+          last_message_preview?: string | null
+          platform?: string | null
+          status?: string | null
           updated_at?: string | null
-          user_id?: string
         }
         Relationships: []
       }
-      connected_forms: {
+      messages: {
         Row: {
-          created_at: string
-          field_mappings: Json
-          form_id: string
-          form_name: string
-          form_url: string
+          content: string
+          conversation_id: string
+          created_at: string | null
           id: string
-          updated_at: string
-          user_id: string
-          website_url: string
+          sender: string
         }
         Insert: {
-          created_at?: string
-          field_mappings: Json
-          form_id: string
-          form_name: string
-          form_url: string
+          content: string
+          conversation_id: string
+          created_at?: string | null
           id?: string
-          updated_at?: string
-          user_id: string
-          website_url: string
+          sender: string
         }
         Update: {
-          created_at?: string
-          field_mappings?: Json
-          form_id?: string
-          form_name?: string
-          form_url?: string
+          content?: string
+          conversation_id?: string
+          created_at?: string | null
           id?: string
-          updated_at?: string
-          user_id?: string
-          website_url?: string
-        }
-        Relationships: []
-      }
-      lead_remarks: {
-        Row: {
-          created_at: string
-          id: string
-          lead_id: string
-          remark: string
-          user_id: string | null
-        }
-        Insert: {
-          created_at?: string
-          id?: string
-          lead_id: string
-          remark: string
-          user_id?: string | null
-        }
-        Update: {
-          created_at?: string
-          id?: string
-          lead_id?: string
-          remark?: string
-          user_id?: string | null
+          sender?: string
         }
         Relationships: [
           {
-            foreignKeyName: "lead_remarks_lead_id_fkey"
-            columns: ["lead_id"]
+            foreignKeyName: "messages_conversation_id_fkey"
+            columns: ["conversation_id"]
             isOneToOne: false
-            referencedRelation: "leads"
+            referencedRelation: "conversations"
             referencedColumns: ["id"]
           },
         ]
       }
-      leads: {
+      website_data: {
         Row: {
-          assigned_to: string | null
-          campaign: string | null
-          company: string | null
-          created_at: string
-          email: string | null
-          first_name: string | null
-          form_id: string
-          id: string
-          last_name: string | null
-          message: string | null
-          name: string | null
-          phone: string | null
-          raw_data: Json | null
-          remarks: string | null
-          search_keyword: string | null
-          source: string | null
-          status: string | null
-          updated_at: string
-          user_id: string
-        }
-        Insert: {
-          assigned_to?: string | null
-          campaign?: string | null
-          company?: string | null
-          created_at?: string
-          email?: string | null
-          first_name?: string | null
-          form_id: string
-          id?: string
-          last_name?: string | null
-          message?: string | null
-          name?: string | null
-          phone?: string | null
-          raw_data?: Json | null
-          remarks?: string | null
-          search_keyword?: string | null
-          source?: string | null
-          status?: string | null
-          updated_at?: string
-          user_id: string
-        }
-        Update: {
-          assigned_to?: string | null
-          campaign?: string | null
-          company?: string | null
-          created_at?: string
-          email?: string | null
-          first_name?: string | null
-          form_id?: string
-          id?: string
-          last_name?: string | null
-          message?: string | null
-          name?: string | null
-          phone?: string | null
-          raw_data?: Json | null
-          remarks?: string | null
-          search_keyword?: string | null
-          source?: string | null
-          status?: string | null
-          updated_at?: string
-          user_id?: string
-        }
-        Relationships: []
-      }
-      profiles: {
-        Row: {
+          chatbot_id: string
+          content: string | null
           created_at: string | null
-          email: string | null
           id: string
+          scraped_at: string | null
+          title: string | null
           updated_at: string | null
+          url: string
         }
         Insert: {
+          chatbot_id: string
+          content?: string | null
           created_at?: string | null
-          email?: string | null
-          id: string
+          id?: string
+          scraped_at?: string | null
+          title?: string | null
           updated_at?: string | null
+          url: string
         }
         Update: {
+          chatbot_id?: string
+          content?: string | null
           created_at?: string | null
-          email?: string | null
           id?: string
+          scraped_at?: string | null
+          title?: string | null
           updated_at?: string | null
+          url?: string
         }
         Relationships: []
       }
@@ -243,21 +179,25 @@ export type Database = {
   }
 }
 
-type DefaultSchema = Database[Extract<keyof Database, "public">]
+type DatabaseWithoutInternals = Omit<Database, "__InternalSupabase">
+
+type DefaultSchema = DatabaseWithoutInternals[Extract<keyof Database, "public">]
 
 export type Tables<
   DefaultSchemaTableNameOrOptions extends
     | keyof (DefaultSchema["Tables"] & DefaultSchema["Views"])
-    | { schema: keyof Database },
+    | { schema: keyof DatabaseWithoutInternals },
   TableName extends DefaultSchemaTableNameOrOptions extends {
-    schema: keyof Database
+    schema: keyof DatabaseWithoutInternals
   }
-    ? keyof (Database[DefaultSchemaTableNameOrOptions["schema"]]["Tables"] &
-        Database[DefaultSchemaTableNameOrOptions["schema"]]["Views"])
+    ? keyof (DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions["schema"]]["Tables"] &
+        DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions["schema"]]["Views"])
     : never = never,
-> = DefaultSchemaTableNameOrOptions extends { schema: keyof Database }
-  ? (Database[DefaultSchemaTableNameOrOptions["schema"]]["Tables"] &
-      Database[DefaultSchemaTableNameOrOptions["schema"]]["Views"])[TableName] extends {
+> = DefaultSchemaTableNameOrOptions extends {
+  schema: keyof DatabaseWithoutInternals
+}
+  ? (DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions["schema"]]["Tables"] &
+      DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions["schema"]]["Views"])[TableName] extends {
       Row: infer R
     }
     ? R
@@ -275,14 +215,16 @@ export type Tables<
 export type TablesInsert<
   DefaultSchemaTableNameOrOptions extends
     | keyof DefaultSchema["Tables"]
-    | { schema: keyof Database },
+    | { schema: keyof DatabaseWithoutInternals },
   TableName extends DefaultSchemaTableNameOrOptions extends {
-    schema: keyof Database
+    schema: keyof DatabaseWithoutInternals
   }
-    ? keyof Database[DefaultSchemaTableNameOrOptions["schema"]]["Tables"]
+    ? keyof DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions["schema"]]["Tables"]
     : never = never,
-> = DefaultSchemaTableNameOrOptions extends { schema: keyof Database }
-  ? Database[DefaultSchemaTableNameOrOptions["schema"]]["Tables"][TableName] extends {
+> = DefaultSchemaTableNameOrOptions extends {
+  schema: keyof DatabaseWithoutInternals
+}
+  ? DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions["schema"]]["Tables"][TableName] extends {
       Insert: infer I
     }
     ? I
@@ -298,14 +240,16 @@ export type TablesInsert<
 export type TablesUpdate<
   DefaultSchemaTableNameOrOptions extends
     | keyof DefaultSchema["Tables"]
-    | { schema: keyof Database },
+    | { schema: keyof DatabaseWithoutInternals },
   TableName extends DefaultSchemaTableNameOrOptions extends {
-    schema: keyof Database
+    schema: keyof DatabaseWithoutInternals
   }
-    ? keyof Database[DefaultSchemaTableNameOrOptions["schema"]]["Tables"]
+    ? keyof DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions["schema"]]["Tables"]
     : never = never,
-> = DefaultSchemaTableNameOrOptions extends { schema: keyof Database }
-  ? Database[DefaultSchemaTableNameOrOptions["schema"]]["Tables"][TableName] extends {
+> = DefaultSchemaTableNameOrOptions extends {
+  schema: keyof DatabaseWithoutInternals
+}
+  ? DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions["schema"]]["Tables"][TableName] extends {
       Update: infer U
     }
     ? U
@@ -321,14 +265,16 @@ export type TablesUpdate<
 export type Enums<
   DefaultSchemaEnumNameOrOptions extends
     | keyof DefaultSchema["Enums"]
-    | { schema: keyof Database },
+    | { schema: keyof DatabaseWithoutInternals },
   EnumName extends DefaultSchemaEnumNameOrOptions extends {
-    schema: keyof Database
+    schema: keyof DatabaseWithoutInternals
   }
-    ? keyof Database[DefaultSchemaEnumNameOrOptions["schema"]]["Enums"]
+    ? keyof DatabaseWithoutInternals[DefaultSchemaEnumNameOrOptions["schema"]]["Enums"]
     : never = never,
-> = DefaultSchemaEnumNameOrOptions extends { schema: keyof Database }
-  ? Database[DefaultSchemaEnumNameOrOptions["schema"]]["Enums"][EnumName]
+> = DefaultSchemaEnumNameOrOptions extends {
+  schema: keyof DatabaseWithoutInternals
+}
+  ? DatabaseWithoutInternals[DefaultSchemaEnumNameOrOptions["schema"]]["Enums"][EnumName]
   : DefaultSchemaEnumNameOrOptions extends keyof DefaultSchema["Enums"]
     ? DefaultSchema["Enums"][DefaultSchemaEnumNameOrOptions]
     : never
@@ -336,14 +282,16 @@ export type Enums<
 export type CompositeTypes<
   PublicCompositeTypeNameOrOptions extends
     | keyof DefaultSchema["CompositeTypes"]
-    | { schema: keyof Database },
+    | { schema: keyof DatabaseWithoutInternals },
   CompositeTypeName extends PublicCompositeTypeNameOrOptions extends {
-    schema: keyof Database
+    schema: keyof DatabaseWithoutInternals
   }
-    ? keyof Database[PublicCompositeTypeNameOrOptions["schema"]]["CompositeTypes"]
+    ? keyof DatabaseWithoutInternals[PublicCompositeTypeNameOrOptions["schema"]]["CompositeTypes"]
     : never = never,
-> = PublicCompositeTypeNameOrOptions extends { schema: keyof Database }
-  ? Database[PublicCompositeTypeNameOrOptions["schema"]]["CompositeTypes"][CompositeTypeName]
+> = PublicCompositeTypeNameOrOptions extends {
+  schema: keyof DatabaseWithoutInternals
+}
+  ? DatabaseWithoutInternals[PublicCompositeTypeNameOrOptions["schema"]]["CompositeTypes"][CompositeTypeName]
   : PublicCompositeTypeNameOrOptions extends keyof DefaultSchema["CompositeTypes"]
     ? DefaultSchema["CompositeTypes"][PublicCompositeTypeNameOrOptions]
     : never
