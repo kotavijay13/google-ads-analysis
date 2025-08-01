@@ -40,30 +40,42 @@ export const useOAuthCallback = () => {
           errorDescription 
         });
         
-        // Determine which type of auth this is based on stored state
+        // Determine which type of auth this is based on stored state and scopes
         const googleAdsState = localStorage.getItem('googleOAuthState');
         const searchConsoleState = localStorage.getItem('googleSearchConsoleOAuthState');
+        const scopes = urlParams.get('scope') || '';
         
         console.log('Stored states:', { googleAdsState, searchConsoleState });
+        console.log('OAuth scopes:', scopes);
         
         let currentAuthType: 'search-console' | 'ads' = 'search-console';
         let storedState: string | null = null;
         
-        if (state === googleAdsState) {
-          currentAuthType = 'ads';
-          storedState = googleAdsState;
-          localStorage.removeItem('googleOAuthState');
-          console.log('Google Ads OAuth flow detected');
-        } else if (state === searchConsoleState) {
+        // Prioritize exact state match first
+        if (state === searchConsoleState) {
           currentAuthType = 'search-console';
           storedState = searchConsoleState;
           localStorage.removeItem('googleSearchConsoleOAuthState');
-          console.log('Google Search Console OAuth flow detected');
+          console.log('Google Search Console OAuth flow detected (state match)');
+        } else if (state === googleAdsState) {
+          currentAuthType = 'ads';
+          storedState = googleAdsState;
+          localStorage.removeItem('googleOAuthState');
+          console.log('Google Ads OAuth flow detected (state match)');
         } else {
-          console.warn('No matching state found in stored states');
-          // Default to search console if no clear match
-          currentAuthType = 'search-console';
-          console.log('Defaulting to Google Search Console OAuth flow');
+          // If no exact state match, use scopes to determine the service
+          if (scopes.includes('webmasters') && !scopes.includes('adwords')) {
+            currentAuthType = 'search-console';
+            console.log('Google Search Console OAuth flow detected (scope-based)');
+          } else if (scopes.includes('adwords') && !scopes.includes('webmasters')) {
+            currentAuthType = 'ads';
+            console.log('Google Ads OAuth flow detected (scope-based)');
+          } else {
+            console.warn('No matching state found and ambiguous scopes');
+            // Default to search console if unclear
+            currentAuthType = 'search-console';
+            console.log('Defaulting to Google Search Console OAuth flow');
+          }
         }
         
         setAuthType(currentAuthType);
