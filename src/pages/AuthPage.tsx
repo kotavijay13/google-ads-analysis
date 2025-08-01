@@ -73,10 +73,14 @@ const AuthPage = () => {
         toast.error(error.message);
       } else {
         toast.success('Signed in successfully!');
+        // Clear any previous errors on success
+        setAuthError(null);
       }
     } catch (error) {
       console.error('Signin error:', error);
-      toast.error('An unexpected error occurred. Please try again.');
+      const errorMessage = error instanceof Error ? error.message : 'An unexpected error occurred. Please try again.';
+      setAuthError(errorMessage);
+      toast.error(errorMessage);
     } finally {
       setLoading(false);
     }
