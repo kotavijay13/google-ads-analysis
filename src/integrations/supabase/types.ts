@@ -7,230 +7,173 @@ export type Json =
   | Json[]
 
 export type Database = {
-  // Allows to automatically instanciate createClient with right options
+  // Allows to automatically instantiate createClient with right options
   // instead of createClient<Database, { PostgrestVersion: 'XX' }>(URL, KEY)
   __InternalSupabase: {
     PostgrestVersion: "12.2.12 (cd3cf9e)"
   }
   public: {
     Tables: {
-      ad_accounts: {
+      chatbot_documents: {
         Row: {
-          account_id: string
-          account_name: string | null
-          created_at: string | null
-          id: string
-          platform: string
-          updated_at: string | null
-          user_id: string
-        }
-        Insert: {
-          account_id: string
-          account_name?: string | null
-          created_at?: string | null
-          id?: string
-          platform: string
-          updated_at?: string | null
-          user_id: string
-        }
-        Update: {
-          account_id?: string
-          account_name?: string | null
-          created_at?: string | null
-          id?: string
-          platform?: string
-          updated_at?: string | null
-          user_id?: string
-        }
-        Relationships: []
-      }
-      api_tokens: {
-        Row: {
-          access_token: string
-          created_at: string | null
-          expires_at: string | null
-          id: string
-          provider: string
-          refresh_token: string | null
-          updated_at: string | null
-          user_id: string
-        }
-        Insert: {
-          access_token: string
-          created_at?: string | null
-          expires_at?: string | null
-          id?: string
-          provider: string
-          refresh_token?: string | null
-          updated_at?: string | null
-          user_id: string
-        }
-        Update: {
-          access_token?: string
-          created_at?: string | null
-          expires_at?: string | null
-          id?: string
-          provider?: string
-          refresh_token?: string | null
-          updated_at?: string | null
-          user_id?: string
-        }
-        Relationships: []
-      }
-      connected_forms: {
-        Row: {
-          created_at: string
-          field_mappings: Json
-          form_id: string
-          form_name: string
-          form_url: string
+          chatbot_id: string
+          content: string
+          file_size: number
+          file_type: string
+          filename: string
           id: string
           updated_at: string
-          user_id: string
-          website_url: string
+          uploaded_at: string
         }
         Insert: {
-          created_at?: string
-          field_mappings: Json
-          form_id: string
-          form_name: string
-          form_url: string
+          chatbot_id: string
+          content: string
+          file_size: number
+          file_type: string
+          filename: string
           id?: string
           updated_at?: string
-          user_id: string
-          website_url: string
+          uploaded_at?: string
         }
         Update: {
-          created_at?: string
-          field_mappings?: Json
-          form_id?: string
-          form_name?: string
-          form_url?: string
+          chatbot_id?: string
+          content?: string
+          file_size?: number
+          file_type?: string
+          filename?: string
           id?: string
           updated_at?: string
-          user_id?: string
-          website_url?: string
+          uploaded_at?: string
         }
         Relationships: []
       }
-      lead_remarks: {
+      chatbots: {
         Row: {
-          created_at: string
+          chatbot_type: string
+          created_at: string | null
+          customization: Json | null
+          edges: Json | null
           id: string
-          lead_id: string
-          remark: string
-          user_id: string | null
+          is_published: boolean | null
+          name: string
+          nodes: Json | null
+          published_at: string | null
+          published_customization: Json | null
+          published_edges: Json | null
+          published_nodes: Json | null
+          updated_at: string | null
+          user_id: string
         }
         Insert: {
-          created_at?: string
+          chatbot_type?: string
+          created_at?: string | null
+          customization?: Json | null
+          edges?: Json | null
           id?: string
-          lead_id: string
-          remark: string
-          user_id?: string | null
+          is_published?: boolean | null
+          name: string
+          nodes?: Json | null
+          published_at?: string | null
+          published_customization?: Json | null
+          published_edges?: Json | null
+          published_nodes?: Json | null
+          updated_at?: string | null
+          user_id: string
         }
         Update: {
-          created_at?: string
+          chatbot_type?: string
+          created_at?: string | null
+          customization?: Json | null
+          edges?: Json | null
           id?: string
-          lead_id?: string
-          remark?: string
-          user_id?: string | null
+          is_published?: boolean | null
+          name?: string
+          nodes?: Json | null
+          published_at?: string | null
+          published_customization?: Json | null
+          published_edges?: Json | null
+          published_nodes?: Json | null
+          updated_at?: string | null
+          user_id?: string
+        }
+        Relationships: []
+      }
+      conversations: {
+        Row: {
+          assigned_to: string | null
+          chatbot_id: string
+          contact_email: string | null
+          contact_name: string
+          contact_phone: string | null
+          created_at: string | null
+          id: string
+          last_message_at: string | null
+          last_message_preview: string | null
+          platform: string | null
+          status: string | null
+          updated_at: string | null
+        }
+        Insert: {
+          assigned_to?: string | null
+          chatbot_id: string
+          contact_email?: string | null
+          contact_name: string
+          contact_phone?: string | null
+          created_at?: string | null
+          id?: string
+          last_message_at?: string | null
+          last_message_preview?: string | null
+          platform?: string | null
+          status?: string | null
+          updated_at?: string | null
+        }
+        Update: {
+          assigned_to?: string | null
+          chatbot_id?: string
+          contact_email?: string | null
+          contact_name?: string
+          contact_phone?: string | null
+          created_at?: string | null
+          id?: string
+          last_message_at?: string | null
+          last_message_preview?: string | null
+          platform?: string | null
+          status?: string | null
+          updated_at?: string | null
+        }
+        Relationships: []
+      }
+      messages: {
+        Row: {
+          content: string
+          conversation_id: string
+          created_at: string | null
+          id: string
+          sender: string
+        }
+        Insert: {
+          content: string
+          conversation_id: string
+          created_at?: string | null
+          id?: string
+          sender: string
+        }
+        Update: {
+          content?: string
+          conversation_id?: string
+          created_at?: string | null
+          id?: string
+          sender?: string
         }
         Relationships: [
           {
-            foreignKeyName: "lead_remarks_lead_id_fkey"
-            columns: ["lead_id"]
+            foreignKeyName: "messages_conversation_id_fkey"
+            columns: ["conversation_id"]
             isOneToOne: false
-            referencedRelation: "leads"
+            referencedRelation: "conversations"
             referencedColumns: ["id"]
           },
         ]
-      }
-      leads: {
-        Row: {
-          assigned_to: string | null
-          campaign: string | null
-          company: string | null
-          created_at: string
-          email: string | null
-          first_name: string | null
-          form_id: string
-          id: string
-          last_name: string | null
-          message: string | null
-          name: string | null
-          phone: string | null
-          raw_data: Json | null
-          remarks: string | null
-          search_keyword: string | null
-          source: string | null
-          status: string | null
-          updated_at: string
-          user_id: string
-        }
-        Insert: {
-          assigned_to?: string | null
-          campaign?: string | null
-          company?: string | null
-          created_at?: string
-          email?: string | null
-          first_name?: string | null
-          form_id: string
-          id?: string
-          last_name?: string | null
-          message?: string | null
-          name?: string | null
-          phone?: string | null
-          raw_data?: Json | null
-          remarks?: string | null
-          search_keyword?: string | null
-          source?: string | null
-          status?: string | null
-          updated_at?: string
-          user_id: string
-        }
-        Update: {
-          assigned_to?: string | null
-          campaign?: string | null
-          company?: string | null
-          created_at?: string
-          email?: string | null
-          first_name?: string | null
-          form_id?: string
-          id?: string
-          last_name?: string | null
-          message?: string | null
-          name?: string | null
-          phone?: string | null
-          raw_data?: Json | null
-          remarks?: string | null
-          search_keyword?: string | null
-          source?: string | null
-          status?: string | null
-          updated_at?: string
-          user_id?: string
-        }
-        Relationships: []
-      }
-      profiles: {
-        Row: {
-          created_at: string | null
-          email: string | null
-          id: string
-          updated_at: string | null
-        }
-        Insert: {
-          created_at?: string | null
-          email?: string | null
-          id: string
-          updated_at?: string | null
-        }
-        Update: {
-          created_at?: string | null
-          email?: string | null
-          id?: string
-          updated_at?: string | null
-        }
-        Relationships: []
       }
     }
     Views: {
